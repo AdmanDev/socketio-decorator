@@ -6,3 +6,4 @@ export * from "./decorators/socketOnDecorator"
 
 // Interfaces
 export * from "./interfaces/IServerMiddleware"
+export * from "./interfaces/ISocketMiddleware"
