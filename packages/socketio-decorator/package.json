@@ -1,0 +1,46 @@
+{
+  "name": "@admandev/socketio-decorator",
+  "version": "0.0.1",
+  "description": "Decorators for socket.io",
+  "files": [
+    "dist"
+  ],
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
+  "author": "Admandev",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/AdmanDev/socketio-decorator"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.55.0",
+    "@typescript-eslint/parser": "5.55.0",
+    "eslint": "8.36.0",
+    "eslint-plugin-jsdoc": "^48.8.3",
+    "tsup": "^8.2.2",
+    "typescript": "^5.5.3"
+  },
+  "peerDependencies": {
+    "socket.io": "^4.7.5"
+  }
+}

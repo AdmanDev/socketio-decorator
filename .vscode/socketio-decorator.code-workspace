@@ -1,0 +1,30 @@
+{
+    "folders": [
+        {
+            "path": ".."
+        },
+        {
+            "path": "../packages/socketio-decorator",
+            "name": "library"
+        },
+        {
+            "path": "../examples/nodeexample",
+            "name": "examples"
+        }
+    ],
+    "settings": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "always"
+        },
+        "eslint.validate": [
+            "typescript",
+            "javascript"
+        ],
+        "editor.formatOnPaste": false,
+        "god.tsconfig": "./socketio-decorator\\tsconfig.json",
+        "jest.disabledWorkspaceFolders": [
+            "socketio-decorator",
+            "examples"
+        ]
+    }
+}
