@@ -1,5 +1,6 @@
 export type Metadata = {
 	type: MetadataType
+	action: MetadataAction
 	target: Function
 	methodName: string
 	eventName: string
@@ -11,3 +12,4 @@ export type ControllerMetadata = {
 }
 
 export type MetadataType = "server" | "socket"
+export type MetadataAction = "on" | "once"
