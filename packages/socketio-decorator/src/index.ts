@@ -4,6 +4,7 @@ export * from "./main"
 export * from "./decorators/serverOnDecorator"
 export * from "./decorators/socketOnDecorator"
 export * from "./decorators/socketOnceDecorator"
+export * from "./decorators/socketOnAnyDecorator"
 
 // Interfaces
 export * from "./interfaces/IServerMiddleware"

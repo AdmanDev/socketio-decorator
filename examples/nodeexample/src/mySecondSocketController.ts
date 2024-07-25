@@ -1,9 +1,14 @@
-import { ServerOn, SocketOn, SocketOnce } from "@admandev/socketio-decorator";
+import { SocketOnAny, SocketOnce } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class MySecondSocketController {
-    @SocketOnce("my-event")
-    onMyEvent(socket: Socket, data: any) {
-        console.log("SecondSocketController: onMyEvent", data);
+    @SocketOnce("my-once-event")
+    onMyOnceEvent(socket: Socket, data: any) {
+        console.log("SecondSocketController: onMyOnceEvent", data);
+    }
+
+    @SocketOnAny()
+    onAnyEvent(socket: Socket, event: string, data: any) {
+        console.log(`SecondSocketController: onAnyEvent (${event})`, data);
     }
 }

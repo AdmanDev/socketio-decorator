@@ -12,4 +12,4 @@ export type ControllerMetadata = {
 }
 
 export type MetadataType = "server" | "socket"
-export type MetadataAction = "on" | "once"
+export type MetadataAction = "on" | "once" | "onAny"
