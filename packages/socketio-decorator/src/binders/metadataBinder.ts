@@ -1,7 +1,8 @@
 import { getInstances } from "../container"
-import { getAllMetadata } from "../globalMetadata"
+import { addBinderEvent, getAllMetadata } from "../globalMetadata"
 import { SiodConfig } from "../types/SiodConfig"
 import { ControllerMetadata, Metadata, MetadataType } from "../types/metadata"
+import { callServerAction, callSocketAction } from "./ioActionFnBinders"
 
 /**
  * Use metadata from decorators
@@ -23,7 +24,7 @@ export function useMetadata (config: SiodConfig) {
 	}
 
 	bindServerEvents(controllerMetadatas, config)
-	bindSocketEvents(controllerMetadatas, config)
+	bindSocketEvents(controllerMetadatas)
 }
 
 /**
@@ -33,19 +34,18 @@ export function useMetadata (config: SiodConfig) {
  */
 function bindServerEvents (controllerMetadata: ControllerMetadata[], config: SiodConfig) {
 	mapMetadata(controllerMetadata, "server", (metadata, controllerInstance, method) => {
-		config.ioserver.on(metadata.eventName, method.bind(controllerInstance))
+		callServerAction(config.ioserver, metadata, controllerInstance, method)
 	})
 }
 
 /**
  * Binds socket events to the controller methods
  * @param {ControllerMetadata} controllerMetadata The controller metadata
- * @param {SiodConfig} config The socketio decocator configuration
  */
-function bindSocketEvents (controllerMetadata: ControllerMetadata[], config: SiodConfig) {
-	config.ioserver.on("connection", (socket) => {
+function bindSocketEvents (controllerMetadata: ControllerMetadata[]) {
+	addBinderEvent("connection", (socket) => {
 		mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
-			socket.on(metadata.eventName, method.bind(controllerInstance, socket))
+			callSocketAction(socket, metadata, controllerInstance, method)
 		})
 	})
 }
@@ -71,5 +71,4 @@ function mapMetadata (
 			}
 		})
 	})
-
 }
