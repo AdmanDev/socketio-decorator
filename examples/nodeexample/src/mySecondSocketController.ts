@@ -1,11 +1,13 @@
-import { SocketOnAny, SocketOnAnyOutgoing, SocketOnce } from "@admandev/socketio-decorator";
+import { SocketOnAny, SocketOnAnyOutgoing, SocketOnce, useIoServer } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class MySecondSocketController {
     @SocketOnce("my-once-event")
     onMyOnceEvent(socket: Socket, data: any) {
         console.log("SecondSocketController: onMyOnceEvent", data);
-        socket.emit("my-once-event", "Hello from onAnyEvent");
+
+        const io = useIoServer();
+        io.emit("my-once-event-response", "Hello from onAnyEvent");
     }
 
     @SocketOnAny()

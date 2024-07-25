@@ -10,3 +10,6 @@ export * from "./decorators/socketOnAnyOutgoingDecorator"
 // Interfaces
 export * from "./interfaces/IServerMiddleware"
 export * from "./interfaces/ISocketMiddleware"
+
+// Hooks
+export * from "./others/hooks"

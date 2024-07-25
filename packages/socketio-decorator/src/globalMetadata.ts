@@ -1,9 +1,10 @@
-import { Socket } from "socket.io"
+import { Server, Socket } from "socket.io"
 import { BinderEvent } from "./types/binderEvent"
 import { Metadata } from "./types/metadata"
 
 const ioMetadata: Metadata[] = []
 const binderEvents: BinderEvent[] = []
+export let ioServer: Server
 
 /**
  * Adds metadata to the global metadata array
@@ -45,4 +46,12 @@ export function getAllBinderEvents () {
 		acc[event.eventName].push(event.method)
 		return acc
 	}, {} as Record<string, Function[]>)
+}
+
+/**
+ * Sets the socket.io server instance
+ * @param {Server} server The socket.io server instance
+ */
+export function setIoServer (server: Server) {
+	ioServer = server
 }
