@@ -31,6 +31,9 @@ const ioFns: IoActionFnBinder = {
 		onAny: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
 			socket.onAny(method.bind(controller, socket))
 		},
+		onAnyOutgoing: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
+			socket.onAnyOutgoing(method.bind(controller, socket))
+		},
 	}
 }
 
