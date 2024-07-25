@@ -2,10 +2,10 @@ import { useSocketIoDecorator } from "@admandev/socketio-decorator"
 import express from "express"
 import http from "http"
 import { Server } from "socket.io"
-import { SocketController } from "./socketController"
-import { MyServerMiddleware } from "./MyServerMiddleware"
+import { SocketController } from "./mySocketController"
+import { MyServerMiddleware } from "./myServerMiddleware"
 import { MySocketMiddleware } from "./MySocketMiddleware"
-import { SecondSocketController } from "./secondSocketController"
+import { MySecondSocketController } from "./mySecondSocketController"
 
 const app = express()
 const server = http.createServer(app)
@@ -20,7 +20,7 @@ useSocketIoDecorator({
 	ioserver: io,
 	controllers: [
 		SocketController,
-		SecondSocketController
+		MySecondSocketController
 	],
 	serverMiddlewares: [MyServerMiddleware],
 	socketMiddlewares: [MySocketMiddleware]
