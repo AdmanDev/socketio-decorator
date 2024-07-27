@@ -22,3 +22,17 @@ export function useCurrentUser<TUser> (socket: Socket) {
 
 	return config.currentUserProvider(socket) as TUser | null
 }
+
+/**
+ * Get the socket instance from a user
+ * @param {T} arg The argument to search the socket
+ * @template T The argument type
+ * @returns {Socket | undefined} The socket instance
+ */
+export function useUserSocket<T> (arg: T): Socket | undefined {
+	if (!config.searchUserSocket) {
+		return undefined
+	}
+
+	return config.searchUserSocket(arg)
+}

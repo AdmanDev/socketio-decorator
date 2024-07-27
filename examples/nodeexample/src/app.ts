@@ -28,6 +28,9 @@ useSocketIoDecorator({
 		return {
 			id: socket.id
 		}
+	},
+	searchUserSocket: (id: string) => {
+		return io.sockets.sockets.get(id)
 	}
 })
 

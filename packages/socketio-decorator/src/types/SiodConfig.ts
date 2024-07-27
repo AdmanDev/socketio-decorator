@@ -22,9 +22,9 @@ export type SiodConfig = {
 	 * The socket.io middlewares to use (socket.use)
 	 */
 	socketMiddlewares?: Function[]
-
 	/**
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
 	 */
-	currentUserProvider?: (socket: Socket) => Any
+	currentUserProvider?: (socket: Socket) => Any,
+	searchUserSocket?: (arg: Any) => Socket | undefined
 }
