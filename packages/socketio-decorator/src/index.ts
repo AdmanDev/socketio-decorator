@@ -14,5 +14,8 @@ export * from "./decorators/emitters/socketEmiterDecorator"
 export * from "./interfaces/IServerMiddleware"
 export * from "./interfaces/ISocketMiddleware"
 
+// Types
+export * from "./types/exportables/emitterOption"
+
 // Hooks
 export * from "./others/hooks"
