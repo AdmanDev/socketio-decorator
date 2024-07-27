@@ -5,7 +5,7 @@ name: Publish Package
 
 on:
   push:
-    branches: [master]
+    branches: [cd]
 
 jobs:
   build:
@@ -14,14 +14,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
-          working-directory: packages/socketio-decorator
+          node-version: 1
       - run: npm i
+        working-directory: packages/socketio-decorator
       - run: npm run build
-      - run: cp ../../README.md dist/README.md
-      - run: cp ../../LICENCE dist/LICENCE
+        working-directory: packages/socketio-decorator
+      - run: cp README.md packages/socketio-decorator/dist/README.md
+      - run: cp LICENCE packages/socketio-decorator/dist/LICENCE
       - run: cp package.json dist/package.json
+        working-directory: packages/socketio-decorator
       - run: ls
+        working-directory: packages/socketio-decorator
 
   publish-npm:
     needs: build
