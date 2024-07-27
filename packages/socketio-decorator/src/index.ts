@@ -8,6 +8,7 @@ export * from "./decorators/listeners/socketOnAnyDecorator"
 export * from "./decorators/listeners/socketOnAnyOutgoingDecorator"
 
 export * from "./decorators/emitters/serverEmitterDecorator"
+export * from "./decorators/emitters/socketEmiterDecorator"
 
 // Interfaces
 export * from "./interfaces/IServerMiddleware"

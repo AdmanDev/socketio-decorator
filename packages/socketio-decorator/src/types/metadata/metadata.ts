@@ -6,4 +6,4 @@ export type Metadata = {
 }
 
 export type MetadataType = "server" | "socket"
-export type MetadataAction = "on" | "once" | "onAny" | "onAnyOutgoing" | "emitto"
+export type MetadataAction = "on" | "once" | "onAny" | "onAnyOutgoing" | "emitto" | "emitSelf"

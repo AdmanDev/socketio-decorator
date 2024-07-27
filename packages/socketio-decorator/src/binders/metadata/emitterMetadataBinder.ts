@@ -1,3 +1,4 @@
+import { Socket } from "socket.io"
 import { getEmitterMetadata } from "../../globalMetadata"
 import { EmitterMetadata } from "../../types/metadata/emiterMetadata"
 import { ControllerMetadata } from "../../types/metadata/listenerMetadata"
@@ -13,7 +14,7 @@ export function bindEmitterMetadata (config: SiodConfig) {
 
 	const controllerMetadatas = getControllerMetadata(config, metadatas)
 	bindServerEmitters(controllerMetadatas, config)
-
+	bindSocketEmitters(controllerMetadatas)
 }
 
 /**
@@ -29,6 +30,28 @@ function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: S
 		controllerInstance[methodName] = function (...args: unknown[]) {
 			const result = method.apply(controllerInstance, args)
 			config.ioserver.to(to).emit(message, result)
+			return result
+		}
+	})
+}
+
+/**
+ * Binds socket emitters
+ * @param {ControllerMetadata[]} controllerMetadata The controllers metadata
+ */
+function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
+	mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
+		const { methodName, message} = metadata as EmitterMetadata
+
+		// eslint-disable-next-line jsdoc/require-jsdoc
+		controllerInstance[methodName] = function (...args: unknown[]) {
+			const result = method.apply(controllerInstance, args)
+
+			const socket = args[0]
+			if (socket instanceof Socket) {
+				socket.emit(message, result)
+			}
+
 			return result
 		}
 	})
