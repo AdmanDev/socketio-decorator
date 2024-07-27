@@ -27,6 +27,12 @@
   "repository": {
     "url": "https://github.com/AdmanDev/socketio-decorator"
   },
+  "keywords": [
+    "socket.io",
+    "decorator",
+    "typescript",
+    "nodejs"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --sourcemap",
