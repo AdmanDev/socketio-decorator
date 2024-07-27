@@ -1,4 +1,4 @@
-import { ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { EmitterOption, ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class SocketController {
@@ -27,11 +27,16 @@ export class SocketController {
 		console.log("Socket disconnected - socket id :", socket.id)
 	}
 
-	@ServerEmitter("room", "my-emitter-event")
+	@ServerEmitter()
     emitMyEvent() {
         console.log("SecondSocketController: emitMyEvent");
-        return {
-			message: "Hello from emitMyEvent"
-		};
+        const response = new EmitterOption({
+			to: "room",
+			message: "my-emitter-event",
+			data: {
+				message: "Hello from my-emitter-event"
+			}
+		})
+		return response
     }
 }
