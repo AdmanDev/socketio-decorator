@@ -1,14 +1,15 @@
-import { Server, Socket } from "socket.io"
+import { Socket } from "socket.io"
 import { BinderEvent } from "./types/binderEvent"
 import { ListenerMetadata } from "./types/metadata/listenerMetadata"
 import { EmitterMetadata } from "./types/metadata/emiterMetadata"
+import { SiodConfig } from "./types/SiodConfig"
 
 const ioMetadata = {
 	listener: [] as ListenerMetadata[],
 	emitters: [] as EmitterMetadata[]
 }
 const binderEvents: BinderEvent[] = []
-export let ioServer: Server
+export let config: SiodConfig
 
 /**
  * Adds listener metadata to the global metadata 
@@ -69,9 +70,9 @@ export function getAllBinderEvents () {
 }
 
 /**
- * Sets the socket.io server instance
- * @param {Server} server The socket.io server instance
+ * Sets the configuration object
+ * @param {SiodConfig} configuration The configuration object
  */
-export function setIoServer (server: Server) {
-	ioServer = server
+export function setConfig (configuration: SiodConfig) {
+	config = configuration
 }

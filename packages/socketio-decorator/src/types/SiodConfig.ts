@@ -1,4 +1,4 @@
-import { Server } from "socket.io"
+import { Server, Socket } from "socket.io"
 import { IoCProvider } from "./iocProvider"
 
 export type SiodConfig = {
@@ -22,4 +22,9 @@ export type SiodConfig = {
 	 * The socket.io middlewares to use (socket.use)
 	 */
 	socketMiddlewares?: Function[]
+
+	/**
+	 * The current user provider that will be used to get the current user from useCurrentUser hook
+	 */
+	currentUserProvider?: (socket: Socket) => Any
 }

@@ -2,7 +2,7 @@ import { useBinderEvent } from "./binders/binderEventIniter"
 import { bindEmitterMetadata } from "./binders/metadata/emitterMetadataBinder"
 import { bindListenerMetadata } from "./binders/metadata/listenerMetadataBinder"
 import { bindServerMiddlewares, bindSocketMiddlewares } from "./binders/middlewareBinders"
-import { setIoServer } from "./globalMetadata"
+import { setConfig } from "./globalMetadata"
 import { SiodConfig } from "./types/SiodConfig"
 
 /**
@@ -10,7 +10,7 @@ import { SiodConfig } from "./types/SiodConfig"
  * @param {SiodConfig} config The socketio decocator configuration
  */
 export function useSocketIoDecorator (config: SiodConfig) {
-	setIoServer(config.ioserver)
+	setConfig(config)
 
 	confugureListeners(config)
 	bindEmitterMetadata(config)

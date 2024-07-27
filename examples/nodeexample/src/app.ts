@@ -1,7 +1,7 @@
 import { useSocketIoDecorator } from "@admandev/socketio-decorator"
 import express from "express"
 import http from "http"
-import { Server } from "socket.io"
+import { Server, Socket } from "socket.io"
 import { SocketController } from "./mySocketController"
 import { MyServerMiddleware } from "./myServerMiddleware"
 import { MySocketMiddleware } from "./MySocketMiddleware"
@@ -23,7 +23,12 @@ useSocketIoDecorator({
 		MySecondSocketController
 	],
 	serverMiddlewares: [MyServerMiddleware],
-	socketMiddlewares: [MySocketMiddleware]
+	socketMiddlewares: [MySocketMiddleware],
+	currentUserProvider: (socket: Socket) => {
+		return {
+			id: socket.id
+		}
+	}
 })
 
 // Start server
