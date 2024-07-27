@@ -5,10 +5,10 @@ import { ISocketMiddleware } from "../interfaces/ISocketMiddleware"
 import { SiodConfig } from "../types/SiodConfig"
 
 /**
- * Use server middlewares
+ * Binds server middlewares
  * @param {SiodConfig} config The socketio decocator configuration
  */
-export function useServerMiddlewares (config: SiodConfig) {
+export function bindServerMiddlewares (config: SiodConfig) {
 	if (!config.serverMiddlewares || config.serverMiddlewares.length === 0) {
 		return
 	}
@@ -20,10 +20,10 @@ export function useServerMiddlewares (config: SiodConfig) {
 }
 
 /**
- * Use socket middlewares 
+ * Binds socket middlewares 
  * @param {SiodConfig} config The socketio decocator configuration
  */
-export function useSocketMiddlewares (config: SiodConfig) {
+export function bindSocketMiddlewares (config: SiodConfig) {
 	if (!config.socketMiddlewares || config.socketMiddlewares.length === 0) {
 		return
 	}

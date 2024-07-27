@@ -1,25 +1,45 @@
 import { Server, Socket } from "socket.io"
 import { BinderEvent } from "./types/binderEvent"
-import { Metadata } from "./types/metadata"
+import { ListenerMetadata } from "./types/metadata/listenerMetadata"
+import { EmitterMetadata } from "./types/metadata/emiterMetadata"
 
-const ioMetadata: Metadata[] = []
+const ioMetadata = {
+	listener: [] as ListenerMetadata[],
+	emitters: [] as EmitterMetadata[]
+}
 const binderEvents: BinderEvent[] = []
 export let ioServer: Server
 
 /**
- * Adds metadata to the global metadata array
- * @param {Metadata} metadata The metadata to add
+ * Adds listener metadata to the global metadata 
+ * @param {ListenerMetadata} metadata The metadata to add
  */
-export function addMetadata (metadata: Metadata) {
-	ioMetadata.push(metadata)
+export function addListenerMetadata (metadata: ListenerMetadata) {
+	ioMetadata.listener.push(metadata)
 }
 
 /**
- * Gets the global metadata array
- * @returns {Metadata[]} The global metadata array
+ * Gets the listener metadata array
+ * @returns {ListenerMetadata[]} The global metadata array
  */
-export function getAllMetadata () {
-	return [...ioMetadata]
+export function getListenerMetadata () {
+	return [...ioMetadata.listener]
+}
+
+/**
+ * Adds emitter metadata to the global metadata 
+ * @param {EmitterMetadata} metadata The metadata to add
+ */
+export function addEmitterMetadata (metadata: EmitterMetadata) {
+	ioMetadata.emitters.push(metadata)
+}
+
+/**
+ * Gets the emitter metadata array
+ * @returns {ListenerMetadata[]} The global metadata array
+ */
+export function getEmitterMetadata () {
+	return [...ioMetadata.emitters]
 }
 
 /**

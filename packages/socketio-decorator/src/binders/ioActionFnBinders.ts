@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
 import { Server, Socket } from "socket.io"
-import { Metadata, MetadataAction } from "../types/metadata"
+import { Metadata } from "../types/metadata/metadata"
+import { MetadataAction } from "../types/metadata/metadata"
+import { ListenerMetadata } from "../types/metadata/listenerMetadata"
 
 type ServerAction = {
 	[action in MetadataAction]: (ioserver: Server, metadata: Metadata, controllerInstance: Any, method: Function) => void
@@ -18,15 +20,18 @@ type IoActionFnBinder = {
 const ioFns: IoActionFnBinder = {
 	server: {
 		on: (ioserver: Server, metadata: Metadata, controller: Any, method: Function) => {
-			ioserver.on(metadata.eventName, method.bind(controller))
+			const { eventName } = metadata as ListenerMetadata
+			ioserver.on(eventName, method.bind(controller))
 		},
 	},
 	socket: {
 		on: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
-			socket.on(metadata.eventName, method.bind(controller, socket))
+			const { eventName } = metadata as ListenerMetadata
+			socket.on(eventName, method.bind(controller, socket))
 		},
 		once: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
-			socket.once(metadata.eventName, method.bind(controller, socket))
+			const { eventName } = metadata as ListenerMetadata
+			socket.once(eventName, method.bind(controller, socket))
 		},
 		onAny: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
 			socket.onAny(method.bind(controller, socket))
