@@ -1,6 +1,6 @@
 {
   "name": "@admandev/socketio-decorator",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Decorators for socket.io",
   "files": [
     "dist"
@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
+    "dev": "tsup --sourcemap",
     "lint": "eslint src"
   },
   "devDependencies": {

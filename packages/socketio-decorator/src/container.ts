@@ -1,6 +1,8 @@
 import { ClassConstructorType } from "./types/classConstructorType"
 import { IoCProvider } from "./types/iocProvider"
 
+const container = new Map<Function, Any>()
+
 /**
  * Get all instances of the services
  * @param {Function} services The services to get instances of
@@ -24,6 +26,12 @@ export function getInstances<T> (services: Function[], userContainer?: IoCProvid
  * @template T The type of the service
  */
 function getserviceInstance<T> (constructor: ClassConstructorType<T>): T {
+	if (container.has(constructor)) {
+		return container.get(constructor) as T
+	}
+
 	const instance = new constructor()
+	container.set(constructor, instance)
+
 	return instance
 }

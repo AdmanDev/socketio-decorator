@@ -1,14 +1,15 @@
-import { addMetadata } from "../globalMetadata"
+import { addListenerMetadata } from "../../globalMetadata"
 
 /**
- * Regiser a method as a socket event listener for the given event
+ * Regiser a method as "socket.on" event listener for the given event
  * @param {string} event The event to listen for
  * @returns {Function} The decorator function
  */
 export function SocketOn (event: string) {
 	return function (target: Object, propertyKey: string) {
-		addMetadata({
+		addListenerMetadata({
 			type: "socket",
+			action: "on",
 			target: target.constructor,
 			methodName: propertyKey,
 			eventName: event
