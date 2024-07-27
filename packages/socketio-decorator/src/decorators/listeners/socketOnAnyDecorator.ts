@@ -1,4 +1,4 @@
-import { addMetadata } from "../globalMetadata"
+import { addListenerMetadata } from "../../globalMetadata"
 
 /**
  * Regiser a method as "socket.onAny" event listener
@@ -6,7 +6,7 @@ import { addMetadata } from "../globalMetadata"
  */
 export function SocketOnAny () {
 	return function (target: Object, propertyKey: string) {
-		addMetadata({
+		addListenerMetadata({
 			type: "socket",
 			action: "onAny",
 			target: target.constructor,

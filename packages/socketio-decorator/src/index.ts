@@ -1,11 +1,13 @@
 export * from "./main"
 
 // Decorators
-export * from "./decorators/serverOnDecorator"
-export * from "./decorators/socketOnDecorator"
-export * from "./decorators/socketOnceDecorator"
-export * from "./decorators/socketOnAnyDecorator"
-export * from "./decorators/socketOnAnyOutgoingDecorator"
+export * from "./decorators/listeners/serverOnDecorator"
+export * from "./decorators/listeners/socketOnDecorator"
+export * from "./decorators/listeners/socketOnceDecorator"
+export * from "./decorators/listeners/socketOnAnyDecorator"
+export * from "./decorators/listeners/socketOnAnyOutgoingDecorator"
+
+export * from "./decorators/emitters/serverEmitterDecorator"
 
 // Interfaces
 export * from "./interfaces/IServerMiddleware"
