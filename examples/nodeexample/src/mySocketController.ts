@@ -1,4 +1,4 @@
-import { ServerEmitter, ServerOn, SocketOn } from "@admandev/socketio-decorator";
+import { ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class SocketController {
@@ -12,6 +12,14 @@ export class SocketController {
 		console.log("Message", data)
 		socket.join("room")
 		this.emitMyEvent()
+	}
+
+	@SocketOn("hello")
+	@SocketEmitter("hello-back")
+	public onHello() {
+		return {
+			message: "Hello you"
+		}
 	}
 
 	@SocketOn("disconnect")
