@@ -24,7 +24,7 @@ jobs:
       - run: cp package.json dist/package.json
         working-directory: packages/socketio-decorator
       - run: ls
-        working-directory: packages/socketio-decorator
+        working-directory: packages/socketio-decorator/dist
 
   publish-npm:
     needs: build
