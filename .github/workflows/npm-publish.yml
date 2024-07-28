@@ -19,12 +19,8 @@ jobs:
         working-directory: packages/socketio-decorator
       - run: npm run build
         working-directory: packages/socketio-decorator
-      - run: cp README.md packages/socketio-decorator/dist/README.md
-      - run: cp LICENCE packages/socketio-decorator/dist/LICENCE
-      - run: cp package.json dist/package.json
+      - run: node prepare-cd.js
         working-directory: packages/socketio-decorator
-      - run: ls
-        working-directory: packages/socketio-decorator/dist
 
   publish-npm:
     needs: build
