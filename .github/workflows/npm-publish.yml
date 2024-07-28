@@ -21,6 +21,7 @@ jobs:
         working-directory: packages/socketio-decorator
       - run: node prepare-cd.js
         working-directory: packages/socketio-decorator
+      - run: ls -la packages/socketio-decorator/dist
 
   publish-npm:
     needs: build
