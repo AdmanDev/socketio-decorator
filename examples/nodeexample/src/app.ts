@@ -6,6 +6,7 @@ import { SocketController } from "./mySocketController"
 import { MyServerMiddleware } from "./myServerMiddleware"
 import { MySocketMiddleware } from "./MySocketMiddleware"
 import { MySecondSocketController } from "./mySecondSocketController"
+import { MyErrorMiddleware } from "./myErrorMiddleware"
 
 const app = express()
 const server = http.createServer(app)
@@ -24,6 +25,7 @@ useSocketIoDecorator({
 	],
 	serverMiddlewares: [MyServerMiddleware],
 	socketMiddlewares: [MySocketMiddleware],
+	errorMiddleware: MyErrorMiddleware,
 	currentUserProvider: (socket: Socket) => {
 		return {
 			id: socket.id

@@ -13,6 +13,7 @@ export * from "./decorators/emitters/socketEmiterDecorator"
 // Interfaces
 export * from "./interfaces/IServerMiddleware"
 export * from "./interfaces/ISocketMiddleware"
+export * from "./interfaces/IErrorMiddleware"
 
 // Types
 export * from "./types/exportables/emitterOption"
