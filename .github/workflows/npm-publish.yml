@@ -8,23 +8,7 @@ on:
     branches: [cd]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - run: npm i
-        working-directory: packages/socketio-decorator
-      - run: npm run build
-        working-directory: packages/socketio-decorator
-      - run: node prepare-cd.js
-        working-directory: packages/socketio-decorator
-      - run: ls -la packages/socketio-decorator/dist
-
-  publish-npm:
-    needs: build
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +16,12 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
+      - run: npm i
+        working-directory: packages/socketio-decorator
+      - run: npm run build
+        working-directory: packages/socketio-decorator
+      - run: node prepare-cd.js
+        working-directory: packages/socketio-decorator
       - run: npm publish packages/socketio-decorator/dist
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
