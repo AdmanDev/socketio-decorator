@@ -51,7 +51,7 @@ To get started, follow these steps:
    Create a file named `SocketController.ts` with the following content:
 
     ```typescript
-    import { ServerOn, SocketOn } from "@admandev/socketio-decorator";
+    import { ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
     import { Socket } from "socket.io";
 
     export class SocketController {
@@ -64,6 +64,17 @@ To get started, follow these steps:
         public onMessage(socket: Socket, data: any) {
             console.log("Message received:", data);
         }
+
+        // Async / Await is supported
+        @SocketOn("hello")
+        @SocketEmitter("hello-back")
+        public async onHello() {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            return {
+                message: "Hello you"
+            }
+        }
+
     }
     ```
 
