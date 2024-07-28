@@ -48,9 +48,9 @@ export function bindErrorMiddleware (config: SiodConfig) {
 	methodsToWrap.forEach(({ methodName, controllerInstance }) => {
 		const originalMethod = controllerInstance[methodName]
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[methodName] = function (...args: unknown[]) {
+		controllerInstance[methodName] = async function (...args: unknown[]) {
 			try {
-				return originalMethod.apply(controllerInstance, args)
+				return await originalMethod.apply(controllerInstance, args)
 			} catch (error: Any) {
 				const socket = args.find(arg => arg instanceof Socket) as Socket | undefined
 				return errorMiddleware.handleError(error, socket)
