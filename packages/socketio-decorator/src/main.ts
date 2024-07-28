@@ -1,7 +1,7 @@
 import { useBinderEvent } from "./binders/binderEventIniter"
 import { bindEmitterMetadata } from "./binders/metadata/emitterMetadataBinder"
 import { bindListenerMetadata } from "./binders/metadata/listenerMetadataBinder"
-import { bindServerMiddlewares, bindSocketMiddlewares } from "./binders/middlewareBinders"
+import { bindErrorMiddleware, bindServerMiddlewares, bindSocketMiddlewares } from "./binders/middlewareBinders"
 import { setConfig } from "./globalMetadata"
 import { SiodConfig } from "./types/SiodConfig"
 
@@ -12,6 +12,7 @@ import { SiodConfig } from "./types/SiodConfig"
 export function useSocketIoDecorator (config: SiodConfig) {
 	setConfig(config)
 
+	bindErrorMiddleware(config)
 	confugureListeners(config)
 	bindEmitterMetadata(config)
 }

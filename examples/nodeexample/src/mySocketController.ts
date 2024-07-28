@@ -16,7 +16,8 @@ export class SocketController {
 
 	@SocketOn("hello")
 	@SocketEmitter("hello-back")
-	public onHello() {
+	public async onHello() {
+		await new Promise((resolve) => setTimeout(resolve, 2000))
 		return {
 			message: "Hello you"
 		}

@@ -1,8 +1,63 @@
+import { Socket } from "socket.io"
 import { getInstances } from "../container"
-import { addBinderEvent } from "../globalMetadata"
+import { addBinderEvent, getAllMetadata } from "../globalMetadata"
+import { IErrorMiddleware } from "../interfaces/IErrorMiddleware"
 import { IServerMiddleware } from "../interfaces/IServerMiddleware"
 import { ISocketMiddleware } from "../interfaces/ISocketMiddleware"
 import { SiodConfig } from "../types/SiodConfig"
+import { getControllerMetadata } from "./metadata/metadataUtils"
+import { MethodMetadata } from "../types/metadata/methodMetadata"
+
+/**
+ * Binds error middleware
+ * @param {SiodConfig} config The socketio decocator configuration
+ */
+export function bindErrorMiddleware (config: SiodConfig) {
+	if (!config.errorMiddleware) {
+		return
+	}
+
+	const errorMiddleware = getInstances([config.errorMiddleware], config.iocContainer)?.[0] as IErrorMiddleware | undefined
+	if (!errorMiddleware) {
+		return
+	}
+
+	const methodsToWrap: MethodMetadata[] = []
+
+	const metadata = getAllMetadata()
+	const controllerMetadatas = getControllerMetadata(config, metadata)
+
+	const otherMiddlewares = getInstances([...config.serverMiddlewares || [], ...config.socketMiddlewares || []], config.iocContainer)
+	otherMiddlewares.forEach(middleware => {
+		methodsToWrap.push({
+			methodName: "use",
+			controllerInstance: middleware
+		})
+	})
+
+	controllerMetadatas.forEach(cm => {
+		const unicMethods = cm.metadatas.map(m => m.methodName).filter((value, index, self) => self.indexOf(value) === index)
+		unicMethods.forEach(methodName => {
+			methodsToWrap.push({
+				methodName,
+				controllerInstance: cm.controllerInstance
+			})
+		})
+	})
+
+	methodsToWrap.forEach(({ methodName, controllerInstance }) => {
+		const originalMethod = controllerInstance[methodName]
+		// eslint-disable-next-line jsdoc/require-jsdoc
+		controllerInstance[methodName] = async function (...args: unknown[]) {
+			try {
+				return await originalMethod.apply(controllerInstance, args)
+			} catch (error: Any) {
+				const socket = args.find(arg => arg instanceof Socket) as Socket | undefined
+				return errorMiddleware.handleError(error, socket)
+			}
+		}
+	})
+}
 
 /**
  * Binds server middlewares

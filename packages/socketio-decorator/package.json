@@ -1,6 +1,6 @@
 {
   "name": "@admandev/socketio-decorator",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Decorators for socket.io",
   "files": [
     "dist"
@@ -25,6 +25,7 @@
   "author": "Admandev",
   "license": "MIT",
   "repository": {
+    "type": "git",
     "url": "https://github.com/AdmanDev/socketio-decorator"
   },
   "keywords": [
@@ -43,6 +44,7 @@
     "@typescript-eslint/parser": "5.55.0",
     "eslint": "8.36.0",
     "eslint-plugin-jsdoc": "^48.8.3",
+    "shelljs": "^0.8.5",
     "tsup": "^8.2.2",
     "typescript": "^5.5.3"
   },

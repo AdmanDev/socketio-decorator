@@ -27,12 +27,12 @@ export function bindEmitterMetadata (config: SiodConfig) {
 function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: SiodConfig) {
 	mapMetadata(controllerMetadata, "server", (metadata, controllerInstance, method) => {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[metadata.methodName] = function (...args: unknown[]) {
-			const result = method.apply(controllerInstance, args)
+		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
+			const result = await method.apply(controllerInstance, args)
 
 			const { data, to, message, disableEmit } = getEmitterOption(metadata, result)
 
-			if (disableEmit || !to || !message) {
+			if (disableEmit || !to || !message || !data) {
 				return result
 			}
 
@@ -49,12 +49,12 @@ function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: S
 function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 	mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[metadata.methodName] = function (...args: unknown[]) {
-			const result = method.apply(controllerInstance, args)
+		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
+			const result = await method.apply(controllerInstance, args)
 
 			const { data, message, disableEmit } = getEmitterOption(metadata, result)
 
-			if (disableEmit || !message) {
+			if (disableEmit || !message || !data) {
 				return result
 			}
 
