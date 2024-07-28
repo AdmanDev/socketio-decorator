@@ -23,6 +23,10 @@ export type SiodConfig = {
 	 */
 	socketMiddlewares?: Function[]
 	/**
+	 * The error middleware that will be used to catch errors in your handlers.
+	 */
+	errorMiddleware?: Function
+	/**
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
 	 */
 	currentUserProvider?: (socket: Socket) => Any,

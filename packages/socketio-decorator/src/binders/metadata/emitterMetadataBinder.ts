@@ -32,7 +32,7 @@ function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: S
 
 			const { data, to, message, disableEmit } = getEmitterOption(metadata, result)
 
-			if (disableEmit || !to || !message) {
+			if (disableEmit || !to || !message || !data) {
 				return result
 			}
 
@@ -54,7 +54,7 @@ function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 
 			const { data, message, disableEmit } = getEmitterOption(metadata, result)
 
-			if (disableEmit || !message) {
+			if (disableEmit || !message || !data) {
 				return result
 			}
 
