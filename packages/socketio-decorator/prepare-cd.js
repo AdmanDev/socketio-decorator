@@ -17,3 +17,5 @@ shelljs.ShellString(pkgJson).to("dist/package.json")
 // ---------------------------------------- Copy files ---------------------------------------- //
 shelljs.cp("../../README.md", "dist/README.md")
 shelljs.cp("../../LICENSE", "dist/LICENSE")
+
+shelljs.ls("dist")
