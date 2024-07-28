@@ -3,6 +3,7 @@ import { BinderEvent } from "./types/binderEvent"
 import { ListenerMetadata } from "./types/metadata/listenerMetadata"
 import { EmitterMetadata } from "./types/metadata/emiterMetadata"
 import { SiodConfig } from "./types/SiodConfig"
+import { Metadata } from "./types/metadata/metadata"
 
 const ioMetadata = {
 	listener: [] as ListenerMetadata[],
@@ -10,6 +11,14 @@ const ioMetadata = {
 }
 const binderEvents: BinderEvent[] = []
 export let config: SiodConfig
+
+/**
+ * Gets all the metadata
+ * @returns {Metadata[]} The global metadata
+ */
+export function getAllMetadata () {
+	return [...ioMetadata.listener, ...ioMetadata.emitters] as Metadata[]
+}
 
 /**
  * Adds listener metadata to the global metadata 

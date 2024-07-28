@@ -12,6 +12,7 @@ This library allows you to use [Socket.io](https://socket.io/) with TypeScript d
 - [Middlewares](#middlewares)
   - [Server Middleware](#server-middleware)
   - [Socket Middleware](#socket-middleware)
+  - [Error handling middleware](#error-handling-middleware)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
   - [UseCurrentUser hook](#usecurrentuser-hook)
@@ -50,7 +51,7 @@ To get started, follow these steps:
    Create a file named `SocketController.ts` with the following content:
 
     ```typescript
-    import { ServerOn, SocketOn } from "@admandev/socketio-decorator";
+    import { ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
     import { Socket } from "socket.io";
 
     export class SocketController {
@@ -63,6 +64,17 @@ To get started, follow these steps:
         public onMessage(socket: Socket, data: any) {
             console.log("Message received:", data);
         }
+
+        // Async / Await is supported
+        @SocketOn("hello")
+        @SocketEmitter("hello-back")
+        public async onHello() {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            return {
+                message: "Hello you"
+            }
+        }
+
     }
     ```
 
@@ -168,17 +180,21 @@ To get started, follow these steps:
     ```
 
     The above code will emit a `newMessage` event to the `room1` room. The event will only be emitted if the `isUserAllowedToSendMessage` function returns `true`.
+\
+    **Emit options**
 
-#### Emit options
+    The `EmitOption` object has the following properties:
 
-The `EmitOption` object has the following properties:
+    | Property | Type | Required | Description |
+    |----------|------|----------|-------------|
+    | `to`     | string | No (if the decorator provides this) | The target to emit the event to. |
+    | `message`| string | No (if the decorator provides this) | The event name to emit. |
+    | `data`   | any    | Yes | The data to emit. |
+    | `disableEmit` | boolean | No | If `true`, the event will not be emitted. |
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `to`     | string | No (if the decorator provides this) | The target to emit the event to. |
-| `message`| string | No (if the decorator provides this) | The event name to emit. |
-| `data`   | any    | Yes | The data to emit. |
-| `disableEmit` | boolean | No | If `true`, the event will not be emitted. |
+3. **Emitting falsy value**
+
+    If the method returns a falsy value (false, null undefined, 0, ...), the event will not be emitted.
 
 ## Middlewares
 
@@ -247,6 +263,38 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
     })
     ```
 
+### Error handling middleware
+
+You can create a middleware to handle errors that occur during event handling and above middlewares.
+
+1. **Create an Error Middleware**
+
+   Create a file named `MyErrorMiddleware.ts` and create a class that implements the `IErrorMiddleware` interface:
+
+    ```typescript
+    import { IErrorMiddleware } from "@admandev/socketio-decorator";
+    import { Socket } from "socket.io";
+
+    export class MyErrorMiddleware implements IErrorMiddleware{
+        handleError (error: Error, socket?: Socket) {
+            // Handle the error here
+            console.log('Error middleware: ', error);
+        }
+    }
+    ```
+
+2. **Register the Middleware**
+
+    Update the `app.ts` file to register the middleware:
+
+     ```typescript
+     useSocketIoDecorator({
+          ioserver: io,
+          controllers: [SocketController],
+          errorMiddleware: MyErrorMiddleware, // Add the unique error middleware here
+     })
+     ```
+
 ## Hooks
 
 Hooks in Socketio Decorator are functions that provides some data.
@@ -287,7 +335,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
    In the event handler, use the `useCurrentUser` hook to get the current user object:
 
     ```typescript
-    import { useCurrentUser } from "@admandev/socketio-decorator"
+    import { useCurrentUser, SocketOn } from "@admandev/socketio-decorator"
     import { Socket } from "socket.io"
 
     @SocketOn("message")

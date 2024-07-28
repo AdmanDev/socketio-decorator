@@ -126,7 +126,7 @@
             "last"
         ],
         "max-len": [
-            "warn",
+            "off",
             {
                 "code": 120,
                 "tabWidth": 4,
