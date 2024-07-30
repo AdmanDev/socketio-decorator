@@ -1,8 +1,9 @@
 export type Metadata = {
 	type: MetadataType
 	action: MetadataAction
-	target: Function
+	target: Object
 	methodName: string
+	dataCheck: boolean
 }
 
 export type MetadataType = "server" | "socket"

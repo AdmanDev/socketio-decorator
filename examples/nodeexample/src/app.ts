@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import { useSocketIoDecorator } from "@admandev/socketio-decorator"
 import express from "express"
 import http from "http"
@@ -19,6 +20,7 @@ const io = new Server(server)
 
 useSocketIoDecorator({
 	ioserver: io,
+	dataValidationEnabled: true,
 	controllers: [
 		SocketController,
 		MySecondSocketController

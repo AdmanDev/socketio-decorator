@@ -12,10 +12,11 @@ export function ServerEmitter (to?: string, eventName?: string) {
 		addEmitterMetadata({
 			type: "server",
 			action: "emitto",
-			target: target.constructor,
+			target: target,
 			methodName: propertyKey as string,
 			message: eventName ?? "",
-			to: to ?? ""
+			to: to ?? "",
+			dataCheck: false
 		})
 	}
 }
