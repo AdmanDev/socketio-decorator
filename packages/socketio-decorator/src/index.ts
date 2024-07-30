@@ -17,6 +17,7 @@ export * from "./interfaces/IErrorMiddleware"
 
 // Types
 export * from "./types/exportables/emitterOption"
+export * from "./types/decoratorOptions/decoratorOptions"
 
 // Hooks
 export * from "./others/hooks"

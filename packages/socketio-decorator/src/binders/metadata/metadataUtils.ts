@@ -15,7 +15,7 @@ export function getControllerMetadata (config: SiodConfig, metadatas: Metadata[]
 	const controllerMetadatas: ControllerMetadata[] = []
 
 	for (const controller of controllerInstances) {
-		const filteredMetadata = metadatas.filter((m) => m.target === controller.constructor)
+		const filteredMetadata = metadatas.filter((m) => m.target.constructor === controller.constructor)
 		controllerMetadatas.push({
 			controllerInstance: controller,
 			metadatas: filteredMetadata

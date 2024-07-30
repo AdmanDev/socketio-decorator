@@ -6,8 +6,8 @@ import { Socket } from "socket.io"
 export interface IErrorMiddleware {
 	/**
 	 * The error handler that will be used to catch errors in your event handlers.
-	 * @param {Error} error The error that was thrown
+	 * @param {any} error The error that was thrown
 	 * @param {Socket | undefined} socket The socket that was used to trigger the event
 	 */
-	handleError: (error: Error, socket?: Socket) => void
+	handleError: (error: Any, socket?: Socket) => void
 }

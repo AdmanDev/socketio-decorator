@@ -13,6 +13,9 @@ This library allows you to use [Socket.io](https://socket.io/) with TypeScript d
   - [Server Middleware](#server-middleware)
   - [Socket Middleware](#socket-middleware)
   - [Error handling middleware](#error-handling-middleware)
+- [Data validation](#data-validation)
+  - [Setup](#setup)
+  - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
   - [UseCurrentUser hook](#usecurrentuser-hook)
@@ -39,7 +42,9 @@ To get started, follow these steps:
     ```json
     {
         "compilerOptions": {
-            "experimentalDecorators": true
+            "module": "Node16",
+            "experimentalDecorators": true,
+            "emitDecoratorMetadata": true // If you use data validation
         }
     }
     ```
@@ -78,8 +83,9 @@ To get started, follow these steps:
     }
     ```
 
-    - `@ServerOn(event: string)` is used to listen for server events. In the example, it listens for the `connection` event when a new client connects.
-    - `@SocketOn(event: string)` is used to listen for client events. In the example, it listens for the `message` event when a client sends a message to the server.
+    The `SocketController` class contains 3 methods: `onConnection`, `onMessage` and `onHello`. 
+
+    The `onConnection` method listens for the socket connection event. The `onMessage` method listens for a `message` event and logs the received data. The `onHello` method listens for a `hello` event, waits for 2 seconds, and emits a `hello-back` event with the message "Hello you".
 
 2. **Set Up the Server**
 
@@ -125,7 +131,7 @@ To get started, follow these steps:
 
 | Decorator               | Description                                              | Equivalent in Basic Socket.io       |
 |-------------------------|----------------------------------------------------------|-------------------------------------|
-| `@ServerOn(event: string)`     | Listens for events emitted by the server.            | `io.on(event, callback)`            |
+| `@ServerOn(event: string)`     | Listens for server events.            | `io.on(event, callback)`            |
 | `@SocketOn(event: string)`     | Listens for events emitted by the client.             | `socket.on(event, callback)`        |
 | `@SocketOnce(event: string)`   | Listens for events emitted by the client only once.    | `socket.once(event, callback)`      |
 | `@SocketOnAny()`               | Listens for any event emitted by the client.           | `socket.onAny(callback)`            |
@@ -225,8 +231,7 @@ A Server Middleware is executed for each incoming connection.
 
     ```typescript
     useSocketIoDecorator({
-        ioserver: io,
-        controllers: [SocketController],
+        ...,
         serverMiddlewares: [MyServerMiddleware], // Add the middleware here
     })
     ```
@@ -257,8 +262,7 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
 
     ```typescript
     useSocketIoDecorator({
-        ioserver: io,
-        controllers: [SocketController],
+        ...,
         socketMiddlewares: [MySocketMiddleware], // Add the middleware here
     })
     ```
@@ -276,7 +280,7 @@ You can create a middleware to handle errors that occur during event handling an
     import { Socket } from "socket.io";
 
     export class MyErrorMiddleware implements IErrorMiddleware{
-        handleError (error: Error, socket?: Socket) {
+        handleError (error: any, socket?: Socket) {
             // Handle the error here
             console.log('Error middleware: ', error);
         }
@@ -289,11 +293,100 @@ You can create a middleware to handle errors that occur during event handling an
 
      ```typescript
      useSocketIoDecorator({
-          ioserver: io,
-          controllers: [SocketController],
+          ...,
           errorMiddleware: MyErrorMiddleware, // Add the unique error middleware here
      })
      ```
+
+## Data validation
+
+You can use the `class-validator` library to validate the data received from the client and be sure that required fields are present and have the correct type.
+
+### Setup
+
+1. **Install the following libraries**
+
+    ```bash
+    npm install class-validator class-transformer reflect-metadata
+    ```
+
+2. **Import the `reflect-metadata` library**
+  
+    Add the following line at the top of your `app.ts` file:
+
+    ```typescript
+    import "reflect-metadata"
+     ```
+
+3. **Be sure to enable the `emitDecoratorMetadata` option in your `tsconfig.json` file**
+
+    ```json
+    {
+        "compilerOptions": {
+            "emitDecoratorMetadata": true
+        }
+    }
+    ```
+
+4. **Enable the validation option in the `useSocketIoDecorator` config**
+
+    ```typescript
+    useSocketIoDecorator({
+        ...,
+        dataValidationEnabled: true
+    })
+    ```
+
+5. **Create and use a class with validation rules**
+
+    ```typescript
+    import { IsString } from "class-validator"
+
+    export class MessageData {
+        @IsString()
+        message: string
+    }
+    ```
+
+    Use the class in the event handler:
+
+    ```typescript
+    @SocketOn("message")
+    public onMessage(socket: Socket, data: MessageData) {
+        console.log("Message received:", data.message)
+    }
+    ```
+
+    If the data does not match the validation rules, an error will be thrown before the event handler is called.
+
+> [!WARNING]
+> We recommend using the [error handling middleware](#error-handling-middleware) to catch and handle validation errors.
+
+### Disable validation for a specific handler
+
+You can disable validation for a specific handler by setting the `disableDataValidation` option to `true`:
+
+```typescript
+@SocketOn("message", { disableDataValidation: true })
+public onMessage(socket: Socket, data: MessageData) {
+    ...
+}
+```
+
+#### Default enabled validation
+
+Data validation works only on socket listeners (not server listeners or emitters).
+
+Here is the default value for the `disableDataValidation` option:
+
+- `@SocketOn` - `false`
+- `@SocketOnce` - `false`
+- `@SocketOnAny` - `true` - If you want to validate the data, you need to set the option to `false`
+- `@SocketOnAnyOutgoing` - `true` because it is not an incoming event from the client
+
+### Learn more about data validation
+
+For more information on data validation, see the [class-validator documentation](https://github.com/typestack/class-validator).
 
 ## Hooks
 
@@ -320,8 +413,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
 
     ```typescript
     useSocketIoDecorator({
-        ioserver: io,
-        controllers: [SocketController],
+        ...,
         currentUserProvider: (socket: Socket) => {
             const token = socket.handshake.auth.token
             const user = userServices.getUserByToken(token)
@@ -355,8 +447,7 @@ To allow Socketio Decorator to work with your DI system, you need to provide the
 import { Container } from "typedi"
 
 useSocketIoDecorator({
-    ioserver: io,
-    controllers: [SocketController],
+    ...,
     iocContainer: Container,
 })
 ```
@@ -367,7 +458,7 @@ Note 2: Your controllers and middlewares must be registered in the DI container.
 
 **Important**: The `iocContainer` option is optional. If you don't provide it, Socketio Decorator will create a new instance of the controllers or middlewares and keep them in memory.
 
-## Sample Project
+## Sample project
 
 You can find a sample project using express [here](https://github.com/AdmanDev/socketio-decorator/tree/master/examples/nodeexample).
 
