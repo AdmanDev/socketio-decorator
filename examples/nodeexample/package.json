@@ -9,6 +9,8 @@
   "dependencies": {
     "@admandev/socketio-decorator": "*",
     "body-parser": "^1.20.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   },

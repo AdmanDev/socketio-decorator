@@ -9,9 +9,10 @@ export function SocketOnAnyOutgoing () {
 		addListenerMetadata({
 			type: "socket",
 			action: "onAnyOutgoing",
-			target: target.constructor,
+			target: target,
 			methodName: propertyKey,
-			eventName: ""
+			eventName: "",
+			dataCheck: false
 		})
 	}
 }

@@ -11,6 +11,10 @@ export type SiodConfig = {
 	 */
 	iocContainer?: IoCProvider
 	/**
+	 * If true, the data validation will be enabled from listen events
+	 */
+	dataValidationEnabled?: boolean
+	/**
 	 * The controllers on which to bind the socket.io events
 	 */
 	controllers: Function[]
@@ -30,5 +34,10 @@ export type SiodConfig = {
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
 	 */
 	currentUserProvider?: (socket: Socket) => Any,
+	/**
+	 * Search for a user socket that matches the search argument
+	 * @param {any} arg The search argument
+	 * @returns {Socket | undefined} The socket that matches the search argument
+	 */
 	searchUserSocket?: (arg: Any) => Socket | undefined
 }

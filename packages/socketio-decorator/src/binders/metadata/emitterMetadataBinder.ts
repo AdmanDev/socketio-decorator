@@ -59,8 +59,8 @@ function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 			}
 
 			const socket = args[0]
-			if (socket instanceof Socket) {
-				socket.emit(message, data)
+			if (socket?.constructor.name === "Socket") {
+				(socket as Socket).emit(message, data)
 			}
 
 			return result

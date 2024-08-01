@@ -10,9 +10,10 @@ export function ServerOn (event: string) {
 		addListenerMetadata({
 			type: "server",
 			action: "on",
-			target: target.constructor,
+			target: target,
 			methodName: propertyKey,
-			eventName: event
+			eventName: event,
+			dataCheck: false
 		})
 	}
 }

@@ -11,10 +11,11 @@ export function SocketEmitter (eventName?: string): MethodDecorator {
 		addEmitterMetadata({
 			type: "socket",
 			action: "emitSelf",
-			target: target.constructor,
+			target: target,
 			methodName: propertyKey as string,
 			message: eventName ?? "",
-			to: ""
+			to: "",
+			dataCheck: false
 		})
 	}
 }

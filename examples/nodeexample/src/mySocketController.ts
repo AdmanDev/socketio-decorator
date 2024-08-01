@@ -1,5 +1,6 @@
 import { EmitterOption, ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
+import { MessageRequest } from "./messageRequest";
 
 export class SocketController {
     @ServerOn("connection")
@@ -8,8 +9,8 @@ export class SocketController {
     }
 
 	@SocketOn("message")
-	public onMessage(socket: Socket, data: any) {
-		console.log("Message", data)
+	public onMessage(socket: Socket, data: MessageRequest) {
+		console.log("Message", data.message)
 		socket.join("room")
 		this.emitMyEvent()
 	}
