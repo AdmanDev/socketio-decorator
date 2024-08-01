@@ -83,7 +83,7 @@ To get started, follow these steps:
     }
     ```
 
-    The `SocketController` class contains 3 methods: `onConnection`, `onMessage` and `onHello`. 
+    The `SocketController` class contains 3 methods: `onConnection`, `onMessage` and `onHello`.
 
     The `onConnection` method listens for the socket connection event. The `onMessage` method listens for a `message` event and logs the received data. The `onHello` method listens for a `hello` event, waits for 2 seconds, and emits a `hello-back` event with the message "Hello you".
 
