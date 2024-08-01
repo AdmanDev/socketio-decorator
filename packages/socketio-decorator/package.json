@@ -1,7 +1,7 @@
 {
   "name": "@admandev/socketio-decorator",
-  "version": "1.0.2",
-  "description": "Decorators for socket.io",
+  "version": "1.1.0",
+  "description": "This library allows you to use Socket.io with TypeScript decorators, simplifying the integration and usage of Socket.io in a TypeScript environment.",
   "files": [
     "dist"
   ],
