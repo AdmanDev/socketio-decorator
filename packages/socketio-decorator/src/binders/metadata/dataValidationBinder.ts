@@ -45,7 +45,7 @@ export function addDataValidation (config: SiodConfig) {
 
 					throw errors
 				}
-				originalMethod.apply(controllerInstance, args)
+				return await originalMethod.apply(controllerInstance, args)
 			}
 		}
 	})
