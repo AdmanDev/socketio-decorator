@@ -27,9 +27,9 @@ export function addDataValidation (config: SiodConfig) {
 
 			// eslint-disable-next-line jsdoc/require-jsdoc
 			controllerInstance[m.methodName] = async function (...args: Any[]) {
-				const dataArgInx = args.findIndex(a => a.constructor === Object)
+				const dataArgInx = args.findIndex(a => a?.constructor === Object)
 				if (dataArgInx === -1) {
-					throw new SiodImcomigDataError("Imcomig data object type is not valid")
+					throw new SiodImcomigDataError("Imcomig data object type is not valid (data validation)")
 				}
 
 				const dataValue = args[dataArgInx]
