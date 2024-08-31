@@ -141,7 +141,7 @@ To get started, follow these steps:
 
 | Decorator               | Description                                             | Equivalent in Basic Socket.io        |
 |-------------------------|---------------------------------------------------------|--------------------------------------|
-| `@ServerEmitter(event?: string)`  | Emits events from the server.                        | `io.emit(event, data)`               |
+| `@ServerEmitter(event?: string, to?: string)`  | Emits events from the server.                        | `io.emit(event, data)`               |
 | `@SocketEmitter(event:? string)`  | Emits events from the client socket.                  | `socket.emit(event, data)`           |
 
 #### How to use
