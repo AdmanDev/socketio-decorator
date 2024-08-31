@@ -25,6 +25,10 @@ export function getAllMetadata () {
  * @param {ListenerMetadata} metadata The metadata to add
  */
 export function addListenerMetadata (metadata: ListenerMetadata) {
+	if (["disconnecting", "disconnect"].includes(metadata.eventName)) {
+		metadata.dataCheck = false
+	}
+
 	ioMetadata.listener.push(metadata)
 }
 
