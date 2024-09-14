@@ -17,13 +17,16 @@ export function addDataValidation (config: SiodConfig) {
 	const metadata = getAllMetadata()
 	metadata.forEach((m) => {
 		if (m.dataCheck) {
-			const controllerInstance = getInstance<Any>(m.target.constructor, config.iocContainer)
-			const originalMethod = controllerInstance[m.methodName]
 			const paramTypes = Reflect.getMetadata("design:paramtypes", m.target, m.methodName)
 
-			if (!paramTypes || paramTypes.length === 0) {
+			const dataParamIndex = paramTypes.findIndex((p: Function) => p.name !== "Socket")
+
+			if (!paramTypes || dataParamIndex === -1) {
 				return
 			}
+
+			const controllerInstance = getInstance<Any>(m.target.constructor, config.iocContainer)
+			const originalMethod = controllerInstance[m.methodName]
 
 			// eslint-disable-next-line jsdoc/require-jsdoc
 			controllerInstance[m.methodName] = async function (...args: Any[]) {
