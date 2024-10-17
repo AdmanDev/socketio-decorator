@@ -19,6 +19,7 @@ export * from "./interfaces/ISocketMiddleware"
 export * from "./interfaces/IErrorMiddleware"
 
 // Types
+export * from "./types/SiodConfig"
 export * from "./types/exportables/emitterOption"
 export * from "./types/decoratorOptions/decoratorOptions"
 
