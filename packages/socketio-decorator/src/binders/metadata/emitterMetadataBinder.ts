@@ -30,13 +30,18 @@ function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: S
 		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
 			const result = await method.apply(controllerInstance, args)
 
-			const { data, to, message, disableEmit } = getEmitterOption(metadata, result)
+			const emitterOptions = getEmitterOptions(metadata, result)
 
-			if (disableEmit || !to || !message || !data) {
-				return result
-			}
+			emitterOptions.forEach((option) => {
+				const { data, message, disableEmit, to } = option
 
-			config.ioserver.to(to).emit(message, data)
+				if (disableEmit || !to || !message || !data) {
+					return result
+				}
+
+				config.ioserver.to(to).emit(message, data)
+			})
+
 			return result
 		}
 	})
@@ -52,15 +57,16 @@ function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
 			const result = await method.apply(controllerInstance, args)
 
-			const { data, message, disableEmit } = getEmitterOption(metadata, result)
-
-			if (disableEmit || !message || !data) {
-				return result
-			}
-
 			const socket = args[0]
 			if (socket?.constructor.name === "Socket") {
-				(socket as Socket).emit(message, data)
+				const emitterOptions = getEmitterOptions(metadata, result)
+
+				emitterOptions.forEach((option) => {
+					const { data, message, disableEmit } = option
+					if (!disableEmit && message && data) {
+						(socket as Socket).emit(message, data)
+					}
+				})
 			}
 
 			return result
@@ -69,43 +75,56 @@ function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 }
 
 /**
- * Gets the emitter option
+ * Gets the emitter options
  * @param {Metadata} metadata The emitter metadata
  * @param {unknown} methodResult The method result
- * @returns {EmitterOption} The emitter option
+ * @returns {EmitterOption[]} The emitter options
  */
-function getEmitterOption (metadata: Metadata, methodResult: unknown) {
+function getEmitterOptions (metadata: Metadata, methodResult: unknown) {
 	const { to, message } = metadata as EmitterMetadata
 
-	let finalTo = to
-	let finalMessage = message
-	let finalData = methodResult
-	let finalDisableEmit = false
+	const emitterOptionsCollection: EmitterOption[] = []
 
-	if (methodResult instanceof EmitterOption) {
-		const { disableEmit, to: newTo, message: newMessage, data } = methodResult
+	const getNormalizeOption = (option: unknown) => {
+		let finalTo = to
+		let finalMessage = message
+		let finalData = option
+		let finalDisableEmit = false
 
-		if (disableEmit) {
-			finalDisableEmit = disableEmit
+		if (option instanceof EmitterOption) {
+
+			const { disableEmit, to: newTo, message: newMessage, data } = option
+
+			if (disableEmit) {
+				finalDisableEmit = disableEmit
+			}
+
+			if (newTo) {
+				finalTo = newTo
+			}
+
+			if (newMessage) {
+				finalMessage = newMessage
+			}
+
+			if (data) {
+				finalData = data
+			}
 		}
 
-		if (newTo) {
-			finalTo = newTo
-		}
-
-		if (newMessage) {
-			finalMessage = newMessage
-		}
-
-		if (data) {
-			finalData = data
-		}
+		return new EmitterOption({
+			to: finalTo,
+			message: finalMessage,
+			data: finalData,
+			disableEmit: finalDisableEmit
+		})
 	}
 
-	return new EmitterOption({
-		to: finalTo,
-		message: finalMessage,
-		data: finalData,
-		disableEmit: finalDisableEmit
-	})
+	if (Array.isArray(methodResult) && methodResult.every(option => option instanceof EmitterOption)) {
+		emitterOptionsCollection.push(...methodResult.map(getNormalizeOption))
+	} else {
+		emitterOptionsCollection.push(getNormalizeOption(methodResult))
+	}
+
+	return emitterOptionsCollection
 }
