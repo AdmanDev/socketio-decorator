@@ -167,28 +167,59 @@ To get started, follow these steps:
 
 2. **Emitting options**
 
-    You can also specify options for the emitted event by returning an `EmitOption` object.
+    - You can also specify options for the emitted event by returning an `EmitOption` object.
 
-    ```typescript
-    import { EmitterOption, SocketEmitter } from "@admandev/socketio-decorator"
-    import { Socket } from "socket.io"
+        ```typescript
+        import { EmitterOption, SocketEmitter } from "@admandev/socketio-decorator"
+        import { Socket } from "socket.io"
 
-    @SocketEmitter() // No event name specified
-    public sendMessage(socket: Socket): EmitOptions {
-        const isAllowedToSend = isUserAllowedToSendMessage(socket)
-        return new EmitterOption({
-            to: "room1",
-            message: "newMessage",
-            data: { message: "Hello, world!" },
-            disableEmit: !isAllowedToSend,
-        })
-    }
-    ```
+        @SocketEmitter() // No event name specified
+        public sendMessage(socket: Socket): EmitOptions {
+            const isAllowedToSend = isUserAllowedToSendMessage(socket)
+            return new EmitterOption({
+                to: "room1",
+                message: "newMessage",
+                data: { message: "Hello, world!" },
+                disableEmit: !isAllowedToSend,
+            })
+        }
+        ```
 
-    The above code will emit a `newMessage` event to the `room1` room. The event will only be emitted if the `isUserAllowedToSendMessage` function returns `true`.
-\
+        The above code will emit a `newMessage` event to the `room1` room. The event will only be emitted if the `isUserAllowedToSendMessage` function returns `true`.
+.
+
+    - If you return an array of `EmitOption` objects, an event will be emitted for each `EmitOption` items.
+
+        ```typescript
+        @SocketOn("multiple-events")
+        @ServerEmitter()
+        onMultipleEvents(socket: Socket) {
+            socket.join("multiple-events");
+            const events: EmitterOption[] = [
+                new EmitterOption({
+                    to: socket.id,
+                    message: "event-1",
+                    data: {
+                        message: "This is event 1"
+                    }
+                }),
+                new EmitterOption({
+                    to: "multiple-events",
+                    message: "event-2",
+                    data: {
+                        message: "This is events-2"
+                    }
+                }),
+            ]
+
+            return events
+        }
+        ```
+
+        The above code will emit two events: `event-1` and `event-2`.
+        `event-1` will be emitted to the client with the `id` of the socket and `event-2` will be emitted to the `multiple-events` room.
+
     **Emit options**
-
     The `EmitOption` object has the following properties:
 
     | Property | Type | Required | Description |
@@ -199,7 +230,6 @@ To get started, follow these steps:
     | `disableEmit` | boolean | No | If `true`, the event will not be emitted. |
 
 3. **Emitting falsy value**
-
     If the method returns a falsy value (false, null undefined, 0, ...), the event will not be emitted.
 
 ## Middlewares
