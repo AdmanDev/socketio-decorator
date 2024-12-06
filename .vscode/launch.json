@@ -17,6 +17,19 @@
                 "<node_internals>/**",
                 "<node_modules>/**"
             ]
-        }
+        },
+        {
+            "name": "Jest Tests",
+            "localRoot": "${workspaceRoot}/packages/socketio-decorator",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceRoot}/node_modules/jest/bin/jest.js",
+                "--runInBand"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
     ]
 }

@@ -21,10 +21,10 @@
             "javascript"
         ],
         "editor.formatOnPaste": false,
-        "god.tsconfig": "./socketio-decorator\\tsconfig.json",
+        "jest.jestCommandLine": "yarn test",
+		"jestrunner.jestCommand": "yarn test",
         "jest.disabledWorkspaceFolders": [
-            "socketio-decorator",
             "examples"
-        ]
+        ],
     }
 }

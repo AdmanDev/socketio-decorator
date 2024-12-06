@@ -13,7 +13,7 @@ export class EmitterOption {
 	/**
 	 * The message to send
 	 */
-	message?: string
+	message: string
 	/**
 	 * The data to send
 	 */

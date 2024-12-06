@@ -1,4 +1,4 @@
-import { addBinderEvent, getListenerMetadata } from "../../globalMetadata"
+import { addEventBinder, getListenerMetadata } from "../../globalMetadata"
 import { SiodConfig } from "../../types/SiodConfig"
 import { ControllerMetadata } from "../../types/metadata/listenerMetadata"
 import { callServerAction, callSocketAction } from "../ioActionFnBinders"
@@ -33,7 +33,7 @@ function bindServerListeners (controllerMetadata: ControllerMetadata[], config: 
  * @param {ControllerMetadata} controllerMetadata The controller metadata
  */
 function bindSocketListeners (controllerMetadata: ControllerMetadata[]) {
-	addBinderEvent("connection", (socket) => {
+	addEventBinder("connection", (socket) => {
 		mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
 			callSocketAction(socket, metadata, controllerInstance, method)
 		})

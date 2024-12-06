@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { useBinderEvent } from "./binders/binderEventIniter"
+import { useEventBinders } from "./binders/eventBindersIniter"
 import { bindEmitterMetadata } from "./binders/metadata/emitterMetadataBinder"
 import { bindListenerMetadata } from "./binders/metadata/listenerMetadataBinder"
 import { bindErrorMiddleware, bindServerMiddlewares, bindSocketMiddlewares } from "./binders/middlewareBinders"
@@ -15,9 +15,19 @@ export function useSocketIoDecorator (config: SiodConfig) {
 	setConfig(config)
 
 	addDataValidation(config)
-	bindErrorMiddleware(config)
-	confugureListeners(config)
+	configureMiddlewares(config)
 	bindEmitterMetadata(config)
+	confugureListeners(config)
+	bindErrorMiddleware(config)
+}
+
+/**
+ * Configures the middlewares
+ * @param {SiodConfig} config The socketio decocator configuration
+ */
+function configureMiddlewares (config: SiodConfig) {
+	bindServerMiddlewares(config)
+	bindSocketMiddlewares(config)
 }
 
 /**
@@ -25,8 +35,6 @@ export function useSocketIoDecorator (config: SiodConfig) {
  * @param {SiodConfig} config The socketio decocator configuration
  */
 function confugureListeners (config: SiodConfig) {
-	bindServerMiddlewares(config)
-	bindSocketMiddlewares(config)
 	bindListenerMetadata(config)
-	useBinderEvent(config)
+	useEventBinders(config)
 }
