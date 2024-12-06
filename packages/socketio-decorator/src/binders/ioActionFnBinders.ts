@@ -51,12 +51,9 @@ const ioFns: IoActionFnBinder = {
  */
 export function callServerAction (ioserver: Server, metadata: Metadata, controller: Any, method: Function) {
 	const fn = ioFns.server[metadata.action]
+	validateAction(metadata.action, fn)
 
-	if (fn) {
-		fn(ioserver, metadata, controller, method)
-	} else {
-		throw new Error(`Invalid io server action: ${metadata.action}`)
-	}
+	fn?.(ioserver, metadata, controller, method)
 }
 
 /**
@@ -68,10 +65,19 @@ export function callServerAction (ioserver: Server, metadata: Metadata, controll
  */
 export function callSocketAction (socket: Socket, metadata: Metadata, controller: Any, method: Function) {
 	const fn = ioFns.socket[metadata.action]
+	validateAction(metadata.action, fn)
 
-	if (fn) {
-		fn(socket, metadata, controller, method)
-	} else {
-		throw new Error(`Invalid io socket action: ${metadata.action}`)
+	fn?.(socket, metadata, controller, method)
+}
+
+/**
+ * Validate if the given action is a valid io socket action
+ * @param {string} action The action name 
+ * @param {Function} [fn] The action function to validate
+ * @throws {Error} If the action is invalid
+ */
+function validateAction (action: string, fn?: Function) {
+	if (!fn) {
+		throw new Error(`Invalid io socket action: ${action}`)
 	}
 }

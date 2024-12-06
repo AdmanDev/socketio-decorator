@@ -1,10 +1,10 @@
 import { addEmitterMetadata } from "../../globalMetadata"
+import type { EmitterOption } from "../../types/exportables/emitterOption"
 
 /**
- * Decorator that register a method as an emiter to all clients connected to the server (io.emit)
- * Must be used with a listener decorator (ServerOn, SocketOn, ...)
- * @param {string} eventName The event name to emit
- * @param {string} to The destination to emit the event
+ * Decorator that register a method as an emitter to all clients connected to the server (io.emit or io.to(...).emit)
+ * @param {string | undefined} eventName The event name to emit (if undefined, must be set in {@link EmitterOption})
+ * @param {string | undefined} to The destination to emit the event (if undefined, will emit to all clients)
  * @returns {MethodDecorator} The decorator function
  */
 export function ServerEmitter (eventName?: string, to?: string,) {

@@ -17,6 +17,14 @@
         "@typescript-eslint",
         "jsdoc"
     ],
+    "overrides": [
+        {
+          "files": ["tests/**/*.spec.ts"], 
+          "rules": {
+            "jsdoc/require-jsdoc": "off"
+          }
+        }
+      ],
     "rules": {
         "semi": [
             "error",

@@ -25,3 +25,4 @@ export * from "./types/decoratorOptions/decoratorOptions"
 
 // Errors
 export * from "./types/errors/SiodImcomigDataError"
+export * from "./types/errors/SiodInvalidArgumentError"

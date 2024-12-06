@@ -6,6 +6,7 @@ import { SiodConfig } from "../../types/SiodConfig"
 import { getControllerMetadata, mapMetadata } from "./metadataUtils"
 import { EmitterOption } from "../../types/exportables/emitterOption"
 import { Metadata } from "../../types/metadata/metadata"
+import { SiodInvalidArgumentError } from "../../types/errors/SiodInvalidArgumentError"
 
 /**
  * Binds emitter metadata from decorators
@@ -17,6 +18,22 @@ export function bindEmitterMetadata (config: SiodConfig) {
 	const controllerMetadatas = getControllerMetadata(config, metadatas)
 	bindServerEmitters(controllerMetadatas, config)
 	bindSocketEmitters(controllerMetadatas)
+}
+
+/**
+ * Determines if an event can be emitted based on the emitter option.
+ * @param {EmitterOption} emitterOption - The options for the emitter.
+ * @returns {boolean} - Returns true if the event can be emitted; false otherwise.
+ * @throws {SiodInvalidArgumentError} - If the message is undefined.
+ */
+function canEmit (emitterOption: EmitterOption) {
+	const { message, disableEmit } = emitterOption
+
+	if (!message) {
+		throw new SiodInvalidArgumentError("The socket message cannot be empty")
+	}
+
+	return !disableEmit
 }
 
 /**
@@ -33,13 +50,17 @@ function bindServerEmitters (controllerMetadata: ControllerMetadata[], config: S
 			const emitterOptions = getEmitterOptions(metadata, result)
 
 			emitterOptions.forEach((option) => {
-				const { data, message, disableEmit, to } = option
+				const { data, message, to } = option
 
-				if (disableEmit || !to || !message || !data) {
+				if (!canEmit(option)) {
 					return result
 				}
 
-				config.ioserver.to(to).emit(message, data)
+				if (to) {
+					config.ioserver.to(to).emit(message, data)
+				} else {
+					config.ioserver.emit(message, data)
+				}
 			})
 
 			return result
@@ -62,8 +83,9 @@ function bindSocketEmitters (controllerMetadata: ControllerMetadata[]) {
 				const emitterOptions = getEmitterOptions(metadata, result)
 
 				emitterOptions.forEach((option) => {
-					const { data, message, disableEmit } = option
-					if (!disableEmit && message && data) {
+					const { data, message } = option
+
+					if (canEmit(option)) {
 						(socket as Socket).emit(message, data)
 					}
 				})

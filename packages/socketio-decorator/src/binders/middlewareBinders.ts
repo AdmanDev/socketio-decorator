@@ -1,6 +1,6 @@
 import { Socket } from "socket.io"
 import { getInstances } from "../container"
-import { addBinderEvent, getAllMetadata } from "../globalMetadata"
+import { addEventBinder, getAllMetadata } from "../globalMetadata"
 import { IErrorMiddleware } from "../interfaces/IErrorMiddleware"
 import { IServerMiddleware } from "../interfaces/IServerMiddleware"
 import { ISocketMiddleware } from "../interfaces/ISocketMiddleware"
@@ -85,7 +85,7 @@ export function bindSocketMiddlewares (config: SiodConfig) {
 
 	const middlewares = getInstances<ISocketMiddleware>(config.socketMiddlewares, config.iocContainer)
 	middlewares.forEach(middleware => {
-		addBinderEvent("connection", (socket) => {
+		addEventBinder("connection", (socket) => {
 			socket.use(middleware.use)
 		})
 	})

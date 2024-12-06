@@ -1,3 +1,5 @@
+import { ValidationError } from "class-validator"
+
 /**
  * Defines the error for incoming data exception
  */
@@ -11,11 +13,11 @@ export class SiodImcomigDataError extends Error {
 	 * Initializes a new instance of the Siod error.
 	 * @param {string} message The error message
 	 * @param {unknown} data The incoming data that caused the error
-	 * @param {Error} cause The error cause
+	 * @param {ValidationError[]} validationErrors The validation errors
 	 */
-	constructor (message: string, data?: unknown, cause?: Error) {
-		super(message, { cause })
-		this.name = "SiodImcomigDataError"
+	constructor (message: string, data?: unknown, validationErrors?: ValidationError[]) {
+		super(message, { cause: validationErrors })
+		this.name = SiodImcomigDataError.name
 		this.dataValue = data
 	}
 }
