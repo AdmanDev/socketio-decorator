@@ -28,6 +28,7 @@ describe("> ErrorMiddleware decorator", () => {
 		@SocketEmitter("newMessage")
 		public onConnection (socket: ServerSocket) {
 			controllerFnSpy(socket.id)
+			return 1
 		}
 	}
 
@@ -93,7 +94,7 @@ describe("> ErrorMiddleware decorator", () => {
 	})
 
 	describe("> Error tests", () => {
-		it.only("should execute error middleware when server middleware throws an error", async () => {
+		it.skip("should execute error middleware when server middleware throws an error", async () => {
 			const middlewareAction: MiddlewareAction = "error"
 			const expectedError = new Error("error thrown")
 

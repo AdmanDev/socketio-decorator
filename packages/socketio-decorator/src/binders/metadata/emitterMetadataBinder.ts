@@ -27,13 +27,13 @@ export function bindEmitterMetadata (config: SiodConfig) {
  * @throws {SiodInvalidArgumentError} - If the message is undefined.
  */
 function canEmit (emitterOption: EmitterOption) {
-	const { message, disableEmit } = emitterOption
+	const { data, message, disableEmit } = emitterOption
 
 	if (!message) {
 		throw new SiodInvalidArgumentError("The socket message cannot be empty")
 	}
 
-	return !disableEmit
+	return !disableEmit && data
 }
 
 /**

@@ -1,6 +1,6 @@
 import { plainToInstance } from "class-transformer"
 import { getInstance } from "../../container"
-import { getAllMetadata } from "../../globalMetadata"
+import { getListenerMetadata } from "../../globalMetadata"
 import { SiodConfig } from "../../types/SiodConfig"
 import { validate } from "class-validator"
 import { SiodImcomigDataError } from "../../types/errors/SiodImcomigDataError"
@@ -14,7 +14,7 @@ export function addDataValidation (config: SiodConfig) {
 		return
 	}
 
-	const metadata = getAllMetadata()
+	const metadata = getListenerMetadata()
 	metadata.forEach((m) => {
 		if (m.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", m.target, m.methodName)
