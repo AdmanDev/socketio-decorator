@@ -4,7 +4,7 @@ import { Socket as ClientSocket } from "socket.io-client"
 import { IErrorMiddleware, SocketOnAnyOutgoing } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createClientSocket, createServer } from "../../../utilities/serverUtils"
-import { getInstance } from "../../../../src/container"
+import { IoCContainer } from "../../../../src/IoCContainer"
 
 describe("> SocketOn decorator", () => {
 	let io: Server
@@ -64,7 +64,7 @@ describe("> SocketOn decorator", () => {
 		it("should register a listener for any outgoing event and dispatch the data to the controller", () => {
 			const data: MessageData = { message: "Hello ma'am" }
 
-			const controller = getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
+			const controller = IoCContainer.getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
 
 			controller.sendMessage(data)
 
@@ -78,7 +78,7 @@ describe("> SocketOn decorator", () => {
 		it("should not throw an error if the data is not valid", () => {
 			const data = { wrong: "data" }
 
-			const controller = getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
+			const controller = IoCContainer.getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
 
 			controller.sendMessage(data as Any)
 

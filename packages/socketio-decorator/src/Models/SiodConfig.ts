@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io"
-import { IoCProvider } from "./iocProvider"
+import { IoCProvider } from "./IocProvider"
 
 export type SiodConfig = {
 	/**

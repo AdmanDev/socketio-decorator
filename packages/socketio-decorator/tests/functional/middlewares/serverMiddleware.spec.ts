@@ -4,11 +4,10 @@ import { MessageData } from "../../types/socketData"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createClientConfiguredSocket as createConfiguredSocketClient, createClientSocket as createSocketClient, createServer, registerServerEventAndEmit } from "../../utilities/serverUtils"
-import { getInstance } from "../../../src/container"
 import { waitFor } from "../../utilities/testUtils"
 import { MiddlewareAction } from "../../types/middlewareAction"
 
-describe("> ErrorMiddleware decorator", () => {
+describe("> ServerMiddleware decorator", () => {
 	let io: Server
 	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
@@ -43,7 +42,7 @@ describe("> ErrorMiddleware decorator", () => {
 			}
 
 			if (action === "nextError") {
-				next(new Error("next error"))
+				return next(new Error("next error"))
 			}
 
 			next()
@@ -93,8 +92,8 @@ describe("> ErrorMiddleware decorator", () => {
 		})
 	})
 
-	describe("> Error tests", () => {
-		it.skip("should execute error middleware when server middleware throws an error", async () => {
+	describe("> Error handling", () => {
+		it("should execute error middleware when server middleware throws an error", async () => {
 			const middlewareAction: MiddlewareAction = "error"
 			const expectedError = new Error("error thrown")
 
@@ -110,7 +109,24 @@ describe("> ErrorMiddleware decorator", () => {
 			await waitFor(50)
 
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expectedError, clientSocket.id)
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expectedError, expect.any(String))
+			expect(controllerFnSpy).not.toHaveBeenCalled()
+		})
+
+		it("should not execute controller when next function was called with an error", async () => {
+			const middlewareAction: MiddlewareAction = "nextError"
+
+			clientSocket = createConfiguredSocketClient({
+				autoConnect: false,
+				query: {
+					middlewareAction
+				}
+			})
+
+			clientSocket.connect()
+
+			await waitFor(50)
+
 			expect(controllerFnSpy).not.toHaveBeenCalled()
 		})
 	})

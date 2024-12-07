@@ -1,5 +1,5 @@
 import { addEmitterMetadata } from "../../globalMetadata"
-import type { EmitterOption } from "../../types/exportables/emitterOption"
+import type { EmitterOption } from "../../Models/DecoratorOptions/EmitterOption"
 
 /**
  * Decorator that register a method as an emitter to all clients connected to the server (io.emit or io.to(...).emit)

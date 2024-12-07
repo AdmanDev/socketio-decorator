@@ -1,5 +1,5 @@
 import { addListenerMetadata } from "../../globalMetadata"
-import { ListenerDecoratorOptions } from "../../types/decoratorOptions/decoratorOptions"
+import { ListenerDecoratorOptions } from "../../Models/DecoratorOptions/DecoratorOptions"
 
 /**
  * Regiser a method as "socket.once" event listener for the given event

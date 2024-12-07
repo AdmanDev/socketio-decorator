@@ -4,8 +4,8 @@ import { MessageData } from "../../../types/socketData"
 import { createClientSocket, createServer } from "../../../utilities/serverUtils"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { getInstance } from "../../../../src/container"
 import { waitFor } from "../../../utilities/testUtils"
+import { IoCContainer } from "../../../../src/IoCContainer"
 
 describe("> ServerEmitter decorator", () => {
 	let io: Server
@@ -49,6 +49,11 @@ describe("> ServerEmitter decorator", () => {
 		public testWithEmptyEventName (data: MessageData) {
 			return data
 		}
+
+		@ServerEmitter("testThrowError")
+		public testThrowError () {
+			throw new Error("Error from testThrowError controller")
+		}
 	}
 
 	beforeAll((done) => {
@@ -66,7 +71,7 @@ describe("> ServerEmitter decorator", () => {
 			}
 		)
 
-		controllerInstance = getInstance<ServerEmitterController>(ServerEmitterController)
+		controllerInstance = IoCContainer.getInstance<ServerEmitterController>(ServerEmitterController)
 	})
 
 	beforeEach((done) => {
@@ -250,6 +255,9 @@ describe("> ServerEmitter decorator", () => {
 			expect(messageReceivedSpy).not.toHaveBeenCalled()
 		})
 
+	})
+
+	describe("> Error handling", () => {
 		it(`should throw an ${SiodInvalidArgumentError.name} when event name is undefined`, async () => {
 			const data: MessageData = { message: "Hello" }
 
@@ -260,6 +268,22 @@ describe("> ServerEmitter decorator", () => {
 			expect(errorMiddlewareSpy).toBeCalledWith(expect.any(SiodInvalidArgumentError))
 		})
 
+		it("should not emit when the controller throws an error", async () => {
+			const eventMessage = "testThrowError"
+			const expectedError = new Error("Error from testThrowError controller")
+
+			const messageReceivedSpy = jest.fn()
+
+			clientSocket.on(eventMessage, messageReceivedSpy)
+
+			controllerInstance.testThrowError()
+
+			await waitFor(50)
+
+			expect(messageReceivedSpy).not.toHaveBeenCalled()
+			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expectedError)
+		})
 	})
 
 })
