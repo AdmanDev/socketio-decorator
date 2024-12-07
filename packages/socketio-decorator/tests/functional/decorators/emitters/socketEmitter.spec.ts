@@ -66,6 +66,12 @@ describe("> SocketEmitter decorator", () => {
 		public testWithEmptyEventName (socket: ServerSocket, data: MessageData) {
 			return data
 		}
+
+		@SocketOn("testThrowError")
+		@SocketEmitter("testThrowErrorMsg")
+		public testThrowError () {
+			throw new Error("Error from testThrowError controller")
+		}
 	}
 
 	beforeAll((done) => {
@@ -188,6 +194,9 @@ describe("> SocketEmitter decorator", () => {
 			expect(messageReceivedSpy).not.toHaveBeenCalled()
 		})
 
+	})
+
+	describe("> Error handling", () => {
 		it(`should throw an ${SiodInvalidArgumentError.name} when event name is undefined`, async () => {
 			const data: MessageData = { message: "Hello" }
 
@@ -198,6 +207,20 @@ describe("> SocketEmitter decorator", () => {
 			expect(errorMiddlewareSpy).toBeCalledWith(expect.any(SiodInvalidArgumentError))
 		})
 
+		it("should not emit when the controller throws an error", async () => {
+			const expectedError = new Error("Error from testThrowError controller")
+
+			const messageReceivedSpy = jest.fn()
+
+			clientSocket.on("testThrowErrorMsg", messageReceivedSpy)
+			clientSocket.emit("testThrowError")
+
+			await waitFor(50)
+
+			expect(messageReceivedSpy).not.toHaveBeenCalled()
+			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expectedError)
+		})
 	})
 
 })

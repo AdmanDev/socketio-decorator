@@ -1,15 +1,15 @@
 import { Socket } from "socket.io"
-import { BinderEvent } from "./types/binderEvent"
-import { ListenerMetadata } from "./types/metadata/listenerMetadata"
-import { EmitterMetadata } from "./types/metadata/emiterMetadata"
-import { SiodConfig } from "./types/SiodConfig"
-import { Metadata } from "./types/metadata/metadata"
+import { EventBinder } from "./Models/EventBinder"
+import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
+import { EmitterMetadata } from "./Models/Metadata/EmiterMetadata"
+import { SiodConfig } from "./Models/SiodConfig"
+import { Metadata } from "./Models/Metadata/Metadata"
 
 const ioMetadata = {
 	listener: [] as ListenerMetadata[],
 	emitters: [] as EmitterMetadata[]
 }
-const binderEvents: BinderEvent[] = []
+const binderEvents: EventBinder[] = []
 export let config: SiodConfig
 
 /**

@@ -1,11 +1,12 @@
 import "reflect-metadata"
-import { useEventBinders } from "./binders/eventBindersIniter"
-import { bindEmitterMetadata } from "./binders/metadata/emitterMetadataBinder"
-import { bindListenerMetadata } from "./binders/metadata/listenerMetadataBinder"
-import { bindErrorMiddleware, bindServerMiddlewares, bindSocketMiddlewares } from "./binders/middlewareBinders"
 import { setConfig } from "./globalMetadata"
-import { SiodConfig } from "./types/SiodConfig"
-import { addDataValidation } from "./binders/metadata/dataValidationBinder"
+import { SiodConfig } from "./Models/SiodConfig"
+import { DataValidationWrapper } from "./Wrappers/DataValidationWrapper"
+import { ServerEmitterWrapper } from "./Wrappers/EmitterWrappers/ServerEmitterWrapper"
+import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWrapper"
+import { ErrorMiddlewareWrapper } from "./Wrappers/ErrorMiddlewareWrapper"
+import { MiddlewaresRegistrar } from "./EventRegistrars/MiddlewaresRegistrar"
+import { ListenersRegistrar } from "./EventRegistrars/ListenersRegistrar"
 
 /**
  * Enables the socket.io decorator system
@@ -14,27 +15,18 @@ import { addDataValidation } from "./binders/metadata/dataValidationBinder"
 export function useSocketIoDecorator (config: SiodConfig) {
 	setConfig(config)
 
-	addDataValidation(config)
-	configureMiddlewares(config)
-	bindEmitterMetadata(config)
-	confugureListeners(config)
-	bindErrorMiddleware(config)
+	DataValidationWrapper.wrapAllListeners()
+	wrapEmitters()
+	ErrorMiddlewareWrapper.wrapAllControllersAndMiddlewares()
+	MiddlewaresRegistrar.registerAll()
+	ListenersRegistrar.registerListeners()
+	ListenersRegistrar.registerSocketEvents()
 }
 
 /**
- * Configures the middlewares
- * @param {SiodConfig} config The socketio decocator configuration
+ * Wraps all server and socket emitters to add custom logic.
  */
-function configureMiddlewares (config: SiodConfig) {
-	bindServerMiddlewares(config)
-	bindSocketMiddlewares(config)
-}
-
-/**
- * Configures the listeners
- * @param {SiodConfig} config The socketio decocator configuration
- */
-function confugureListeners (config: SiodConfig) {
-	bindListenerMetadata(config)
-	useEventBinders(config)
+function wrapEmitters () {
+	ServerEmitterWrapper.wrapAllEmitters()
+	SocketEmitterWrapper.wrapAllEmitters()
 }

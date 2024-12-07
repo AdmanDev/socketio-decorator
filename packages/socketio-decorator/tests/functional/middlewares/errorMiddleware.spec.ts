@@ -4,8 +4,8 @@ import { MessageData } from "../../types/socketData"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createClientSocket, createServer, registerServerEventAndEmit } from "../../utilities/serverUtils"
-import { getInstance } from "../../../src/container"
 import { waitFor } from "../../utilities/testUtils"
+import { IoCContainer } from "../../../src/IoCContainer"
 
 describe("> ErrorMiddleware decorator", () => {
 	let io: Server
@@ -147,7 +147,7 @@ describe("> ErrorMiddleware decorator", () => {
 		})
 
 		it("should call the error middleware when an error is thrown from a server emitter binder method", async () => {
-			const controllerInstance = getInstance<ErrorTestController>(ErrorTestController)
+			const controllerInstance = IoCContainer.getInstance<ErrorTestController>(ErrorTestController)
 
 			controllerInstance.testServerEmitterErrorHandling()
 

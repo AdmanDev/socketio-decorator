@@ -1,7 +1,7 @@
 import http from "http"
 import { Server } from "socket.io"
 import Client, { Socket as ClientSocket, ManagerOptions, SocketOptions } from "socket.io-client"
-import { SiodConfig } from "../../src/types/SiodConfig"
+import { SiodConfig } from "../../src/Models/SiodConfig"
 import { useSocketIoDecorator } from "../../src/main"
 import { RegisterEventAndEmitParams, ServerEventCallbacks } from "../types/functionsReturnTypes"
 
