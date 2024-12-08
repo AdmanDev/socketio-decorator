@@ -1,4 +1,4 @@
-import { afterAll, afterEach, describe, expect, it, jest } from "@jest/globals"
+import { afterEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { SocketEmitter, SocketOn, useCurrentUser, useIoServer, useUserSocket } from "../../../src"
@@ -11,9 +11,6 @@ describe("> Hooks tests", () => {
 
 	afterEach(() => {
 		clientSocket?.disconnect()
-	})
-
-	afterAll(() => {
 		io?.close()
 	})
 
