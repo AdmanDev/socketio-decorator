@@ -46,8 +46,8 @@ export function createServer (siodConfig: Omit<SiodConfig, "ioserver">, serverEv
  * @param {boolean | undefined} autoConnect Whether to auto connect the client socket
  * @returns {ClientSocket} The client socket
  */
-export function createClientSocket (done?: Function, autoConnect = true) {
-	return createClientConfiguredSocket({ autoConnect }, done)
+export function createSocketClient (done?: Function, autoConnect = true) {
+	return createConfiguredSocketClient({ autoConnect }, done)
 }
 
 /**
@@ -56,7 +56,7 @@ export function createClientSocket (done?: Function, autoConnect = true) {
  * @param {Function | undefined} done The callback to call when the client socket is connected
  * @returns {ClientSocket} The client socket
  */
-export function createClientConfiguredSocket (config: Partial<ManagerOptions & SocketOptions>, done?: Function) {
+export function createConfiguredSocketClient (config: Partial<ManagerOptions & SocketOptions>, done?: Function) {
 	const clientSocket = Client(`http://localhost:${port}`, config)
 
 	if (config.autoConnect && done) {

@@ -3,7 +3,7 @@ import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { IErrorMiddleware, SiodImcomigDataError, SocketOnce } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
-import { createClientSocket, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
+import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
 describe("> SocketOnce decorator", () => {
 	let io: Server
@@ -59,7 +59,7 @@ describe("> SocketOnce decorator", () => {
 	})
 
 	beforeEach((done) => {
-		clientSocket = createClientSocket(done)
+		clientSocket = createSocketClient(done)
 	})
 
 	afterEach(() => {

@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { EmitterOption, IErrorMiddleware, ServerEmitter, SiodInvalidArgumentError } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
-import { createClientSocket, createServer } from "../../../utilities/serverUtils"
+import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { waitFor } from "../../../utilities/testUtils"
@@ -75,7 +75,7 @@ describe("> ServerEmitter decorator", () => {
 	})
 
 	beforeEach((done) => {
-		clientSocket = createClientSocket(done)
+		clientSocket = createSocketClient(done)
 	})
 
 	afterEach(() => {

@@ -20,7 +20,7 @@ export function useSocketIoDecorator (config: SiodConfig) {
 	ErrorMiddlewareWrapper.wrapAllControllersAndMiddlewares()
 	MiddlewaresRegistrar.registerAll()
 	ListenersRegistrar.registerListeners()
-	ListenersRegistrar.registerSocketEvents()
+	ListenersRegistrar.applyGroupedSocketEventsRegistration()
 }
 
 /**

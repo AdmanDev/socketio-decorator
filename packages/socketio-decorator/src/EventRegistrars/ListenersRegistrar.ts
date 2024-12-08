@@ -22,9 +22,9 @@ export class ListenersRegistrar {
 	}
 
 	/**
-	 * Registers socket events
+	 * Applies grouped socket events registration
 	 */
-	public static registerSocketEvents () {
+	public static applyGroupedSocketEventsRegistration () {
 		const binderEvents = getAllEventBinders()
 		Object.keys(binderEvents)
 			.forEach(event => {

@@ -1,15 +1,13 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { EmitterOption, IErrorMiddleware, IServerMiddleware, ServerEmitter, ServerOn, SiodImcomigDataError, SiodInvalidArgumentError, SocketEmitter, SocketOn } from "../../../src"
-import { MessageData } from "../../types/socketData"
+import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
+import { IErrorMiddleware, IServerMiddleware, ServerOn, SocketEmitter, SocketOn } from "../../../../src"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { createClientConfiguredSocket as createConfiguredSocketClient, createClientSocket as createSocketClient, createServer, registerServerEventAndEmit } from "../../utilities/serverUtils"
-import { waitFor } from "../../utilities/testUtils"
-import { MiddlewareAction } from "../../types/middlewareAction"
+import { createConfiguredSocketClient as createConfiguredSocketClient, createSocketClient as createSocketClient, createServer } from "../../../utilities/serverUtils"
+import { waitFor } from "../../../utilities/testUtils"
+import { MiddlewareAction } from "../../../types/middlewareAction"
 
-describe("> ServerMiddleware decorator", () => {
+describe("> Server middleware tests", () => {
 	let io: Server
-	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
 
 	const controllerFnSpy = jest.fn()
@@ -24,10 +22,17 @@ describe("> ServerMiddleware decorator", () => {
 
 	class ServerMiddlewareTestController {
 		@ServerOn("connection")
-		@SocketEmitter("newMessage")
+		@SocketEmitter("connectionResp")
 		public onConnection (socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 			return 1
+		}
+
+		@SocketOn("message")
+		@SocketEmitter("messageResp")
+		public onMessage (socket: ServerSocket) {
+			controllerFnSpy(socket.id)
+			return "Hello, world!"
 		}
 	}
 
@@ -58,10 +63,7 @@ describe("> ServerMiddleware decorator", () => {
 				dataValidationEnabled: true
 			},
 			{
-				onServerListen: done,
-				onServerSocketConnection: (socket) => {
-					serverSocket = socket
-				}
+				onServerListen: done
 			}
 		)
 	})
@@ -75,10 +77,10 @@ describe("> ServerMiddleware decorator", () => {
 	})
 
 	describe("> Functional tests", () => {
-		it("should execute server middleware before controller", (done) => {
+		it("should call server middleware before controller", (done) => {
 			clientSocket = createSocketClient(undefined, false)
 
-			clientSocket.on("newMessage", () => {
+			clientSocket.on("connectionResp", () => {
 				expect(errorMiddlewareSpy).not.toHaveBeenCalled()
 				expect(serverMiddlewareSpy).toHaveBeenCalledTimes(1)
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
@@ -90,10 +92,24 @@ describe("> ServerMiddleware decorator", () => {
 
 			clientSocket.connect()
 		})
+
+		it("should call server middleware only once for each client", (done) => {
+			clientSocket = createSocketClient(undefined, false)
+
+			clientSocket.on("messageResp", () => {
+				expect(errorMiddlewareSpy).not.toHaveBeenCalled()
+				expect(serverMiddlewareSpy).toHaveBeenCalledTimes(1)
+
+				done()
+			})
+
+			clientSocket.connect()
+			clientSocket.emit("message")
+		})
 	})
 
 	describe("> Error handling", () => {
-		it("should execute error middleware when server middleware throws an error", async () => {
+		it("should call error middleware when server middleware throws an error", async () => {
 			const middlewareAction: MiddlewareAction = "error"
 			const expectedError = new Error("error thrown")
 
@@ -113,7 +129,7 @@ describe("> ServerMiddleware decorator", () => {
 			expect(controllerFnSpy).not.toHaveBeenCalled()
 		})
 
-		it("should not execute controller when next function was called with an error", async () => {
+		it("should not call controller when next function was called with an error", async () => {
 			const middlewareAction: MiddlewareAction = "nextError"
 
 			clientSocket = createConfiguredSocketClient({

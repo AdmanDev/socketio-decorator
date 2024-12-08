@@ -3,10 +3,10 @@ import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { IErrorMiddleware, SocketOnAnyOutgoing } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
-import { createClientSocket, createServer } from "../../../utilities/serverUtils"
+import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { IoCContainer } from "../../../../src/IoCContainer"
 
-describe("> SocketOn decorator", () => {
+describe("> SocketOnAnyOutgoing decorator", () => {
 	let io: Server
 	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
@@ -49,7 +49,7 @@ describe("> SocketOn decorator", () => {
 	})
 
 	beforeEach((done) => {
-		clientSocket = createClientSocket(done)
+		clientSocket = createSocketClient(done)
 	})
 
 	afterEach(() => {

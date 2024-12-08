@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { createClientSocket, createServer } from "../../../utilities/serverUtils"
+import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { Server, Socket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { ServerOn } from "../../../../src"
@@ -30,7 +30,7 @@ describe("> ServerOn decorator", () => {
 	})
 
 	beforeEach(() => {
-		clientSocket = createClientSocket()
+		clientSocket = createSocketClient()
 	})
 
 	afterEach(() => {

@@ -19,14 +19,14 @@ export class DataValidationWrapper {
 		}
 
 		const metadata = getListenerMetadata()
-		metadata.forEach(DataValidationWrapper.prepareDataValidationLayer)
+		metadata.forEach(DataValidationWrapper.prepareDataValidationLayerAndWrap)
 	}
 
 	/**
-	 * Prepares data validation layer
+	 * Prepares data validation layer and wraps listener methods
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata of method to wrap
 	 */
-	private static prepareDataValidationLayer (listenerMetadata: ListenerMetadata) {
+	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata) {
 		if (listenerMetadata.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", listenerMetadata.target, listenerMetadata.methodName)
 
