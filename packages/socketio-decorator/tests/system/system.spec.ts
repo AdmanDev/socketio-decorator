@@ -66,7 +66,7 @@ describe("> System tests", () => {
 			describe("> get(ONE)Instance  tests", () => {
 				it("should return an instance of a service", () => {
 					const firstServerMiddleware = IoCContainer.getInstance(FirstService)
-					expect(firstServerMiddleware).toBeInstanceOf(FirstService)
+					expect(firstServerMiddleware).toBeInstanceOf(SecondService)
 				})
 
 				it("should always return the same instance of a service", () => {
