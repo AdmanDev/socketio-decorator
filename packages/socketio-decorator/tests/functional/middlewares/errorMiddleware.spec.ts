@@ -3,11 +3,11 @@ import { EmitterOption, IErrorMiddleware, ServerEmitter, SiodImcomigDataError, S
 import { MessageData } from "../../types/socketData"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { createClientSocket, createServer, registerServerEventAndEmit } from "../../utilities/serverUtils"
+import { createSocketClient, createServer, registerServerEventAndEmit } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
 import { IoCContainer } from "../../../src/IoCContainer"
 
-describe("> ErrorMiddleware decorator", () => {
+describe("> Error middleware tests", () => {
 	let io: Server
 	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
@@ -70,7 +70,7 @@ describe("> ErrorMiddleware decorator", () => {
 	})
 
 	beforeEach((done) => {
-		clientSocket = createClientSocket(done)
+		clientSocket = createSocketClient(done)
 	})
 
 	afterEach(() => {
@@ -146,7 +146,7 @@ describe("> ErrorMiddleware decorator", () => {
 			})
 		})
 
-		it("should call the error middleware when an error is thrown from a server emitter binder method", async () => {
+		it("should call the error middleware when an error is thrown from a server emitter wrapped method", async () => {
 			const controllerInstance = IoCContainer.getInstance<ErrorTestController>(ErrorTestController)
 
 			controllerInstance.testServerEmitterErrorHandling()
@@ -157,7 +157,7 @@ describe("> ErrorMiddleware decorator", () => {
 			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodInvalidArgumentError), undefined)
 		})
 
-		it("should call the error middleware when an error is thrown from a socket emitter binder method", async () => {
+		it("should call the error middleware when an error is thrown from a socket emitter wrapped method", async () => {
 			clientSocket.emit("testSocketEmitterErrorHandling")
 
 			await waitFor(50)

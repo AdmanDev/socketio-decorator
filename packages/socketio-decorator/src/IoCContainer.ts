@@ -31,7 +31,8 @@ export class IoCContainer {
 		if (userContainer) {
 			return userContainer.get(service as ClassConstructorType<typeof service>) as T
 		}
-		return IoCContainer.getserviceInstance(service as ClassConstructorType<typeof service>) as T
+
+		return IoCContainer.getServiceInstance(service as ClassConstructorType<typeof service>) as T
 	}
 
 	/**
@@ -40,7 +41,7 @@ export class IoCContainer {
 	 * @returns {T} The instance of the service
 	 * @template T The type of the service
 	 */
-	public static getserviceInstance<T> (constructor: ClassConstructorType<T>): T {
+	private static getServiceInstance<T> (constructor: ClassConstructorType<T>): T {
 		if (IoCContainer.container.has(constructor)) {
 			return IoCContainer.container.get(constructor) as T
 		}
