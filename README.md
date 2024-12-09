@@ -44,7 +44,7 @@ To get started, follow these steps:
         "compilerOptions": {
             "module": "Node16",
             "experimentalDecorators": true,
-            "emitDecoratorMetadata": true // If you use data validation
+            "emitDecoratorMetadata": true
         }
     }
     ```
@@ -74,7 +74,7 @@ To get started, follow these steps:
         @SocketOn("hello")
         @SocketEmitter("hello-back")
         public async onHello() {
-            await new Promise((resolve) => setTimeout(resolve, 2000))
+            await something()
             return {
                 message: "Hello you"
             }
@@ -115,19 +115,13 @@ To get started, follow these steps:
 
 3. **Run the Server**
 
-    Start the server by running:
-
-    ```bash
-    node dist/app.js
-    ```
-
-    Ensure you have compiled your TypeScript files into JavaScript using `tsc`.
-
     You can now test the server by connecting with Postman or another WebSocket client and sending a `message` event. You should see the message logged in the console.
 
 ## Decorators
 
 ### Listening for Events
+
+The following decorators can be used to listen for events:
 
 | Decorator               | Description                                              | Equivalent in Basic Socket.io       |
 |-------------------------|----------------------------------------------------------|-------------------------------------|
@@ -135,22 +129,112 @@ To get started, follow these steps:
 | `@SocketOn(event: string)`     | Listens for events emitted by the client.             | `socket.on(event, callback)`        |
 | `@SocketOnce(event: string)`   | Listens for events emitted by the client only once.    | `socket.once(event, callback)`      |
 | `@SocketOnAny()`               | Listens for any event emitted by the client.           | `socket.onAny(callback)`            |
-| `@SocketOnAnyOutgoing()`       | Listens for any outgoing event emitted by the client.  | `socket.onAnyOutgoing(callback)`    |
+| `@SocketOnAnyOutgoing()`       | Listens for any outgoing event.  | `socket.onAnyOutgoing(callback)`    |
+
+#### Example
+
+---
+
+##### @SeverOn(event: string)
+
+**Equivalent in basic Socket.io:** `io.on(event, callback)`
+
+Listens for server events.
+
+**Usage** :
+
+```typescript
+@ServerOn("connection")
+public onConnection(socket: Socket) {
+    console.log("Socket connected with socket id", socket.id);
+}
+```
+
+---
+
+##### @SocketOn(event: string)
+
+**Equivalent in basic Socket.io:** `socket.on(event, callback)`
+
+Listens for events emitted by the client.
+
+**Usage** :
+
+```typescript
+@SocketOn("message")
+public onMessage(socket: Socket, data: any) {
+    console.log("Message received:", data);
+}
+```
+
+---
+
+##### @SocketOnce(event: string)
+
+**Equivalent in basic Socket.io:** `socket.once(event, callback)`
+
+Listens for events emitted by the client only once.
+
+**Usage** :
+
+```typescript
+@SocketOnce("message")
+public onMessage(socket: Socket, data: any) {
+    console.log("Message received:", data);
+}
+```
+
+---
+
+##### @SocketOnAny()
+
+**Equivalent in basic Socket.io:** `socket.onAny(callback)`
+
+Listens for any event emitted by the client.
+
+**Usage** :
+
+```typescript
+@SocketOnAny()
+public onAnyEvent(socket: Socket, event: string, data: any) {
+    console.log("Any event received:", event, data);
+}
+```
+
+---
+
+##### @SocketOnAnyOutgoing()
+
+**Equivalent in basic Socket.io:** `socket.onAnyOutgoing(callback)`
+
+Listens for any outgoing event
+
+**Usage** :
+
+```typescript
+@SocketOnAnyOutgoing()
+public onAnyOutgoingEvent(socket: Socket, event: string, data: any) {
+    console.log("Any outgoing event received:", event, data);
+}
+```
 
 ### Emitting Events
 
+The following decorators can be used to emit events to the client:
+
 | Decorator               | Description                                             | Equivalent in Basic Socket.io        |
 |-------------------------|---------------------------------------------------------|--------------------------------------|
-| `@ServerEmitter(event?: string, to?: string)`  | Emits events from the server.                        | `io.emit(event, data)`               |
-| `@SocketEmitter(event:? string)`  | Emits events from the client socket.                  | `socket.emit(event, data)`           |
+| `@ServerEmitter(event?: string, to?: string)`  | Emits event from the server.                        | `io.emit(event, data)`               |
+| `@SocketEmitter(event:? string)`  | Emits event from the socket.                  | `socket.emit(event, data)`           |
 
 #### How to use
 
-1. **Basic Usage**
+1. **Basic usage**
 
     The return value of the method is sent as the data of the event.
 
     ```typescript
+    @SocketOn("get-latest-message")
     @SocketEmitter("message")
     public sendMessage() {
         return { message: "Hello, world!" }
@@ -167,14 +251,15 @@ To get started, follow these steps:
 
 2. **Emitting options**
 
-    - You can also specify options for the emitted event by returning an `EmitOption` object.
+    - You can also specify options for the emitted event by returning an `EmitterOption` object.
 
         ```typescript
         import { EmitterOption, SocketEmitter } from "@admandev/socketio-decorator"
         import { Socket } from "socket.io"
 
+        @SocketOn("get-latest-message")
         @SocketEmitter() // No event name specified
-        public sendMessage(socket: Socket): EmitOptions {
+        public sendMessage(socket: Socket): EmitterOptions {
             const isAllowedToSend = isUserAllowedToSendMessage(socket)
             return new EmitterOption({
                 to: "room1",
@@ -188,7 +273,7 @@ To get started, follow these steps:
         The above code will emit a `newMessage` event to the `room1` room. The event will only be emitted if the `isUserAllowedToSendMessage` function returns `true`.
 .
 
-    - If you return an array of `EmitOption` objects, an event will be emitted for each `EmitOption` items.
+    - If you return an array of `EmitterOption` objects, an event will be emitted for each `EmitterOption` items.
 
         ```typescript
         @SocketOn("multiple-events")
@@ -219,8 +304,8 @@ To get started, follow these steps:
         The above code will emit two events: `event-1` and `event-2`.
         `event-1` will be emitted to the client with the `id` of the socket and `event-2` will be emitted to the `multiple-events` room.
 
-    **Emit options**
-    The `EmitOption` object has the following properties:
+    **Emitter options**
+    The `EmitterOption` object has the following properties:
 
     | Property | Type | Required | Description |
     |----------|------|----------|-------------|
@@ -231,6 +316,73 @@ To get started, follow these steps:
 
 3. **Emitting falsy value**
     If the method returns a falsy value (false, null undefined, 0, ...), the event will not be emitted.
+
+#### Examples
+
+##### @ServerEmitter(event?: string, to?: string)
+
+**Equivalent in basic Socket.io:** `io.emit(event, data)` or `io.to(to).emit(event, data)`
+
+Emits events to all connected clients or to a specific room if the `to` parameter is provided.
+
+> [!WARNING]
+> This decorator must be used with a listener decorator (ServerOn or SocketOn) to work.
+
+**Usages** :
+
+```typescript
+@SocketOn("message")
+@ServerEmitter("newMessage", "room1")
+public sendMessage() {
+    return { message: "Hello, world!" }
+}
+```
+
+```typescript
+@SocketOn("message")
+@ServerEmitter()
+public sendMessage() {
+    return new EmitterOption({
+        to: "room1",
+        message: "newMessage",
+        data: { message: "Hello, world!" },
+    })
+}
+```
+
+##### @SocketEmitter(event?: string)
+
+**Equivalent in basic Socket.io:** `socket.emit(event, data)`
+
+Emits event to the current client.
+
+> [!WARNING]
+> If the `event` parameter is not provided in decorator, it must be provided in the `EmitterOption` object.
+
+> [!WARNING]
+> This decorator must be used with a listener decorator (ServerOn or SocketOn) to work.
+
+**Usage** :
+
+```typescript
+@SocketOn("get-user")
+@SocketEmitter("get-user-resp")
+public getUser(socket: Socket) {
+    return useCurrentUser(socket)
+}
+```
+
+```typescript
+@SocketOn("get-user")
+@SocketEmitter()
+public getUser(socket: Socket) {
+    return new EmitterOption({
+        to: socket.id,
+        message: "get-user-resp",
+        data: useCurrentUser(socket),
+    })
+}
+```
 
 ## Middlewares
 
