@@ -319,6 +319,8 @@ The following decorators can be used to emit events to the client:
 
 #### Examples
 
+---
+
 ##### @ServerEmitter(event?: string, to?: string)
 
 **Equivalent in basic Socket.io:** `io.emit(event, data)` or `io.to(to).emit(event, data)`
@@ -349,6 +351,8 @@ public sendMessage() {
     })
 }
 ```
+
+---
 
 ##### @SocketEmitter(event?: string)
 
