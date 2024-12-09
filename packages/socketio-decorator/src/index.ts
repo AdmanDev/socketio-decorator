@@ -1,26 +1,28 @@
 export * from "./main"
 
 // Decorators
-export * from "./decorators/listeners/serverOnDecorator"
-export * from "./decorators/listeners/socketOnDecorator"
-export * from "./decorators/listeners/socketOnceDecorator"
-export * from "./decorators/listeners/socketOnAnyDecorator"
-export * from "./decorators/listeners/socketOnAnyOutgoingDecorator"
+export * from "./Decorators/Listeners/ServerOnDecorator"
+export * from "./Decorators/Listeners/SocketOnDecorator"
+export * from "./Decorators/Listeners/SocketOnceDecorator"
+export * from "./Decorators/Listeners/SocketOnAnyDecorator"
+export * from "./Decorators/Listeners/SocketOnAnyOutgoingDecorator"
 
-export * from "./decorators/emitters/serverEmitterDecorator"
-export * from "./decorators/emitters/socketEmiterDecorator"
+export * from "./Decorators/Emitters/ServerEmitterDecorator"
+export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
 // Hooks
-export * from "./others/hooks"
+export * from "./Others/Hooks"
 
 // Interfaces
-export * from "./interfaces/IServerMiddleware"
-export * from "./interfaces/ISocketMiddleware"
-export * from "./interfaces/IErrorMiddleware"
+export * from "./Interfaces/IServerMiddleware"
+export * from "./Interfaces/ISocketMiddleware"
+export * from "./Interfaces/IErrorMiddleware"
 
-// Types
-export * from "./types/exportables/emitterOption"
-export * from "./types/decoratorOptions/decoratorOptions"
+// Models
+export * from "./Models/SiodConfig"
+export * from "./Models/DecoratorOptions/EmitterOption"
+export * from "./Models/DecoratorOptions/DecoratorOptions"
 
 // Errors
-export * from "./types/errors/SiodImcomigDataError"
+export * from "./Models/Errors/SiodImcomigDataError"
+export * from "./Models/Errors/SiodInvalidArgumentError"

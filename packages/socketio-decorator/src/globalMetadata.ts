@@ -1,15 +1,15 @@
 import { Socket } from "socket.io"
-import { BinderEvent } from "./types/binderEvent"
-import { ListenerMetadata } from "./types/metadata/listenerMetadata"
-import { EmitterMetadata } from "./types/metadata/emiterMetadata"
-import { SiodConfig } from "./types/SiodConfig"
-import { Metadata } from "./types/metadata/metadata"
+import { EventBinder } from "./Models/EventBinder"
+import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
+import { EmitterMetadata } from "./Models/Metadata/EmiterMetadata"
+import { SiodConfig } from "./Models/SiodConfig"
+import { Metadata } from "./Models/Metadata/Metadata"
 
 const ioMetadata = {
 	listener: [] as ListenerMetadata[],
 	emitters: [] as EmitterMetadata[]
 }
-const binderEvents: BinderEvent[] = []
+const binderEvents: EventBinder[] = []
 export let config: SiodConfig
 
 /**
@@ -57,11 +57,11 @@ export function getEmitterMetadata () {
 }
 
 /**
- * Adds a binder event to the global binder events array
+ * Adds a event binder to the global binder events array
  * @param {string} event The event name
  * @param {Function} bindMethod The method to execute when the event is triggered
  */
-export function addBinderEvent (event: string, bindMethod: (socket: Socket) => void) {
+export function addEventBinder (event: string, bindMethod: (socket: Socket) => void) {
 	binderEvents.push({
 		eventName: event,
 		method: bindMethod
@@ -69,10 +69,10 @@ export function addBinderEvent (event: string, bindMethod: (socket: Socket) => v
 }
 
 /**
- * Gets the global binder events array
+ * Gets the global event binders array
  * @returns {Record<string, Function[]>} The binder events grouped by event name
  */
-export function getAllBinderEvents () {
+export function getAllEventBinders () {
 	return binderEvents.reduce((acc, event) => {
 		if (!acc[event.eventName]) {
 			acc[event.eventName] = []

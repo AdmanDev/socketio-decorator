@@ -11,8 +11,6 @@ export class SocketController {
 	@SocketOn("message")
 	public onMessage(socket: Socket, data: MessageRequest) {
 		console.log("Message", data.message)
-		socket.join("room")
-		this.emitMyEvent()
 	}
 
 	@SocketOn("hello")
@@ -29,16 +27,4 @@ export class SocketController {
 		console.log("Socket disconnected - socket id :", socket.id)
 	}
 
-	@ServerEmitter()
-    emitMyEvent() {
-        console.log("SecondSocketController: emitMyEvent");
-        const response = new EmitterOption({
-			to: "room",
-			message: "my-emitter-event",
-			data: {
-				message: "Hello from my-emitter-event"
-			}
-		})
-		return response
-    }
 }

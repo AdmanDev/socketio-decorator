@@ -2,6 +2,7 @@
   "name": "@admandev/socketio-decorator",
   "license": "MIT",
   "author": "Admandev",
+  "private": true,
   "workspaces": {
     "packages": [
       "packages/*",
