@@ -1,21 +1,22 @@
 import { Socket } from "socket.io"
-import { config, getEmitterMetadata } from "../../globalMetadata"
+import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
 import { Metadata } from "../../Models/Metadata/Metadata"
-import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
+import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
 
 /**
  * Allow to wrap a method to add socket emitter layer
  */
 export class SocketEmitterWrapper {
 	/**
-	 * Wraps all emitters controllers to add emitter logic
+	 * Wraps all emitters to add emitter logic
+	 * @param {EmitterMetadata[]} metadata - The metadata of the emitters to wrap
+	 * @param {any} controllerInstance - The controller instance
 	 */
-	public static wrapAllEmitters () {
-		const metadatas = getEmitterMetadata()
-
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, metadatas)
-		MetadataUtils.mapMetadata(controllerMetadatas, "socket", SocketEmitterWrapper.wrapMethod)
+	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
+		MetadataUtils.mapTreeMetadata(metadata, "socket", controllerInstance, (m, method) => {
+			SocketEmitterWrapper.wrapMethod(m, controllerInstance, method)
+		})
 	}
 
 	/**

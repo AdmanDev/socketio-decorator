@@ -1,4 +1,4 @@
-import { afterAll, afterEach, describe, expect, it, jest } from "@jest/globals"
+import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { ListenersRegistrar } from "../../src/EventRegistrars/ListenersRegistrar"
@@ -10,6 +10,8 @@ import { ServerEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/ServerE
 import { SocketEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrapper"
 import { createServer } from "../utilities/serverUtils"
+import { SocketOn } from "../../src"
+import { setConfig } from "../../src/globalMetadata"
 
 describe("> System tests", () => {
 	let io: Server
@@ -23,11 +25,20 @@ describe("> System tests", () => {
 		io?.close()
 	})
 
+	class FirstController {
+
+		@SocketOn("message")
+		public onMessage () {
+			return "Hello from controller 1"
+		}
+	}
+
 	describe("> Wrapping and Bindings order tests", () => {
-		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapAllListeners")
-		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapAllEmitters")
-		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapAllEmitters")
-		const errorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllControllersAndMiddlewares")
+		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapListeners")
+		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapEmitters")
+		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
+		const controllerErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapController")
+		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllMiddlewares")
 		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
 		const listenersRegistrarSpy = jest.spyOn(ListenersRegistrar, "registerListeners")
 		const groupedEventsRegistrationSpy = jest.spyOn(ListenersRegistrar, "applyGroupedSocketEventsRegistration")
@@ -35,24 +46,26 @@ describe("> System tests", () => {
 		it("should wrap controller methods and binds events in the correct order", () => {
 			io = createServer(
 				{
-					controllers: [],
+					controllers: [FirstController],
 				},
 				{}
 			)
 
+			const middlewareErrorMiddlewareWrapperCallOrder = middlewareErrorMiddlewareWrapperSpy.mock.invocationCallOrder[0]
 			const dataValidationCallOrder = dataValidationWrapperSpy.mock.invocationCallOrder[0]
 			const serverEmitterCallOrder = serverEmitterWrapperSpy.mock.invocationCallOrder[0]
 			const socketEmitterCallOrder = socketEmitterWrapperSpy.mock.invocationCallOrder[0]
-			const errorMiddlewareCallOrder = errorMiddlewareWrapperSpy.mock.invocationCallOrder[0]
+			const errorMiddlewareCallOrder = controllerErrorMiddlewareWrapperSpy.mock.invocationCallOrder[0]
 			const middlewaresRegistrarCallOrder = middlewaresRegistrarSpy.mock.invocationCallOrder[0]
 			const listenersRegistrarCallOrder = listenersRegistrarSpy.mock.invocationCallOrder[0]
 			const groupedEventsRegistrationCallOrder = groupedEventsRegistrationSpy.mock.invocationCallOrder[0]
 
+			expect(middlewareErrorMiddlewareWrapperCallOrder).toBeLessThan(dataValidationCallOrder)
 			expect(dataValidationCallOrder).toBeLessThan(serverEmitterCallOrder)
 			expect(serverEmitterCallOrder).toBeLessThan(socketEmitterCallOrder)
 			expect(socketEmitterCallOrder).toBeLessThan(errorMiddlewareCallOrder)
 			expect(errorMiddlewareCallOrder).toBeLessThan(middlewaresRegistrarCallOrder)
-			expect(middlewaresRegistrarCallOrder).toBeLessThan(listenersRegistrarCallOrder)
+			expect(listenersRegistrarCallOrder).toBeLessThan(middlewaresRegistrarCallOrder)
 			expect(listenersRegistrarCallOrder).toBeLessThan(groupedEventsRegistrationCallOrder)
 		})
 	})
@@ -105,15 +118,25 @@ describe("> System tests", () => {
 				}
 			}
 
+			beforeAll(() => {
+				setConfig({
+					iocContainer: externalContainer
+				} as Any)
+			})
+
+			afterAll(() => {
+				setConfig(undefined as Any)
+			})
+
 			it("should return an instance of a service from the external container", () => {
-				const firstServerMiddleware = IoCContainer.getInstance(FirstService, externalContainer)
+				const firstServerMiddleware = IoCContainer.getInstance(FirstService)
 
 				expect(firstServerMiddleware).toBeInstanceOf(FirstService)
 				expect(externalContainerSpy).toHaveBeenCalledWith(FirstService)
 			})
 
 			it("should return an array of service instances of given types from the external container", () => {
-				const serverMiddlewares = IoCContainer.getInstances([FirstService, SecondService], externalContainer)
+				const serverMiddlewares = IoCContainer.getInstances([FirstService, SecondService])
 
 				expect(serverMiddlewares).toBeInstanceOf(Array)
 				expect(serverMiddlewares).toHaveLength(2)

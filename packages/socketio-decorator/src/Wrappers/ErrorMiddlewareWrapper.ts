@@ -1,9 +1,10 @@
 import { Socket } from "socket.io"
-import { MethodMetadata } from "../Models/Metadata/MethodMetadata"
+import { config } from "../globalMetadata"
 import { IErrorMiddleware } from "../Interfaces/IErrorMiddleware"
-import { config, getAllMetadata } from "../globalMetadata"
-import { MetadataUtils } from "../Utils/MetadataUtils"
 import { IoCContainer } from "../IoCContainer"
+import { TreeRootMetadata } from "../Models/Metadata/Metadata"
+import { MethodMetadata } from "../Models/Metadata/MethodMetadata"
+import { MetadataUtils } from "../Utils/MetadataUtils"
 
 /**
  * Error middleware wrapper
@@ -11,20 +12,28 @@ import { IoCContainer } from "../IoCContainer"
 export class ErrorMiddlewareWrapper {
 
 	/**
-	 * Wraps all controllers and middlewares to add error middleware
+	 * Wraps all controllers with the error middleware
+	 * @param {TreeRootMetadata} metadata The metadata of the controller
 	 */
-	public static wrapAllControllersAndMiddlewares () {
-		if (!config.errorMiddleware) {
-			return
-		}
-
-		const errorMiddleware = IoCContainer.getInstances([config.errorMiddleware], config.iocContainer)?.[0] as IErrorMiddleware | undefined
+	public static wrapController (metadata: TreeRootMetadata) {
+		const errorMiddleware = ErrorMiddlewareWrapper.getErrorMiddlewareInstance()
 		if (!errorMiddleware) {
 			return
 		}
 
-		ErrorMiddlewareWrapper.wrapAllControllers(errorMiddleware)
-		ErrorMiddlewareWrapper.wrapAllMiddlewares(errorMiddleware)
+		ErrorMiddlewareWrapper.addMiddlewareToController(metadata, errorMiddleware)
+	}
+
+	/**
+	 * Gets the error middleware instance
+	 * @returns {IErrorMiddleware | undefined} The error middleware instance or undefined if not set
+	 */
+	private static getErrorMiddlewareInstance () {
+		if (!config.errorMiddleware) {
+			return undefined
+		}
+
+		return IoCContainer.getInstances([config.errorMiddleware])?.[0] as IErrorMiddleware | undefined
 	}
 
 	/**
@@ -49,11 +58,11 @@ export class ErrorMiddlewareWrapper {
 
 	/**
 	 * Wraps all controllers to add error middleware
+	 * @param {TreeRootMetadata} metadata The metadata of the controller
 	 * @param {IErrorMiddleware} errorMiddleware The error middleware
 	 */
-	private static wrapAllControllers (errorMiddleware: IErrorMiddleware) {
-		const metadata = getAllMetadata()
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, metadata)
+	private static addMiddlewareToController (metadata: TreeRootMetadata, errorMiddleware: IErrorMiddleware) {
+		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, [metadata])
 
 		controllerMetadatas.forEach(cm => {
 			const unicMethods = cm.metadatas.map(m => m.methodName).filter((value, index, self) => self.indexOf(value) === index)
@@ -70,10 +79,14 @@ export class ErrorMiddlewareWrapper {
 
 	/**
 	 * Wraps all middlewares to add error middleware
-	 * @param {IErrorMiddleware} errorMiddleware The error middleware
 	 */
-	private static wrapAllMiddlewares (errorMiddleware: IErrorMiddleware) {
-		const otherMiddlewares = IoCContainer.getInstances([...config.serverMiddlewares || [], ...config.socketMiddlewares || []], config.iocContainer)
+	public static wrapAllMiddlewares () {
+		const errorMiddleware = ErrorMiddlewareWrapper.getErrorMiddlewareInstance()
+		if (!errorMiddleware) {
+			return
+		}
+
+		const otherMiddlewares = IoCContainer.getInstances([...config.serverMiddlewares || [], ...config.socketMiddlewares || []])
 
 		otherMiddlewares.forEach(middleware => {
 			const methodMetadata: MethodMetadata = {

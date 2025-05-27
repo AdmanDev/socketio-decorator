@@ -24,7 +24,7 @@ export class MiddlewaresRegistrar {
 			return
 		}
 
-		const middlewares = IoCContainer.getInstances<IServerMiddleware>(config.serverMiddlewares, config.iocContainer)
+		const middlewares = IoCContainer.getInstances<IServerMiddleware>(config.serverMiddlewares)
 
 		middlewares.forEach(middleware => {
 			config.ioserver.use(middleware.use.bind(middleware))
@@ -39,8 +39,7 @@ export class MiddlewaresRegistrar {
 			return
 		}
 
-		const middlewares = IoCContainer.getInstances<ISocketMiddleware>(config.socketMiddlewares, config.iocContainer)
-
+		const middlewares = IoCContainer.getInstances<ISocketMiddleware>(config.socketMiddlewares)
 		middlewares.forEach(middleware => {
 			addEventBinder("connection", (socket) => {
 				socket.use(middleware.use)

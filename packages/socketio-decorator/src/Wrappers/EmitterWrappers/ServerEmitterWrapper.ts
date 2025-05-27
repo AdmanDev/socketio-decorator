@@ -1,4 +1,5 @@
-import { config, getEmitterMetadata } from "../../globalMetadata"
+import { config } from "../../globalMetadata"
+import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
 import { Metadata } from "../../Models/Metadata/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
@@ -9,12 +10,13 @@ import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
 export class ServerEmitterWrapper {
 	/**
 	 * Wraps all emitters controllers to add emitter logic
+	 * @param {EmitterMetadata[]} metadata - The metadata of the emitters to wrap
+	 * @param {any} controllerInstance - The controller instance
 	 */
-	public static wrapAllEmitters () {
-		const metadatas = getEmitterMetadata()
-
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, metadatas)
-		MetadataUtils.mapMetadata(controllerMetadatas, "server", ServerEmitterWrapper.wrapMethod)
+	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
+		MetadataUtils.mapTreeMetadata(metadata, "server", controllerInstance, (m, method) => {
+			ServerEmitterWrapper.wrapMethod(m, controllerInstance, method)
+		})
 	}
 
 	/**

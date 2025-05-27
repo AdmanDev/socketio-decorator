@@ -1,7 +1,8 @@
 import { IoCContainer } from "../IoCContainer"
 import { SiodConfig } from "../Models/SiodConfig"
 import { ControllerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { Metadata, MetadataType } from "../Models/Metadata/Metadata"
+import { Metadata, MetadataType, TreeRootMetadata } from "../Models/Metadata/Metadata"
+import { ClassConstructorType } from "../Models/ClassConstructorType"
 
 /**
  * Defines utilities for metadata manipulation
@@ -13,16 +14,15 @@ export class MetadataUtils {
 	 * @param {Metadata[]} metadatas The metadata array
 	 * @returns {ControllerMetadata[]} The controller metadata
 	 */
-	public static getControllerMetadata (config: SiodConfig, metadatas: Metadata[]) {
-		const controllerInstances = IoCContainer.getInstances<{constructor: Function}>(config.controllers, config.iocContainer)
-
+	public static getControllerMetadata (config: SiodConfig, metadatas: TreeRootMetadata[]) {
 		const controllerMetadatas: ControllerMetadata[] = []
 
-		for (const controller of controllerInstances) {
-			const filteredMetadata = metadatas.filter((m) => m.target.constructor === controller.constructor)
+		for (const metadata of metadatas) {
+			const controllerInstance = IoCContainer.getInstance(metadata.controllerTarget) as Any
+
 			controllerMetadatas.push({
-				controllerInstance: controller,
-				metadatas: filteredMetadata
+				controllerInstance: controllerInstance,
+				metadatas: metadata.methodMetadata.flatMap(m => [m.metadata.ioMetadata.listenerMetadata, m.metadata.ioMetadata.emitterMetadata].flat()),
 			})
 		}
 
@@ -30,26 +30,44 @@ export class MetadataUtils {
 	}
 
 	/**
-	 * Maps metadata to the given type
-	 * @param {ControllerMetadata} metadata Controller metadata
-	 * @param {MetadataType} type The type of metadata to map
-	 * @param {Function} callback The callback to call for each metadata
+	 * Filters and iterates over metadata of a specific type, invoking a callback for each method found.
+	 * @param {Metadata[]} metadata - An array of metadata objects to filter and map.
+	 * @param {MetadataType} type - The type of metadata to filter for.
+	 * @param {any} controllerInstance - The instance of the controller containing the methods.
+	 * @param {Function} callback - A callback function that is called with each metadata and its corresponding method.
 	 */
-	public static mapMetadata (
-		metadata: ControllerMetadata[],
+	public static mapTreeMetadata (
+		metadata: Metadata[],
 		type: MetadataType,
-		callback: (metadata: Metadata, controllerInstance: Any, method: Any) => void
+		controllerInstance: Any,
+		callback: (metadata: Metadata, method: Any) => void
 	) {
-		metadata.forEach(controllerMetadatas => {
-			const filteredMetadatas = controllerMetadatas.metadatas.filter((m) => m.type === type)
+		const filteredMetadata = metadata.filter((m) => m.type === type)
 
-			filteredMetadatas.forEach(metadata => {
-				const method = controllerMetadatas.controllerInstance[metadata.methodName]
-				if (typeof method === "function") {
-					callback(metadata, controllerMetadatas.controllerInstance, method)
-				}
-			})
+		filteredMetadata.forEach(metadata => {
+			const method = controllerInstance[metadata.methodName]
+			if (typeof method === "function") {
+				callback(metadata, method)
+			}
 		})
+	}
+
+	/**
+	 * Gets the name of the target's constructor.
+	 * @param {object} target - The target object.
+	 * @returns {string} The name of the target's constructor.
+	 */
+	public static getTargetName (target: Object) {
+		return target.constructor.name
+	}
+
+	/**
+	 * Gets the class constructor of the target.
+	 * @param {object} target - The target object.
+	 * @returns {ClassConstructorType<typeof target>} The class constructor of the target.
+	 */
+	public static getTargetClass (target: Object) {
+		return target.constructor as ClassConstructorType<typeof target>
 	}
 
 }

@@ -1,9 +1,8 @@
 import { ClassConstructor, plainToInstance } from "class-transformer"
-import { IoCContainer } from "../IoCContainer"
-import { config, getListenerMetadata } from "../globalMetadata"
 import { validate } from "class-validator"
 import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { config } from "../globalMetadata"
 
 /**
  * Allows to wrap a method to add data validation layer
@@ -12,21 +11,25 @@ export class DataValidationWrapper {
 
 	/**
 	 * Wraps all listeners to add data validation layer
+	 * @param {ListenerMetadata[]} metadata The metadata of the listeners to wrap
+	 * @param {any} controllerInstance The controller instance
 	 */
-	public static wrapAllListeners () {
+	public static wrapListeners (metadata: ListenerMetadata[], controllerInstance: Any) {
 		if (!config.dataValidationEnabled) {
 			return
 		}
 
-		const metadata = getListenerMetadata()
-		metadata.forEach(DataValidationWrapper.prepareDataValidationLayerAndWrap)
+		metadata.forEach(m => {
+			DataValidationWrapper.prepareDataValidationLayerAndWrap(m, controllerInstance)
+		})
 	}
 
 	/**
 	 * Prepares data validation layer and wraps listener methods
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata of method to wrap
+	 * @param {any} controllerInstance The controller instance
 	 */
-	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata) {
+	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: Any) {
 		if (listenerMetadata.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", listenerMetadata.target, listenerMetadata.methodName)
 
@@ -34,7 +37,6 @@ export class DataValidationWrapper {
 				return
 			}
 
-			const controllerInstance = IoCContainer.getInstance<Any>(listenerMetadata.target.constructor, config.iocContainer)
 			const originalMethod = controllerInstance[listenerMetadata.methodName]
 
 			DataValidationWrapper.wrapMethod(listenerMetadata, controllerInstance, originalMethod, paramTypes)
