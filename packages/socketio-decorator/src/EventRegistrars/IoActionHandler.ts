@@ -5,10 +5,12 @@ import { MetadataAction } from "../Models/Metadata/Metadata"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 
 type ServerAction = {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	[action in MetadataAction]: (ioserver: Server, metadata: Metadata, controllerInstance: Any, method: Function) => void
 }
 
 type SocketAction = {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	[action in MetadataAction]: (socket: Socket, metadata: Metadata, controllerInstance: Any, method: Function) => void
 }
 

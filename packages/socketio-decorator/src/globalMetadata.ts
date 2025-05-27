@@ -1,23 +1,70 @@
 import { Socket } from "socket.io"
 import { EventBinder } from "./Models/EventBinder"
-import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
 import { EmitterMetadata } from "./Models/Metadata/EmiterMetadata"
+import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
+import { TreeMethodMetadata, TreeRootMetadata } from "./Models/Metadata/Metadata"
 import { SiodConfig } from "./Models/SiodConfig"
-import { Metadata } from "./Models/Metadata/Metadata"
+import { MetadataUtils } from "./Utils/MetadataUtils"
 
-const ioMetadata = {
-	listener: [] as ListenerMetadata[],
-	emitters: [] as EmitterMetadata[]
-}
+const treeMetadata: TreeRootMetadata[] = []
 const binderEvents: EventBinder[] = []
 export let config: SiodConfig
 
 /**
+ * Gets or creates the tree metadata for a given target.
+ * @param {object} target - The target object.
+ * @returns {TreeRootMetadata} The tree metadata for the target.
+ */
+function getOrCreateTreeMetadata (target: Object) {
+	const metadata = treeMetadata.find((m) => m.controllerTarget === target)
+	if (!metadata) {
+		const controllerName = MetadataUtils.getTargetName(target)
+		const targetClass = MetadataUtils.getTargetClass(target)
+
+		const newMetadata: TreeRootMetadata = {
+			controllerTarget: targetClass,
+			controllerName,
+			methodMetadata: []
+		}
+
+		treeMetadata.push(newMetadata)
+
+		return newMetadata
+	}
+	return metadata
+}
+
+/**
+ * Gets or creates the tree method metadata for a given target and method name.
+ * @param {object} target - The target object.
+ * @param {string} methodName - The name of the method.
+ * @returns {TreeMethodMetadata} The tree method metadata for the target and method name.
+ */
+function getOrCreateTreeMethodMetadata (target: Object, methodName: string) {
+	const treeMetadata = getOrCreateTreeMetadata(target)
+	const methodMetadata = treeMetadata.methodMetadata.find((m) => m.methodName === methodName)
+	if (!methodMetadata) {
+		const newMethodMetadata: TreeMethodMetadata = {
+			methodName,
+			metadata: {
+				ioMetadata: {
+					listenerMetadata: [],
+					emitterMetadata: []
+				}
+			}
+		}
+		treeMetadata.methodMetadata.push(newMethodMetadata)
+		return newMethodMetadata
+	}
+	return methodMetadata
+}
+
+/**
  * Gets all the metadata
- * @returns {Metadata[]} The global metadata
+ * @returns {TreeRootMetadata[]} The global metadata
  */
 export function getAllMetadata () {
-	return [...ioMetadata.listener, ...ioMetadata.emitters] as Metadata[]
+	return [...treeMetadata] as TreeRootMetadata[]
 }
 
 /**
@@ -29,15 +76,8 @@ export function addListenerMetadata (metadata: ListenerMetadata) {
 		metadata.dataCheck = false
 	}
 
-	ioMetadata.listener.push(metadata)
-}
-
-/**
- * Gets the listener metadata array
- * @returns {ListenerMetadata[]} The global metadata array
- */
-export function getListenerMetadata () {
-	return [...ioMetadata.listener]
+	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
+	treeMethodMetadata.metadata.ioMetadata.listenerMetadata.push(metadata)
 }
 
 /**
@@ -45,15 +85,8 @@ export function getListenerMetadata () {
  * @param {EmitterMetadata} metadata The metadata to add
  */
 export function addEmitterMetadata (metadata: EmitterMetadata) {
-	ioMetadata.emitters.push(metadata)
-}
-
-/**
- * Gets the emitter metadata array
- * @returns {ListenerMetadata[]} The global metadata array
- */
-export function getEmitterMetadata () {
-	return [...ioMetadata.emitters]
+	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
+	treeMethodMetadata.metadata.ioMetadata.emitterMetadata.push(metadata)
 }
 
 /**

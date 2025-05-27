@@ -26,5 +26,6 @@
         "jest.disabledWorkspaceFolders": [
             "examples"
         ],
+        "powershell.cwd": "library",
     }
 }

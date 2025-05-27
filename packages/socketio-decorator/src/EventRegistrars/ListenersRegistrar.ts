@@ -1,8 +1,8 @@
-import { IoActionHandler } from "./IoActionHandler"
-import { addEventBinder, config, getAllEventBinders, getListenerMetadata } from "../globalMetadata"
-import { ControllerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { addEventBinder, config, getAllEventBinders } from "../globalMetadata"
+import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { Metadata } from "../Models/Metadata/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
+import { IoActionHandler } from "./IoActionHandler"
 
 /**
  * A class to register listeners controllers
@@ -11,14 +11,12 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server and socket listeners.
+	 * @param {ListenerMetadata[]} metadatas - The metadata of the listeners to register
+	 * @param {any} controllerInstance - The controller instance
 	 */
-	public static registerListeners () {
-		const metadatas = getListenerMetadata()
-
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, metadatas)
-
-		ListenersRegistrar.registerServerListeners(controllerMetadatas)
-		ListenersRegistrar.setupSocketListeners(controllerMetadatas)
+	public static registerListeners (metadatas: ListenerMetadata[], controllerInstance: Any) {
+		ListenersRegistrar.registerServerListeners(metadatas, controllerInstance)
+		ListenersRegistrar.setupSocketListeners(metadatas, controllerInstance)
 	}
 
 	/**
@@ -36,31 +34,32 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server listeners
-	 * @param {ControllerMetadata[]} controllerMetadata Metadata of controllers
+	 * @param {Metadata[]} metadata Metadata of the listeners
+	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static registerServerListeners (controllerMetadata: ControllerMetadata[]) {
-		MetadataUtils.mapMetadata(controllerMetadata, "server", (metadata, controllerInstance, method) => {
+	private static registerServerListeners (metadata: Metadata[], controllerInstance: Any) {
+		MetadataUtils.mapTreeMetadata(metadata, "server", controllerInstance, (metadata, method) => {
 			IoActionHandler.callServerAction(config.ioserver, metadata, controllerInstance, method)
 		})
 	}
 
 	/**
 	 * Setups socket listeners
-	 * @param {ControllerMetadata[]} controllerMetadata Metadata of controllers
+	 * @param {Metadata[]} metadata Metadata of the listeners
+	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static setupSocketListeners (controllerMetadata: ControllerMetadata[]) {
-		const filteredMetadata: {method: Function, controllerInstance: Any, metadata: Metadata}[] = []
+	private static setupSocketListeners (metadata: Metadata[], controllerInstance: Any) {
+		const filteredMetadata: {method: Function, metadata: Metadata}[] = []
 
-		MetadataUtils.mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
+		MetadataUtils.mapTreeMetadata(metadata, "socket", controllerInstance, (metadata, method) => {
 			filteredMetadata.push({
-				controllerInstance,
 				method,
 				metadata
 			})
 		})
 
 		addEventBinder("connection", (socket) => {
-			filteredMetadata.forEach(({controllerInstance, method, metadata}) => {
+			filteredMetadata.forEach(({method, metadata}) => {
 				IoActionHandler.callSocketAction(socket, metadata, controllerInstance, method)
 			})
 		})
