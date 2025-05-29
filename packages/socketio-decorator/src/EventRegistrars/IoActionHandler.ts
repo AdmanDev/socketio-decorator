@@ -1,17 +1,17 @@
 /* eslint-disable max-len */
 import { Server, Socket } from "socket.io"
-import { Metadata } from "../Models/Metadata/Metadata"
+import { IoMappingMetadata, Metadata } from "../Models/Metadata/Metadata"
 import { MetadataAction } from "../Models/Metadata/Metadata"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 
 type ServerAction = {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	[action in MetadataAction]: (ioserver: Server, metadata: Metadata, controllerInstance: Any, method: Function) => void
+	[action in MetadataAction]: (ioserver: Server, metadata: IoMappingMetadata, controllerInstance: Any, method: Function) => void
 }
 
 type SocketAction = {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	[action in MetadataAction]: (socket: Socket, metadata: Metadata, controllerInstance: Any, method: Function) => void
+	[action in MetadataAction]: (socket: Socket, metadata: IoMappingMetadata, controllerInstance: Any, method: Function) => void
 }
 
 type IoActionFnBinder = {
@@ -25,24 +25,24 @@ type IoActionFnBinder = {
 export class IoActionHandler {
 	private static readonly ioFns: IoActionFnBinder = {
 		server: {
-			on: (ioserver: Server, metadata: Metadata, controller: Any, method: Function) => {
+			on: (ioserver: Server, metadata: IoMappingMetadata, controller: Any, method: Function) => {
 				const { eventName } = metadata as ListenerMetadata
 				ioserver.on(eventName, method.bind(controller))
 			},
 		},
 		socket: {
-			on: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
+			on: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
 				const { eventName } = metadata as ListenerMetadata
 				socket.on(eventName, method.bind(controller, socket))
 			},
-			once: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
+			once: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
 				const { eventName } = metadata as ListenerMetadata
 				socket.once(eventName, method.bind(controller, socket))
 			},
-			onAny: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
+			onAny: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
 				socket.onAny(method.bind(controller, socket))
 			},
-			onAnyOutgoing: (socket: Socket, metadata: Metadata, controller: Any, method: Function) => {
+			onAnyOutgoing: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
 				socket.onAnyOutgoing(method.bind(controller, socket))
 			},
 		}
@@ -55,7 +55,7 @@ export class IoActionHandler {
 	 * @param {any} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callServerAction (ioserver: Server, metadata: Metadata, controller: Any, method: Function) {
+	public static callServerAction (ioserver: Server, metadata: IoMappingMetadata, controller: Any, method: Function) {
 		const fn = IoActionHandler.ioFns.server[metadata.action]
 		IoActionHandler.validateAction(metadata.action, fn)
 
@@ -69,7 +69,7 @@ export class IoActionHandler {
 	 * @param {any} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callSocketAction (socket: Socket, metadata: Metadata, controller: Any, method: Function) {
+	public static callSocketAction (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) {
 		const fn = IoActionHandler.ioFns.socket[metadata.action]
 		IoActionHandler.validateAction(metadata.action, fn)
 

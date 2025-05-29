@@ -15,7 +15,6 @@ export function SocketEmitter (eventName?: string): MethodDecorator {
 			methodName: propertyKey as string,
 			message: eventName ?? "",
 			to: "",
-			dataCheck: false
 		})
 	}
 }

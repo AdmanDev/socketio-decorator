@@ -5,6 +5,7 @@ import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
 import { TreeMethodMetadata, TreeRootMetadata } from "./Models/Metadata/Metadata"
 import { SiodConfig } from "./Models/SiodConfig"
 import { MetadataUtils } from "./Utils/MetadataUtils"
+import { SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
 
 const treeMetadata: TreeRootMetadata[] = []
 const binderEvents: EventBinder[] = []
@@ -49,7 +50,8 @@ function getOrCreateTreeMethodMetadata (target: Object, methodName: string) {
 			metadata: {
 				ioMetadata: {
 					listenerMetadata: [],
-					emitterMetadata: []
+					emitterMetadata: [],
+					socketMiddlewareMetadata: []
 				}
 			}
 		}
@@ -81,12 +83,21 @@ export function addListenerMetadata (metadata: ListenerMetadata) {
 }
 
 /**
- * Adds emitter metadata to the global metadata 
+ * Adds emitter metadata to the method tree metadata
  * @param {EmitterMetadata} metadata The metadata to add
  */
 export function addEmitterMetadata (metadata: EmitterMetadata) {
 	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
 	treeMethodMetadata.metadata.ioMetadata.emitterMetadata.push(metadata)
+}
+
+/**
+ * Adds socket middleware metadata to the method tree metadata
+ * @param {SocketMiddlewareMetadata} metadata The metadata to add
+ */
+export function addSocketMiddlewareMetadata (metadata: SocketMiddlewareMetadata) {
+	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
+	treeMethodMetadata.metadata.ioMetadata.socketMiddlewareMetadata.push(metadata)
 }
 
 /**

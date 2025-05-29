@@ -14,7 +14,7 @@ export class SocketEmitterWrapper {
 	 * @param {any} controllerInstance - The controller instance
 	 */
 	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
-		MetadataUtils.mapTreeMetadata(metadata, "socket", controllerInstance, (m, method) => {
+		MetadataUtils.mapIoMappingMetadata(metadata, "socket", controllerInstance, (m, method) => {
 			SocketEmitterWrapper.wrapMethod(m, controllerInstance, method)
 		})
 	}

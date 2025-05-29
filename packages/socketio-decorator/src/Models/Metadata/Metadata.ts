@@ -1,5 +1,6 @@
 import { EmitterMetadata } from "./EmiterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
+import { SocketMiddlewareMetadata } from "./MiddlewareMetadata"
 
 export type TreeRootMetadata = {
 	controllerTarget: new () => Any
@@ -17,15 +18,18 @@ export type TreeMethodMetadataItem = {
 	ioMetadata: {
 		listenerMetadata: ListenerMetadata[]
 		emitterMetadata: EmitterMetadata[]
+		socketMiddlewareMetadata: SocketMiddlewareMetadata[]
 	}
 }
 
 export type Metadata = {
-	type: MetadataType
-	action: MetadataAction
 	target: Object
 	methodName: string
-	dataCheck: boolean
+}
+
+export type IoMappingMetadata = Metadata & {
+	type: MetadataType
+	action: MetadataAction
 }
 
 export type MetadataType = "server" | "socket"

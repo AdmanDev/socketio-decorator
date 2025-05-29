@@ -1,6 +1,6 @@
 import { addEventBinder, config, getAllEventBinders } from "../globalMetadata"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { Metadata } from "../Models/Metadata/Metadata"
+import { IoMappingMetadata, Metadata } from "../Models/Metadata/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
 import { IoActionHandler } from "./IoActionHandler"
 
@@ -37,8 +37,8 @@ export class ListenersRegistrar {
 	 * @param {Metadata[]} metadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static registerServerListeners (metadata: Metadata[], controllerInstance: Any) {
-		MetadataUtils.mapTreeMetadata(metadata, "server", controllerInstance, (metadata, method) => {
+	private static registerServerListeners (metadata: IoMappingMetadata[], controllerInstance: Any) {
+		MetadataUtils.mapIoMappingMetadata(metadata, "server", controllerInstance, (metadata, method) => {
 			IoActionHandler.callServerAction(config.ioserver, metadata, controllerInstance, method)
 		})
 	}
@@ -48,10 +48,10 @@ export class ListenersRegistrar {
 	 * @param {Metadata[]} metadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static setupSocketListeners (metadata: Metadata[], controllerInstance: Any) {
-		const filteredMetadata: {method: Function, metadata: Metadata}[] = []
+	private static setupSocketListeners (metadata: IoMappingMetadata[], controllerInstance: Any) {
+		const filteredMetadata: {method: Function, metadata: IoMappingMetadata}[] = []
 
-		MetadataUtils.mapTreeMetadata(metadata, "socket", controllerInstance, (metadata, method) => {
+		MetadataUtils.mapIoMappingMetadata(metadata, "socket", controllerInstance, (metadata, method) => {
 			filteredMetadata.push({
 				method,
 				metadata

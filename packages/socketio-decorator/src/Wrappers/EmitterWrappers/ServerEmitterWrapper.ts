@@ -14,7 +14,7 @@ export class ServerEmitterWrapper {
 	 * @param {any} controllerInstance - The controller instance
 	 */
 	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
-		MetadataUtils.mapTreeMetadata(metadata, "server", controllerInstance, (m, method) => {
+		MetadataUtils.mapIoMappingMetadata(metadata, "server", controllerInstance, (m, method) => {
 			ServerEmitterWrapper.wrapMethod(m, controllerInstance, method)
 		})
 	}
