@@ -2,6 +2,7 @@ import { Socket } from "socket.io"
 import { config } from "../globalMetadata"
 import { IErrorMiddleware } from "../Interfaces/IErrorMiddleware"
 import { IoCContainer } from "../IoCContainer"
+import { EventFuncProxyArgs } from "../Models/EventFuncProxyType"
 import { TreeRootMetadata } from "../Models/Metadata/Metadata"
 import { MethodMetadata } from "../Models/Metadata/MethodMetadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
@@ -46,14 +47,16 @@ export class ErrorMiddlewareWrapper {
 		const originalMethod = controllerInstance[methodName]
 
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[methodName] = async function (...args: unknown[]) {
+		const wrappedMethod = async function (...args: unknown[]) {
 			try {
 				return await originalMethod.apply(controllerInstance, args)
 			} catch (error: Any) {
-				const socket = args.find(arg => arg instanceof Socket) as Socket | undefined
+				const socket = ErrorMiddlewareWrapper.getSocketFromArgs(...args)
 				return errorMiddleware.handleError(error, socket)
 			}
 		}
+
+		controllerInstance[methodName] = wrappedMethod
 	}
 
 	/**
@@ -62,7 +65,7 @@ export class ErrorMiddlewareWrapper {
 	 * @param {IErrorMiddleware} errorMiddleware The error middleware
 	 */
 	private static addMiddlewareToController (metadata: TreeRootMetadata, errorMiddleware: IErrorMiddleware) {
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, [metadata])
+		const controllerMetadatas = MetadataUtils.getControllerMetadata([metadata])
 
 		controllerMetadatas.forEach(cm => {
 			const unicMethods = cm.metadatas.map(m => m.methodName).filter((value, index, self) => self.indexOf(value) === index)
@@ -96,5 +99,24 @@ export class ErrorMiddlewareWrapper {
 
 			ErrorMiddlewareWrapper.wrapMethod(methodMetadata, errorMiddleware)
 		})
+	}
+
+	/**
+	 * Gets the socket from the arguments
+	 * @param {any[]} args The arguments
+	 * @returns {Socket | undefined} The socket
+	 */
+	private static getSocketFromArgs (...args: unknown[]) {
+		let socket: Socket| undefined
+		if (args.length > 0) {
+			const firstArg = args[0]
+			if (firstArg instanceof EventFuncProxyArgs) {
+				socket = firstArg.socket || undefined
+			} else {
+				socket = args.find(arg => arg instanceof Socket) as Socket | undefined
+			}
+		}
+
+		return socket
 	}
 }

@@ -6,6 +6,7 @@ import { TreeMethodMetadata, TreeRootMetadata } from "./Models/Metadata/Metadata
 import { SiodConfig } from "./Models/SiodConfig"
 import { MetadataUtils } from "./Utils/MetadataUtils"
 import { SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
+import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
 
 const treeMetadata: TreeRootMetadata[] = []
 const binderEvents: EventBinder[] = []
@@ -17,10 +18,11 @@ export let config: SiodConfig
  * @returns {TreeRootMetadata} The tree metadata for the target.
  */
 function getOrCreateTreeMetadata (target: Object) {
-	const metadata = treeMetadata.find((m) => m.controllerTarget === target)
+	const targetClass = MetadataUtils.getTargetClass(target)
+	const metadata = treeMetadata.find((m) => m.controllerTarget === targetClass)
+
 	if (!metadata) {
 		const controllerName = MetadataUtils.getTargetName(target)
-		const targetClass = MetadataUtils.getTargetClass(target)
 
 		const newMetadata: TreeRootMetadata = {
 			controllerTarget: targetClass,
@@ -55,9 +57,14 @@ function getOrCreateTreeMethodMetadata (target: Object, methodName: string) {
 				}
 			}
 		}
+
 		treeMetadata.methodMetadata.push(newMethodMetadata)
+
+		defineReflectMethodMetadata(target, newMethodMetadata)
+
 		return newMethodMetadata
 	}
+
 	return methodMetadata
 }
 

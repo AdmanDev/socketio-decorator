@@ -1,17 +1,17 @@
 /* eslint-disable max-len */
 import { Server, Socket } from "socket.io"
-import { IoMappingMetadata, Metadata } from "../Models/Metadata/Metadata"
-import { MetadataAction } from "../Models/Metadata/Metadata"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { IoMappingMetadata, MetadataAction, TreeMethodMetadata } from "../Models/Metadata/Metadata"
+import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
 
 type ServerAction = {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	[action in MetadataAction]: (ioserver: Server, metadata: IoMappingMetadata, controllerInstance: Any, method: Function) => void
+	[action in MetadataAction]: (ioserver: Server, eventName: string, metadata: TreeMethodMetadata, controllerInstance: Any, method: EventFuncProxyType) => void
 }
 
 type SocketAction = {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	[action in MetadataAction]: (socket: Socket, metadata: IoMappingMetadata, controllerInstance: Any, method: Function) => void
+	[action in MetadataAction]: (socket: Socket, eventName: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => void
 }
 
 type IoActionFnBinder = {
@@ -25,25 +25,49 @@ type IoActionFnBinder = {
 export class IoActionHandler {
 	private static readonly ioFns: IoActionFnBinder = {
 		server: {
-			on: (ioserver: Server, metadata: IoMappingMetadata, controller: Any, method: Function) => {
-				const { eventName } = metadata as ListenerMetadata
-				ioserver.on(eventName, method.bind(controller))
+			on: (ioserver: Server, eventName: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => {
+				ioserver.on(eventName, (socket: Socket) => {
+					const proxyArgs = new EventFuncProxyArgs([socket], metadata, eventName, socket)
+					method.apply(controller, [proxyArgs])
+				})
 			},
 		},
 		socket: {
-			on: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
-				const { eventName } = metadata as ListenerMetadata
-				socket.on(eventName, method.bind(controller, socket))
+			on: (socket: Socket, eventName: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => {
+				socket.on(eventName, (...data: unknown[]) => {
+					const proxyArgs = new EventFuncProxyArgs([socket, ...data], metadata, eventName, socket)
+					method.apply(controller, [proxyArgs])
+				})
 			},
-			once: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
-				const { eventName } = metadata as ListenerMetadata
-				socket.once(eventName, method.bind(controller, socket))
+			once: (socket: Socket, eventName: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => {
+				socket.once(eventName, (...data: unknown[]) => {
+					const proxyArgs = new EventFuncProxyArgs([socket, ...data], metadata, eventName, socket)
+					method.apply(controller, [proxyArgs])
+				})
 			},
-			onAny: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
-				socket.onAny(method.bind(controller, socket))
+			onAny: (socket: Socket, _: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => {
+				socket.onAny((eventName: string, ...data: unknown[]) => {
+					const proxyArgs = new EventFuncProxyArgs(
+						[socket, eventName, ...data],
+						metadata,
+						eventName,
+						socket
+					)
+
+					method.apply(controller, [proxyArgs])
+				})
 			},
-			onAnyOutgoing: (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) => {
-				socket.onAnyOutgoing(method.bind(controller, socket))
+			onAnyOutgoing: (socket: Socket, _: string, metadata: TreeMethodMetadata, controller: Any, method: EventFuncProxyType) => {
+				socket.onAnyOutgoing((eventName: string, ...data: unknown[]) => {
+					const proxyArgs = new EventFuncProxyArgs(
+						[socket, eventName, ...data],
+						metadata,
+						eventName,
+						socket
+					)
+
+					method.apply(controller, [proxyArgs])
+				})
 			},
 		}
 	}
@@ -51,29 +75,31 @@ export class IoActionHandler {
 	/**
 	 * Call the appropriate io server action function
 	 * @param {Server} ioserver The socket.io server instance
-	 * @param {Metadata} metadata The metadata for the action
+	 * @param {TreeMethodMetadata} methodMetadata The metadata for the method
+	 * @param {ListenerMetadata} listenerMetadata The listener metadata
 	 * @param {any} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callServerAction (ioserver: Server, metadata: IoMappingMetadata, controller: Any, method: Function) {
-		const fn = IoActionHandler.ioFns.server[metadata.action]
-		IoActionHandler.validateAction(metadata.action, fn)
+	public static callServerAction (ioserver: Server, methodMetadata: TreeMethodMetadata, listenerMetadata: ListenerMetadata, controller: Any, method: EventFuncProxyType) {
+		const fn = IoActionHandler.ioFns.server[listenerMetadata.action]
+		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
-		fn?.(ioserver, metadata, controller, method)
+		fn?.(ioserver, listenerMetadata.eventName, methodMetadata, controller, method)
 	}
 
 	/**
 	 * Call the appropriate io socket action function
 	 * @param {Socket} socket The socket.io socket instance
-	 * @param {Metadata} metadata The metadata for the action
+	 * @param {TreeMethodMetadata} methodMetadata The metadata for the method
+	 * @param {IoMappingMetadata} listenerMetadata The listener metadata
 	 * @param {any} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callSocketAction (socket: Socket, metadata: IoMappingMetadata, controller: Any, method: Function) {
-		const fn = IoActionHandler.ioFns.socket[metadata.action]
-		IoActionHandler.validateAction(metadata.action, fn)
+	public static callSocketAction (socket: Socket, methodMetadata: TreeMethodMetadata, listenerMetadata: ListenerMetadata, controller: Any, method: EventFuncProxyType) {
+		const fn = IoActionHandler.ioFns.socket[listenerMetadata.action]
+		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
-		fn?.(socket, metadata, controller, method)
+		fn?.(socket, listenerMetadata.eventName, methodMetadata, controller, method)
 	}
 
 	/**

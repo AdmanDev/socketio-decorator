@@ -1,4 +1,5 @@
 import { config } from "../../globalMetadata"
+import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
 import { Metadata } from "../../Models/Metadata/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
@@ -27,8 +28,8 @@ export class ServerEmitterWrapper {
 	 */
 	private static wrapMethod (metadata: Metadata, controllerInstance: Any, method: Function) {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
-			const result = await method.apply(controllerInstance, args)
+		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
+			const result = await method.apply(controllerInstance, [proxyArgs])
 
 			const emitterOptions = EmitterWrapperUtils.getEmitterOptions(metadata, result)
 
@@ -48,6 +49,8 @@ export class ServerEmitterWrapper {
 
 			return result
 		}
+
+		controllerInstance[metadata.methodName] = wrappedMethod
 	}
 
 }

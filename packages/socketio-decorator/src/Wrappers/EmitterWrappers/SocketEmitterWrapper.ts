@@ -3,6 +3,8 @@ import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
 import { Metadata } from "../../Models/Metadata/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
+import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
+import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
 
 /**
  * Allow to wrap a method to add socket emitter layer
@@ -27,23 +29,27 @@ export class SocketEmitterWrapper {
 	 */
 	private static wrapMethod (metadata: Metadata, controllerInstance: Any, method: Function) {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[metadata.methodName] = async function (...args: unknown[]) {
-			const result = await method.apply(controllerInstance, args)
+		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
+			const result = await method.apply(controllerInstance, [proxyArgs])
 
-			const socket = args[0]
-			if (socket?.constructor.name === "Socket") {
-				const emitterOptions = EmitterWrapperUtils.getEmitterOptions(metadata, result)
-
-				emitterOptions.forEach((option) => {
-					const { data, message } = option
-
-					if (EmitterWrapperUtils.canEmit(option)) {
-						(socket as Socket).emit(message, data)
-					}
-				})
+			const socket = proxyArgs.socket
+			if (!socket) {
+				throw new SiodInvalidArgumentError("Socket not found to emit data")
 			}
+
+			const emitterOptions = EmitterWrapperUtils.getEmitterOptions(metadata, result)
+
+			emitterOptions.forEach((option) => {
+				const { data, message } = option
+
+				if (EmitterWrapperUtils.canEmit(option)) {
+					(socket as Socket).emit(message, data)
+				}
+			})
 
 			return result
 		}
+
+		controllerInstance[metadata.methodName] = wrappedMethod
 	}
 }

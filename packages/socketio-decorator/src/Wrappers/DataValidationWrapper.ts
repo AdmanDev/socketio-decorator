@@ -1,8 +1,9 @@
 import { ClassConstructor, plainToInstance } from "class-transformer"
 import { validate } from "class-validator"
-import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
-import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { config } from "../globalMetadata"
+import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
+import { EventFuncProxyType } from "../Models/EventFuncProxyType"
+import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 
 /**
  * Allows to wrap a method to add data validation layer
@@ -62,14 +63,15 @@ export class DataValidationWrapper {
 	 */
 	private static wrapMethod (listenerMetadata: ListenerMetadata, controllerInstance: Any, originalMethod: Function, paramTypes: ClassConstructor<unknown>[]) {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[listenerMetadata.methodName] = async function (...args: Any[]) {
-			const dataArgInx = args.findIndex(a => a?.constructor === Object)
+		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
+			const ioArgs = proxyArgs.args
+			const dataArgInx = ioArgs.findIndex(a => a?.constructor === Object)
 
 			if (dataArgInx === -1) {
 				throw new SiodImcomigDataError("Imcomig data object type is not valid (data validation)")
 			}
 
-			const dataValue = args[dataArgInx]
+			const dataValue = ioArgs[dataArgInx]
 			const dataType = paramTypes[dataArgInx]
 
 			const dataInstance = plainToInstance(dataType, dataValue)
@@ -85,7 +87,9 @@ export class DataValidationWrapper {
 				throw new SiodImcomigDataError(errorMessage, dataValue, errors)
 			}
 
-			return await originalMethod.apply(controllerInstance, args)
+			return await originalMethod.apply(controllerInstance, [proxyArgs])
 		}
+
+		controllerInstance[listenerMetadata.methodName] = wrappedMethod
 	}
 }

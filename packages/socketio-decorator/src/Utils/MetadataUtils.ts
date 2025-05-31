@@ -1,8 +1,8 @@
 import { IoCContainer } from "../IoCContainer"
-import { SiodConfig } from "../Models/SiodConfig"
 import { ControllerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { IoMappingMetadata, Metadata, MetadataType, TreeRootMetadata } from "../Models/Metadata/Metadata"
 import { ClassConstructorType } from "../Models/ClassConstructorType"
+import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 
 /**
  * Defines utilities for metadata manipulation
@@ -10,11 +10,10 @@ import { ClassConstructorType } from "../Models/ClassConstructorType"
 export class MetadataUtils {
 	/**
 	 * Gets the controller metadata
-	 * @param {SiodConfig} config The socketio decocator configuration
-	 * @param {Metadata[]} metadatas The metadata array
+	 * @param {TreeRootMetadata[]} metadatas The metadata array
 	 * @returns {ControllerMetadata[]} The controller metadata
 	 */
-	public static getControllerMetadata (config: SiodConfig, metadatas: TreeRootMetadata[]) {
+	public static getControllerMetadata (metadatas: TreeRootMetadata[]) {
 		const controllerMetadatas: ControllerMetadata[] = []
 
 		for (const metadata of metadatas) {
@@ -36,11 +35,11 @@ export class MetadataUtils {
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 * @param {Function} callback - A callback function that is called with each metadata and its corresponding method.
 	 */
-	public static mapIoMappingMetadata (
-		metadata: IoMappingMetadata[],
+	public static mapIoMappingMetadata<TMetadata extends IoMappingMetadata> (
+		metadata: TMetadata[],
 		type: MetadataType,
 		controllerInstance: Any,
-		callback: (metadata: IoMappingMetadata, method: Any) => void
+		callback: (metadata: TMetadata, method: EventFuncProxyType) => void
 	) {
 		const filteredMetadata = metadata.filter((m) => m.type === type)
 		MetadataUtils.mapMetadata(filteredMetadata, controllerInstance, callback)
@@ -56,7 +55,7 @@ export class MetadataUtils {
 	public static mapMetadata <T extends Metadata> (
 		metadata: T[],
 		controllerInstance: Any,
-		callback: (metadata: T, method: Any) => void
+		callback: (metadata: T, method: EventFuncProxyType) => void
 	) {
 		metadata.forEach(m => {
 			const method = controllerInstance[m.methodName]
