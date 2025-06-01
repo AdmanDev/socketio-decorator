@@ -1,7 +1,7 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { IoCContainer } from "../../IoCContainer"
+import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
-import { MetadataUtils } from "../../Utils/MetadataUtils"
 
 /**
  * Defines a wrapper to apply socket middleware decorators.
@@ -13,8 +13,8 @@ export class SocketMiddlewareDecoratorWrapper {
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 */
 	public static addSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
-		MetadataUtils.mapMetadata(metadata, controllerInstance, (meta, method) => {
-			SocketMiddlewareDecoratorWrapper.wrapMethod(meta, controllerInstance, method)
+		metadata.forEach((m) => {
+			SocketMiddlewareDecoratorWrapper.wrapMethod(m, controllerInstance)
 		})
 
 	}
@@ -23,28 +23,33 @@ export class SocketMiddlewareDecoratorWrapper {
 	 * Wraps a controller method with socket middleware logic.
 	 * @param {SocketMiddlewareMetadata} metadata - Metadata associated with the middleware to be applied.
 	 * @param {any} controllerInstance - The target controller instance containing the method to wrap.
-	 * @param {Function} method - The original method of the controller to be wrapped with middleware.
 	 */
-	private static wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any, method: Function) {
-		const middlewareInsances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares)
+	private static wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any) {
 		const methodName = metadata.methodName
+		const middlewareInsances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares).toReversed()
 
 		middlewareInsances.forEach((middleware) => {
-			// eslint-disable-next-line jsdoc/require-jsdoc
-			controllerInstance[methodName] = async function (...args: unknown[]) {
-				const middlewareResult = new Promise((resolve, reject) => {
-					middleware.use([eventName, ...args], (err?: Error) => {
-						if (err) {
-							return reject(err)
-						}
+			const method = controllerInstance[methodName]
 
-						resolve(null)
-					})
+			// eslint-disable-next-line jsdoc/require-jsdoc
+			const socketMiddlewareProxy: EventFuncProxyType = async function (proxyArgs) {
+				const methodArgs = proxyArgs.args
+				const [, ...methodArgsWithoutSocket] = methodArgs
+
+				const middlewareResult = new Promise((resolve) => {
+					middleware.use([proxyArgs.eventName, ...methodArgsWithoutSocket], resolve)
 				})
 
-				await middlewareResult
-				return method.apply(controllerInstance, args)
+				const error = await middlewareResult
+
+				if (error) {
+					return
+				}
+
+				return method.apply(controllerInstance, [proxyArgs])
 			}
+
+			controllerInstance[methodName] = socketMiddlewareProxy
 		})
 	}
 }

@@ -18,8 +18,8 @@ export type TreeMethodMetadataItem = {
 	ioMetadata: {
 		listenerMetadata: ListenerMetadata[]
 		emitterMetadata: EmitterMetadata[]
-		socketMiddlewareMetadata: SocketMiddlewareMetadata[]
 	}
+	socketMiddlewareMetadata: SocketMiddlewareMetadata[]
 }
 
 export type Metadata = {

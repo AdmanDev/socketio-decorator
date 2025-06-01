@@ -53,8 +53,8 @@ function getOrCreateTreeMethodMetadata (target: Object, methodName: string) {
 				ioMetadata: {
 					listenerMetadata: [],
 					emitterMetadata: [],
-					socketMiddlewareMetadata: []
-				}
+				},
+				socketMiddlewareMetadata: []
 			}
 		}
 
@@ -104,7 +104,7 @@ export function addEmitterMetadata (metadata: EmitterMetadata) {
  */
 export function addSocketMiddlewareMetadata (metadata: SocketMiddlewareMetadata) {
 	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
-	treeMethodMetadata.metadata.ioMetadata.socketMiddlewareMetadata.push(metadata)
+	treeMethodMetadata.metadata.socketMiddlewareMetadata.push(metadata)
 }
 
 /**

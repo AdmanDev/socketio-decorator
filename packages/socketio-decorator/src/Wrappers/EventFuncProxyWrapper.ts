@@ -3,9 +3,9 @@ import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxy
 import { getReflectMethodMetadata } from "../reflectLetadataFunc"
 
 /**
- * Define the evant function handler proxy initer
+ * Define the evant function handler proxy wrapper to manage handler args
  */
-export class EventFuncProxyIniter {
+export class EventFuncProxyWrapper {
 	/**
 	 * Adds last proxy layer to the method
 	 * @param {any} controller The controller instance.
@@ -38,7 +38,7 @@ export class EventFuncProxyIniter {
 			if (firstArg && firstArg instanceof EventFuncProxyArgs) {
 				proxyArgs = firstArg
 			} else {
-				proxyArgs = EventFuncProxyIniter.createProxyArgs(controller, methodName, args)
+				proxyArgs = EventFuncProxyWrapper.createProxyArgs(controller, methodName, args)
 			}
 
 			return await originalHandler.apply(controller, [proxyArgs])

@@ -7,7 +7,8 @@ import { DataValidationWrapper } from "./Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "./Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "./Wrappers/ErrorMiddlewareWrapper"
-import { EventFuncProxyIniter } from "./Wrappers/EventFuncProxyIniter"
+import { EventFuncProxyWrapper } from "./Wrappers/EventFuncProxyWrapper"
+import { SocketMiddlewareDecoratorWrapper } from "./Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 
 /**
  * Defines the workflow process responsible for binding all the metadata.
@@ -30,6 +31,7 @@ export class SiodWorkflowProcess {
 
 			SiodWorkflowProcess.bindDataValidation(m)
 			SiodWorkflowProcess.bindEmitters(m)
+			SiodWorkflowProcess.bindUseSocketMiddlewareDecorator(m)
 			SiodWorkflowProcess.bindErrorMiddleware(m)
 
 			SiodWorkflowProcess.bindFirstChainProxy(m)
@@ -47,7 +49,7 @@ export class SiodWorkflowProcess {
 	 */
 	private static bindLastChainProxy (metadata: TreeRootMetadata) {
 		metadata.methodMetadata.forEach(methodMetadata => {
-			EventFuncProxyIniter.addLastProxyLayer(metadata.controllerInstance, methodMetadata.methodName)
+			EventFuncProxyWrapper.addLastProxyLayer(metadata.controllerInstance, methodMetadata.methodName)
 		})
 	}
 
@@ -57,7 +59,7 @@ export class SiodWorkflowProcess {
 	 */
 	private static bindFirstChainProxy (metadata: TreeRootMetadata) {
 		metadata.methodMetadata.forEach(methodMetadata => {
-			EventFuncProxyIniter.addFirstProxyLayer(metadata.controllerInstance, methodMetadata.methodName)
+			EventFuncProxyWrapper.addFirstProxyLayer(metadata.controllerInstance, methodMetadata.methodName)
 		})
 	}
 
@@ -86,6 +88,15 @@ export class SiodWorkflowProcess {
 	 */
 	private static bindListeners (metadata: TreeRootMetadata) {
 		ListenersRegistrar.registerListeners(metadata.methodMetadata, metadata.controllerInstance)
+	}
+
+	/**
+	 * Binds the socket middleware decorator to the controller methods.
+	 * @param {TreeRootMetadata} metadata - The metadata of the controller.
+	 */
+	private static bindUseSocketMiddlewareDecorator (metadata: TreeRootMetadata) {
+		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.map(m => m.metadata.socketMiddlewareMetadata).flat()
+		SocketMiddlewareDecoratorWrapper.addSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
 	}
 
 	/**

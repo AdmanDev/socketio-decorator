@@ -12,7 +12,8 @@ import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrappe
 import { createServer } from "../utilities/serverUtils"
 import { SocketOn } from "../../src"
 import { setConfig } from "../../src/globalMetadata"
-import { EventFuncProxyIniter } from "../../src/Wrappers/EventFuncProxyIniter"
+import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxyWrapper"
+import { expectCallOrder } from "../utilities/testUtils"
 
 describe("> System tests", () => {
 	let io: Server
@@ -35,8 +36,8 @@ describe("> System tests", () => {
 	}
 
 	describe("> Wrapping and Bindings order tests", () => {
-		const eventFuncAddLastProxyLayerSpy = jest.spyOn(EventFuncProxyIniter, "addLastProxyLayer")
-		const eventFuncAddFirstProxyLayerSpy = jest.spyOn(EventFuncProxyIniter, "addFirstProxyLayer")
+		const eventFuncAddLastProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addLastProxyLayer")
+		const eventFuncAddFirstProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addFirstProxyLayer")
 		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapListeners")
 		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapEmitters")
 		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
@@ -147,21 +148,4 @@ describe("> System tests", () => {
 
 	})
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	function expectCallOrder (...spies: jest.SpiedFunction<(...args: Any[]) => unknown>[]) {
-		for (let i = 0; i < spies.length - 1; i++) {
-			const nexSpyIndex = i + 1
-			if (nexSpyIndex >= spies.length) {
-				return
-			}
-
-			const currentSpy = spies[i]
-			const nextSpy = spies[nexSpyIndex]
-
-			const currentSpyCallOrder = currentSpy.mock.invocationCallOrder[0]
-			const nextSpyCallOrder = nextSpy.mock.invocationCallOrder[0]
-
-			expect(currentSpyCallOrder).toBeLessThan(nextSpyCallOrder)
-		}
-	}
 })
