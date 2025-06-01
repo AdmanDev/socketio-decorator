@@ -5,7 +5,7 @@ import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
 import { TreeMethodMetadata, TreeRootMetadata } from "./Models/Metadata/Metadata"
 import { SiodConfig } from "./Models/SiodConfig"
 import { MetadataUtils } from "./Utils/MetadataUtils"
-import { SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
+import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
 import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
 
 const treeMetadata: TreeRootMetadata[] = []
@@ -27,7 +27,8 @@ function getOrCreateTreeMetadata (target: Object) {
 		const newMetadata: TreeRootMetadata = {
 			controllerTarget: targetClass,
 			controllerName,
-			methodMetadata: []
+			methodMetadata: [],
+			middlewaresMetadata: []
 		}
 
 		treeMetadata.push(newMetadata)
@@ -102,9 +103,18 @@ export function addEmitterMetadata (metadata: EmitterMetadata) {
  * Adds socket middleware metadata to the method tree metadata
  * @param {SocketMiddlewareMetadata} metadata The metadata to add
  */
-export function addSocketMiddlewareMetadata (metadata: SocketMiddlewareMetadata) {
+export function addMethodSocketMiddlewareMetadata (metadata: SocketMiddlewareMetadata) {
 	const treeMethodMetadata = getOrCreateTreeMethodMetadata(metadata.target, metadata.methodName)
 	treeMethodMetadata.metadata.socketMiddlewareMetadata.push(metadata)
+}
+
+/**
+ * Adds class socket middleware metadata to the method tree metadata
+ * @param {ClassSocketMiddlewareMetadata} metadata The metadata to add
+ */
+export function addClassSocketMiddlewareMetadata (metadata: ClassSocketMiddlewareMetadata) {
+	const treeMetadata = getOrCreateTreeMetadata(metadata.target)
+	treeMetadata.middlewaresMetadata.push(metadata)
 }
 
 /**

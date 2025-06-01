@@ -1,6 +1,7 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
+import { TreeRootMetadata } from "../../Models/Metadata/Metadata"
 import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
 
 /**
@@ -8,15 +9,40 @@ import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetada
  */
 export class SocketMiddlewareDecoratorWrapper {
 	/**
-	 * Applies socket middleware decorators to the methods of a controller instance.
+	 * Applies methods socket middleware decorators to the methods of a controller instance.
 	 * @param {SocketMiddlewareMetadata[]} metadata - The metadata of the socket middleware to apply.
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 */
-	public static addSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
+	public static addMethodSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
 		metadata.forEach((m) => {
 			SocketMiddlewareDecoratorWrapper.wrapMethod(m, controllerInstance)
 		})
+	}
 
+	/**
+	 * Applies class socket middleware decorators to all methods of a controller class.
+	 * @param {TreeRootMetadata} metadata - The metadata of the controller class containing the methods.
+	 */
+	public static addSocketMiddlewareToManyClassMethods (metadata: TreeRootMetadata) {
+		const { controllerInstance, methodMetadata, middlewaresMetadata } = metadata
+
+		const methodNames: string[] = methodMetadata
+			.map(method => method.metadata.ioMetadata.listenerMetadata[0]?.methodName)
+			.filter((methodName): methodName is string => methodName !== undefined)
+
+		if (methodNames.length === 0) {
+			return
+		}
+
+		const socketMiddlewareMetadata: SocketMiddlewareMetadata[] = middlewaresMetadata.flatMap(
+			classMiddleware => methodNames.map(methodName => ({
+				target: classMiddleware.target,
+				middlewares: classMiddleware.middlewares,
+				methodName,
+			}))
+		)
+
+		SocketMiddlewareDecoratorWrapper.addMethodSocketMiddleware(socketMiddlewareMetadata, controllerInstance)
 	}
 
 	/**

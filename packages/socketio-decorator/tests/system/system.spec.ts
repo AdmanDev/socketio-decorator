@@ -14,6 +14,7 @@ import { SocketOn } from "../../src"
 import { setConfig } from "../../src/globalMetadata"
 import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxyWrapper"
 import { expectCallOrder } from "../utilities/testUtils"
+import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 
 describe("> System tests", () => {
 	let io: Server
@@ -41,6 +42,8 @@ describe("> System tests", () => {
 		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapListeners")
 		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapEmitters")
 		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
+		const useSocketMiddlewareMethodWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addMethodSocketMiddleware")
+		const useSocketMiddlewareClassWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addSocketMiddlewareToManyClassMethods")
 		const controllerErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapController")
 		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllMiddlewares")
 		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
@@ -61,6 +64,8 @@ describe("> System tests", () => {
 				dataValidationWrapperSpy,
 				serverEmitterWrapperSpy,
 				socketEmitterWrapperSpy,
+				useSocketMiddlewareMethodWrapperSpy,
+				useSocketMiddlewareClassWrapperSpy,
 				controllerErrorMiddlewareWrapperSpy,
 				eventFuncAddFirstProxyLayerSpy,
 				listenersRegistrarSpy,

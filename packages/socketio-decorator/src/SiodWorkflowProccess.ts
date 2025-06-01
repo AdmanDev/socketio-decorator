@@ -68,7 +68,7 @@ export class SiodWorkflowProcess {
 	 * @param {TreeRootMetadata} metadata - The metadata of the controller.
 	 */
 	private static bindDataValidation (metadata: TreeRootMetadata) {
-		const listeners = metadata.methodMetadata.map(m => m.metadata.ioMetadata.listenerMetadata).flat()
+		const listeners = metadata.methodMetadata.flatMap(m => m.metadata.ioMetadata.listenerMetadata)
 		DataValidationWrapper.wrapListeners(listeners, metadata.controllerInstance)
 	}
 
@@ -77,7 +77,7 @@ export class SiodWorkflowProcess {
 	 * @param {TreeRootMetadata} metadata - The metadata of the controller.
 	 */
 	private static bindEmitters (metadata: TreeRootMetadata) {
-		const emitters = metadata.methodMetadata.map(m => m.metadata.ioMetadata.emitterMetadata).flat()
+		const emitters = metadata.methodMetadata.flatMap(m => m.metadata.ioMetadata.emitterMetadata)
 		ServerEmitterWrapper.wrapEmitters(emitters, metadata.controllerInstance)
 		SocketEmitterWrapper.wrapEmitters(emitters, metadata.controllerInstance)
 	}
@@ -95,8 +95,10 @@ export class SiodWorkflowProcess {
 	 * @param {TreeRootMetadata} metadata - The metadata of the controller.
 	 */
 	private static bindUseSocketMiddlewareDecorator (metadata: TreeRootMetadata) {
-		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.map(m => m.metadata.socketMiddlewareMetadata).flat()
-		SocketMiddlewareDecoratorWrapper.addSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
+		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.flatMap(m => m.metadata.socketMiddlewareMetadata)
+
+		SocketMiddlewareDecoratorWrapper.addMethodSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
+		SocketMiddlewareDecoratorWrapper.addSocketMiddlewareToManyClassMethods(metadata)
 	}
 
 	/**

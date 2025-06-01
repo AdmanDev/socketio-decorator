@@ -1,12 +1,13 @@
 import { EmitterMetadata } from "./EmiterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
-import { SocketMiddlewareMetadata } from "./MiddlewareMetadata"
+import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
 
 export type TreeRootMetadata = {
 	controllerTarget: new () => Any
 	controllerInstance?: Any
 	controllerName: string
 	methodMetadata: TreeMethodMetadata[]
+	middlewaresMetadata: ClassSocketMiddlewareMetadata[]
 }
 
 export type TreeMethodMetadata = {

@@ -57,15 +57,15 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 	class DecoratorOnFunctionControllerTest {
 		@SocketOn("simpleMiddlewareTest")
 		@UseSocketMiddleware(FirstSocketMiddleware)
-		simpleMiddlewareTest (socket: ServerSocket) {
-			controllerFnSpy(socket.id)
+		simpleMiddlewareTest (socket: ServerSocket, data: unknown) {
+			controllerFnSpy(socket.id, data)
 			socket.emit("simpleMiddlewareTestResp")
 		}
 
 		@SocketOn("multiSocketMiddlewareTest")
 		@UseSocketMiddleware(FirstSocketMiddleware, SecondSocketMiddleware)
-		multiSocketMiddlewareTest (socket: ServerSocket) {
-			controllerFnSpy(socket.id)
+		multiSocketMiddlewareTest (socket: ServerSocket, data: unknown) {
+			controllerFnSpy(socket.id, data)
 			socket.emit("multiSocketMiddlewareTestResp")
 		}
 
@@ -122,6 +122,8 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
+				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
+
 				expectCallOrder(firstSocketMiddlewareSpy, controllerFnSpy)
 
 				done()
@@ -142,6 +144,8 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
+				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
+
 				expectCallOrder(firstSocketMiddlewareSpy, secondSocketMiddlewareSpy, controllerFnSpy)
 
 				done()
