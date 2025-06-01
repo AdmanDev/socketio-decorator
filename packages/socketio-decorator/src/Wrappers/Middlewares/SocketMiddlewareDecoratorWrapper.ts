@@ -1,7 +1,7 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { TreeRootMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
 
 /**
@@ -21,9 +21,9 @@ export class SocketMiddlewareDecoratorWrapper {
 
 	/**
 	 * Applies class socket middleware decorators to all methods of a controller class.
-	 * @param {TreeRootMetadata} metadata - The metadata of the controller class containing the methods.
+	 * @param {ControllerMetadata} metadata - The metadata of the controller class containing the methods.
 	 */
-	public static addSocketMiddlewareToManyClassMethods (metadata: TreeRootMetadata) {
+	public static addSocketMiddlewareToManyClassMethods (metadata: ControllerMetadata) {
 		const { controllerInstance, methodMetadata, middlewaresMetadata } = metadata
 
 		const methodNames: string[] = methodMetadata

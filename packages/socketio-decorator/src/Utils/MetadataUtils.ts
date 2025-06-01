@@ -1,43 +1,22 @@
-import { IoCContainer } from "../IoCContainer"
-import { ControllerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { IoMappingMetadata, Metadata, MetadataType, TreeRootMetadata } from "../Models/Metadata/Metadata"
 import { ClassConstructorType } from "../Models/ClassConstructorType"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
+import { EventMappingDescription, EventMappingType } from "../Models/Metadata/EventMappingDescription"
+import { MetadataDescription } from "../Models/Metadata/Metadata"
 
 /**
  * Defines utilities for metadata manipulation
  */
 export class MetadataUtils {
 	/**
-	 * Gets the controller metadata
-	 * @param {TreeRootMetadata[]} metadatas The metadata array
-	 * @returns {ControllerMetadata[]} The controller metadata
-	 */
-	public static getControllerMetadata (metadatas: TreeRootMetadata[]) {
-		const controllerMetadatas: ControllerMetadata[] = []
-
-		for (const metadata of metadatas) {
-			const controllerInstance = IoCContainer.getInstance(metadata.controllerTarget) as Any
-
-			controllerMetadatas.push({
-				controllerInstance: controllerInstance,
-				metadatas: metadata.methodMetadata.flatMap(m => [m.metadata.ioMetadata.listenerMetadata, m.metadata.ioMetadata.emitterMetadata].flat()),
-			})
-		}
-
-		return controllerMetadatas
-	}
-
-	/**
 	 * Filters and iterates over IO mapping metadata of a specific type, invoking a callback for each method found.
-	 * @param {Metadata[]} metadata - An array of metadata objects to filter and map.
-	 * @param {MetadataType} type - The type of metadata to filter for.
+	 * @param {MetadataDescription[]} metadata - An array of metadata objects to filter and map.
+	 * @param {EventMappingType} type - The type of metadata to filter for.
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 * @param {Function} callback - A callback function that is called with each metadata and its corresponding method.
 	 */
-	public static mapIoMappingMetadata<TMetadata extends IoMappingMetadata> (
+	public static mapIoMappingMetadata<TMetadata extends EventMappingDescription> (
 		metadata: TMetadata[],
-		type: MetadataType,
+		type: EventMappingType,
 		controllerInstance: Any,
 		callback: (metadata: TMetadata, method: EventFuncProxyType) => void
 	) {
@@ -52,7 +31,7 @@ export class MetadataUtils {
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 * @param {Function} callback - A callback function that is called with each metadata and its corresponding method.
 	 */
-	public static mapMetadata <T extends Metadata> (
+	public static mapMetadata <T extends MetadataDescription> (
 		metadata: T[],
 		controllerInstance: Any,
 		callback: (metadata: T, method: EventFuncProxyType) => void

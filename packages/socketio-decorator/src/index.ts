@@ -10,7 +10,7 @@ export * from "./Decorators/Listeners/SocketOnAnyOutgoingDecorator"
 export * from "./Decorators/Emitters/ServerEmitterDecorator"
 export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
-export * from "./Decorators/Middlewares/UseSocketMiddleware"
+export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
 // Hooks
 export * from "./Others/Hooks"

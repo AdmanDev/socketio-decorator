@@ -1,20 +1,19 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
+import { SocketOn, useSocketIoDecorator } from "../../src"
 import { ListenersRegistrar } from "../../src/EventRegistrars/ListenersRegistrar"
 import { MiddlewaresRegistrar } from "../../src/EventRegistrars/MiddlewaresRegistrar"
+import { setConfig } from "../../src/globalMetadata"
 import { IoCContainer } from "../../src/IoCContainer"
 import { IoCProvider } from "../../src/Models/IocProvider"
 import { DataValidationWrapper } from "../../src/Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrapper"
-import { createServer } from "../utilities/serverUtils"
-import { SocketOn } from "../../src"
-import { setConfig } from "../../src/globalMetadata"
 import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxyWrapper"
-import { expectCallOrder } from "../utilities/testUtils"
 import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
+import { expectCallOrder } from "../utilities/testUtils"
 
 describe("> System tests", () => {
 	let io: Server
@@ -51,12 +50,12 @@ describe("> System tests", () => {
 		const groupedEventsRegistrationSpy = jest.spyOn(ListenersRegistrar, "applyGroupedSocketEventsRegistration")
 
 		it("should wrap controller methods and binds events in the correct order", () => {
-			io = createServer(
-				{
-					controllers: [FirstController],
-				},
-				{}
-			)
+			useSocketIoDecorator({
+				controllers: [FirstController],
+				ioserver: {
+					on: jest.fn(),
+				} as unknown as Server,
+			})
 
 			expectCallOrder(
 				middlewareErrorMiddlewareWrapperSpy,

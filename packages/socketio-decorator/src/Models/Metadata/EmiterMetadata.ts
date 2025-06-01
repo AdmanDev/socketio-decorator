@@ -1,6 +1,6 @@
-import { IoMappingMetadata } from "./Metadata"
+import { EventMappingDescription } from "./EventMappingDescription"
 
-export type EmitterMetadata = IoMappingMetadata & {
+export type EmitterMetadata = EventMappingDescription & {
 	to: string
 	message: string
 }

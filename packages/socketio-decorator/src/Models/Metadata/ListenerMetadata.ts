@@ -1,11 +1,6 @@
-import { IoMappingMetadata, Metadata } from "./Metadata"
+import { EventMappingDescription } from "./EventMappingDescription"
 
-export type ListenerMetadata = IoMappingMetadata & {
+export type ListenerMetadata = EventMappingDescription & {
 	eventName: string
 	dataCheck: boolean
-}
-
-export type ControllerMetadata = {
-	controllerInstance: Any
-	metadatas: Metadata[]
 }

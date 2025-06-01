@@ -1,7 +1,7 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
-import { Metadata } from "./Metadata"
+import { MetadataDescription } from "./Metadata"
 
-export type SocketMiddlewareMetadata = Metadata & {
+export type SocketMiddlewareMetadata = MetadataDescription & {
 	middlewares: (new() => ISocketMiddleware)[]
 }
 

@@ -1,13 +1,13 @@
-import { TreeMethodMetadata } from "./Models/Metadata/Metadata"
+import { MethodMetadata } from "./Models/Metadata/Metadata"
 
 const METHOD_METADATA_KEY = "siod:method-metadata"
 
 /**
  * Defines the method metadata for a event method handler.
  * @param {object} target - The target object.
- * @param {TreeMethodMetadata} methodMetadata - The metadata of the method.
+ * @param {MethodMetadata} methodMetadata - The metadata of the method.
  */
-export function defineReflectMethodMetadata (target: Object, methodMetadata: TreeMethodMetadata) {
+export function defineReflectMethodMetadata (target: Object, methodMetadata: MethodMetadata) {
 	Reflect.defineMetadata(METHOD_METADATA_KEY, methodMetadata, target, methodMetadata.methodName)
 }
 
@@ -15,8 +15,8 @@ export function defineReflectMethodMetadata (target: Object, methodMetadata: Tre
  * Gets the method metadata for a event method handler.
  * @param {object} target - The target object.
  * @param {string} methodName - The name of the method.
- * @returns {TreeMethodMetadata | undefined} The metadata of the method, or undefined if none.
+ * @returns {MethodMetadata | undefined} The metadata of the method, or undefined if none.
  */
 export function getReflectMethodMetadata (target: Object, methodName: string) {
-	return Reflect.getMetadata(METHOD_METADATA_KEY, target, methodName) as TreeMethodMetadata | undefined
+	return Reflect.getMetadata(METHOD_METADATA_KEY, target, methodName) as MethodMetadata | undefined
 }
