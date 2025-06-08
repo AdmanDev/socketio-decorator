@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest 
 import { Event, Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
-import { IErrorMiddleware, ISocketMiddleware, SocketOn, UseSocketMiddleware } from "../../../../../src"
+import { IErrorMiddleware, ISocketMiddleware, ServerOn, SocketOn, UseSocketMiddleware } from "../../../../../src"
 import { MessageData } from "../../../../types/socketData"
 import { expectCallOrder, waitFor } from "../../../../utilities/testUtils"
 import { MiddlewareAction } from "../../../../types/middlewareAction"
@@ -11,9 +11,11 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	let io: Server
 	let clientSocket: ClientSocket
 
+	const connectionFnSpy = jest.fn()
 	const errorMiddlewareSpy = jest.fn()
 	const firstSocketMiddlewareSpy = jest.fn()
 	const secondSocketMiddlewareSpy = jest.fn()
+	const serverListenerTestSocketMiddlewareSpy = jest.fn()
 	const errorSocketMiddlewareSpy = jest.fn()
 	const listenerFnSpy = jest.fn()
 	const secondListenerFnSpy = jest.fn()
@@ -53,6 +55,13 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	class SecondSocketMiddleware implements ISocketMiddleware {
 		public use (event: Event, next: (err?: Error) => void) {
 			secondSocketMiddlewareSpy(event)
+			next()
+		}
+	}
+
+	class SocketMiddlewareForServerListenerTest implements ISocketMiddleware {
+		public use (event: Event, next: (err?: Error) => void) {
+			serverListenerTestSocketMiddlewareSpy(event)
 			next()
 		}
 	}
@@ -106,10 +115,30 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 		}
 	}
 
+	@UseSocketMiddleware(SocketMiddlewareForServerListenerTest)
+	class ControllerWithServerListenerTest {
+		@ServerOn("connection")
+		connection (socket: ServerSocket) {
+			connectionFnSpy(socket.id)
+		}
+
+		@SocketOn("serverListenerTest")
+		serverListenerTest (socket: ServerSocket) {
+			listenerFnSpy(socket.id)
+			socket.emit("serverListenerTestResp")
+		}
+	}
+
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [ControllerWithOneListenerTest, ControllerWithManyListenersTest, ControllerWithManyMiddlewaresTest, ControllerWithErrorMiddlewareTest],
+				controllers: [
+					ControllerWithOneListenerTest,
+					ControllerWithManyListenersTest,
+					ControllerWithManyMiddlewaresTest,
+					ControllerWithErrorMiddlewareTest,
+					ControllerWithServerListenerTest
+				],
 				errorMiddleware: ErrorMiddleware
 			},
 			{
@@ -197,6 +226,21 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 			})
 
 			clientSocket.emit(event, data)
+		})
+
+		it("should not call middleware on server listener", (done) => {
+			const event = "serverListenerTest"
+
+			clientSocket.on("serverListenerTestResp", () => {
+				expect(connectionFnSpy).toHaveBeenCalledTimes(1)
+
+				expect(serverListenerTestSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
+				expect(serverListenerTestSocketMiddlewareSpy).toHaveBeenCalledWith([event])
+
+				done()
+			})
+
+			clientSocket.emit(event)
 		})
 	})
 

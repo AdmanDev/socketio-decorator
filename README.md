@@ -423,6 +423,10 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
 
     In this case, the `MyMiddleware` will be applied to all event handlers in the `MyController` class.
 
+    > [!NOTE]
+    > This decorator is applied to socket listener handlers only (`@SocketOn`, `@SocketOnce`, `@SocketOnAny`, ...).
+    > It does not apply to server listeners (`@ServerOn`) or emitters.
+
 ## Middlewares
 
 You can use middlewares to execute code before  an event is handled. Middlewares can be used to perform tasks such as authentication or logging.

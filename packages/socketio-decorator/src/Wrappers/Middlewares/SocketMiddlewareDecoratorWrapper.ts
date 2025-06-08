@@ -27,8 +27,11 @@ export class SocketMiddlewareDecoratorWrapper {
 		const { controllerInstance, methodMetadata, middlewaresMetadata } = metadata
 
 		const methodNames: string[] = methodMetadata
-			.map(method => method.metadata.ioMetadata.listenerMetadata[0]?.methodName)
-			.filter((methodName): methodName is string => methodName !== undefined)
+			.filter(method => {
+				const listeners = method.metadata.ioMetadata.listenerMetadata
+				return listeners.length > 0 && !listeners.some(lm => lm.type === "server")
+			})
+			.map(method => method.metadata.ioMetadata.listenerMetadata[0].methodName)
 
 		if (methodNames.length === 0) {
 			return
