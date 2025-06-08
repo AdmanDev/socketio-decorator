@@ -96,9 +96,11 @@ export class ErrorMiddlewareWrapper {
 	 * @returns {Socket | undefined} The socket
 	 */
 	private static getSocketFromArgs (...args: unknown[]) {
-		let socket: Socket| undefined
+		let socket: Socket | undefined
+
 		if (args.length > 0) {
 			const firstArg = args[0]
+
 			if (firstArg instanceof EventFuncProxyArgs) {
 				socket = firstArg.socket || undefined
 			} else {

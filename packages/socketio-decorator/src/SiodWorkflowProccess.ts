@@ -44,7 +44,7 @@ export class SiodWorkflowProcess {
 	}
 
 	/**
-	 * Binds with the last chain last proxy to the controller methods.
+	 * Binds with the last chain proxy to the controller methods.
 	 * @param {ControllerMetadata} metadata - The metadata of the controller.
 	 */
 	private static bindLastChainProxy (metadata: ControllerMetadata) {
@@ -54,7 +54,7 @@ export class SiodWorkflowProcess {
 	}
 
 	/**
-	 * Binds with the first chain last proxy to the controller methods.
+	 * Binds with the first chain proxy to the controller methods.
 	 * @param {ControllerMetadata} metadata - The metadata of the controller.
 	 */
 	private static bindFirstChainProxy (metadata: ControllerMetadata) {

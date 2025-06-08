@@ -11,7 +11,7 @@ export async function waitFor (duration: number) {
 
 /**
  * Checks if the given spies were called in the same order as given in the argument list.
- * This function is useful for checking if the middleware functions are called in the correct order.
+ * This function is useful for checking if the functions are called in the correct order.
  * @param {Array<jest.SpiedFunction<(...args: any[]) => unknown>>} spies Spies to check
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

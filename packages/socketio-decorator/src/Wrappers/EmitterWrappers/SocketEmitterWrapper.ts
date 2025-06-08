@@ -1,4 +1,3 @@
-import { Socket } from "socket.io"
 import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
@@ -42,7 +41,7 @@ export class SocketEmitterWrapper {
 				const { data, message } = option
 
 				if (EmitterWrapperUtils.canEmit(option)) {
-					(socket as Socket).emit(message, data)
+					socket.emit(message, data)
 				}
 			})
 
