@@ -42,7 +42,7 @@ export class MiddlewaresRegistrar {
 		const middlewares = IoCContainer.getInstances<ISocketMiddleware>(config.socketMiddlewares)
 		middlewares.forEach(middleware => {
 			addEventBinder("connection", (socket) => {
-				socket.use(middleware.use)
+				socket.use(middleware.use.bind(middleware))
 			})
 		})
 	}

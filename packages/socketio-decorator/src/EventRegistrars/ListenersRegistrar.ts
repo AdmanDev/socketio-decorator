@@ -1,6 +1,7 @@
 import { addEventBinder, config, getAllEventBinders } from "../globalMetadata"
+import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { Metadata } from "../Models/Metadata/Metadata"
+import { MethodMetadata } from "../Models/Metadata/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
 import { IoActionHandler } from "./IoActionHandler"
 
@@ -11,12 +12,15 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server and socket listeners.
-	 * @param {ListenerMetadata[]} metadatas - The metadata of the listeners to register
+	 * @param {MethodMetadata[]} metadata - The method metadata of the listeners to register
 	 * @param {any} controllerInstance - The controller instance
 	 */
-	public static registerListeners (metadatas: ListenerMetadata[], controllerInstance: Any) {
-		ListenersRegistrar.registerServerListeners(metadatas, controllerInstance)
-		ListenersRegistrar.setupSocketListeners(metadatas, controllerInstance)
+	public static registerListeners (metadata: MethodMetadata[], controllerInstance: Any) {
+		metadata.forEach(methodMetadata => {
+			const listenerMetadata = methodMetadata.metadata.ioMetadata.listenerMetadata
+			ListenersRegistrar.registerServerListeners(methodMetadata, listenerMetadata, controllerInstance)
+			ListenersRegistrar.setupSocketListeners(methodMetadata, listenerMetadata, controllerInstance)
+		})
 	}
 
 	/**
@@ -34,24 +38,26 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server listeners
-	 * @param {Metadata[]} metadata Metadata of the listeners
+	 * @param {MethodMetadata} methodMetadata Metadata of the method
+	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static registerServerListeners (metadata: Metadata[], controllerInstance: Any) {
-		MetadataUtils.mapTreeMetadata(metadata, "server", controllerInstance, (metadata, method) => {
-			IoActionHandler.callServerAction(config.ioserver, metadata, controllerInstance, method)
+	private static registerServerListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
+		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "server", controllerInstance, (metadata, method) => {
+			IoActionHandler.callServerAction(config.ioserver, methodMetadata, metadata, controllerInstance, method)
 		})
 	}
 
 	/**
 	 * Setups socket listeners
-	 * @param {Metadata[]} metadata Metadata of the listeners
+	 * @param {MethodMetadata} methodMetadata Metadata of the method
+	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static setupSocketListeners (metadata: Metadata[], controllerInstance: Any) {
-		const filteredMetadata: {method: Function, metadata: Metadata}[] = []
+	private static setupSocketListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
+		const filteredMetadata: {method: EventFuncProxyType, metadata: ListenerMetadata}[] = []
 
-		MetadataUtils.mapTreeMetadata(metadata, "socket", controllerInstance, (metadata, method) => {
+		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "socket", controllerInstance, (metadata, method) => {
 			filteredMetadata.push({
 				method,
 				metadata
@@ -60,7 +66,7 @@ export class ListenersRegistrar {
 
 		addEventBinder("connection", (socket) => {
 			filteredMetadata.forEach(({method, metadata}) => {
-				IoActionHandler.callSocketAction(socket, metadata, controllerInstance, method)
+				IoActionHandler.callSocketAction(socket, methodMetadata, metadata, controllerInstance, method)
 			})
 		})
 	}

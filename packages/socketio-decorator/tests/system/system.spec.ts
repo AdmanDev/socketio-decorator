@@ -1,17 +1,19 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
+import { SocketOn, useSocketIoDecorator } from "../../src"
 import { ListenersRegistrar } from "../../src/EventRegistrars/ListenersRegistrar"
 import { MiddlewaresRegistrar } from "../../src/EventRegistrars/MiddlewaresRegistrar"
+import { setConfig } from "../../src/globalMetadata"
 import { IoCContainer } from "../../src/IoCContainer"
 import { IoCProvider } from "../../src/Models/IocProvider"
 import { DataValidationWrapper } from "../../src/Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrapper"
-import { createServer } from "../utilities/serverUtils"
-import { SocketOn } from "../../src"
-import { setConfig } from "../../src/globalMetadata"
+import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxyWrapper"
+import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
+import { expectCallOrder } from "../utilities/testUtils"
 
 describe("> System tests", () => {
 	let io: Server
@@ -34,9 +36,13 @@ describe("> System tests", () => {
 	}
 
 	describe("> Wrapping and Bindings order tests", () => {
+		const eventFuncAddLastProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addLastProxyLayer")
+		const eventFuncAddFirstProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addFirstProxyLayer")
 		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapListeners")
 		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapEmitters")
 		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
+		const useSocketMiddlewareMethodWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addMethodSocketMiddleware")
+		const useSocketMiddlewareClassWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addSocketMiddlewareToManyClassMethods")
 		const controllerErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapController")
 		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllMiddlewares")
 		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
@@ -44,29 +50,27 @@ describe("> System tests", () => {
 		const groupedEventsRegistrationSpy = jest.spyOn(ListenersRegistrar, "applyGroupedSocketEventsRegistration")
 
 		it("should wrap controller methods and binds events in the correct order", () => {
-			io = createServer(
-				{
-					controllers: [FirstController],
-				},
-				{}
+			useSocketIoDecorator({
+				controllers: [FirstController],
+				ioserver: {
+					on: jest.fn(),
+				} as unknown as Server,
+			})
+
+			expectCallOrder(
+				middlewareErrorMiddlewareWrapperSpy,
+				eventFuncAddLastProxyLayerSpy,
+				dataValidationWrapperSpy,
+				serverEmitterWrapperSpy,
+				socketEmitterWrapperSpy,
+				useSocketMiddlewareMethodWrapperSpy,
+				useSocketMiddlewareClassWrapperSpy,
+				controllerErrorMiddlewareWrapperSpy,
+				eventFuncAddFirstProxyLayerSpy,
+				listenersRegistrarSpy,
+				middlewaresRegistrarSpy,
+				groupedEventsRegistrationSpy
 			)
-
-			const middlewareErrorMiddlewareWrapperCallOrder = middlewareErrorMiddlewareWrapperSpy.mock.invocationCallOrder[0]
-			const dataValidationCallOrder = dataValidationWrapperSpy.mock.invocationCallOrder[0]
-			const serverEmitterCallOrder = serverEmitterWrapperSpy.mock.invocationCallOrder[0]
-			const socketEmitterCallOrder = socketEmitterWrapperSpy.mock.invocationCallOrder[0]
-			const errorMiddlewareCallOrder = controllerErrorMiddlewareWrapperSpy.mock.invocationCallOrder[0]
-			const middlewaresRegistrarCallOrder = middlewaresRegistrarSpy.mock.invocationCallOrder[0]
-			const listenersRegistrarCallOrder = listenersRegistrarSpy.mock.invocationCallOrder[0]
-			const groupedEventsRegistrationCallOrder = groupedEventsRegistrationSpy.mock.invocationCallOrder[0]
-
-			expect(middlewareErrorMiddlewareWrapperCallOrder).toBeLessThan(dataValidationCallOrder)
-			expect(dataValidationCallOrder).toBeLessThan(serverEmitterCallOrder)
-			expect(serverEmitterCallOrder).toBeLessThan(socketEmitterCallOrder)
-			expect(socketEmitterCallOrder).toBeLessThan(errorMiddlewareCallOrder)
-			expect(errorMiddlewareCallOrder).toBeLessThan(middlewaresRegistrarCallOrder)
-			expect(listenersRegistrarCallOrder).toBeLessThan(middlewaresRegistrarCallOrder)
-			expect(listenersRegistrarCallOrder).toBeLessThan(groupedEventsRegistrationCallOrder)
 		})
 	})
 

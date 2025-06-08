@@ -1,14 +1,18 @@
+
 # Socketio Decorator
 
-This library allows you to use [Socket.io](https://socket.io/) with TypeScript decorators, simplifying the integration and usage of Socket.io in a TypeScript environment.
+Use TypeScript decorators to simplify working with [Socket.IO](https://socket.io/) in your Node.js applications.
 
-## Table of Contents
+This library provides an elegant and declarative way to define Socket.IO event listeners, emitters, middlewares, and more — all using modern TypeScript decorators.
+
+## 📚 Table of Contents
 
 - [Installation](#installation)
-- [Usage](#usage)
+- [Quick Start](#quick-start)
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
   - [Server Middleware](#server-middleware)
   - [Socket Middleware](#socket-middleware)
@@ -28,32 +32,27 @@ To get started, follow these steps:
 1. Install the package:
 
     ```bash
-    npm install @admandev/socketio-decorator
+    npm install @admandev/socketio-decorator socket.io
     ```
 
-2. Install the required peer dependencies for Socket.io:
+    > [!NOTE]
+    > ℹ️ Peer dependencies like `reflect-metadata` and `class-validator` may also be required depending on your use case (see [Data Validation](#data-validation)).
 
-    ```bash
-    npm install socket.io
-    ```
-
-3. Update your `tsconfig.json` to enable decorators:
+2. Update your `tsconfig.json` to enable decorators:
 
     ```json
     {
         "compilerOptions": {
-            "module": "Node16",
+            "module": "Node16 (or more recent)",
             "experimentalDecorators": true,
             "emitDecoratorMetadata": true
         }
     }
     ```
 
-## Usage
+## Quick Start
 
 1. **Create a Socket Controller**
-
-   Create a file named `SocketController.ts` with the following content:
 
     ```typescript
     import { ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
@@ -72,7 +71,7 @@ To get started, follow these steps:
 
         // Async / Await is supported
         @SocketOn("hello")
-        @SocketEmitter("hello-back")
+        @SocketEmitter("hello-back") // Emit returned data as response, automatically
         public async onHello() {
             await something()
             return {
@@ -83,13 +82,9 @@ To get started, follow these steps:
     }
     ```
 
-    The `SocketController` class contains 3 methods: `onConnection`, `onMessage` and `onHello`.
-
-    The `onConnection` method listens for the socket connection event. The `onMessage` method listens for a `message` event and logs the received data. The `onHello` method listens for a `hello` event, waits for 2 seconds, and emits a `hello-back` event with the message "Hello you".
-
 2. **Set Up the Server**
 
-   Create a file named `app.ts` with the following content:
+   In your `app.ts` file, set up the server and use the Controller:
 
     ```typescript
     import { useSocketIoDecorator } from "@admandev/socketio-decorator";
@@ -112,10 +107,6 @@ To get started, follow these steps:
         console.log("Server running on port 3000");
     });
     ```
-
-3. **Run the Server**
-
-    You can now test the server by connecting with Postman or another WebSocket client and sending a `message` event. You should see the message logged in the console.
 
 ## Decorators
 
@@ -224,8 +215,8 @@ The following decorators can be used to emit events to the client:
 
 | Decorator               | Description                                             | Equivalent in Basic Socket.io        |
 |-------------------------|---------------------------------------------------------|--------------------------------------|
-| `@ServerEmitter(event?: string, to?: string)`  | Emits event from the server.                        | `io.emit(event, data)`               |
-| `@SocketEmitter(event:? string)`  | Emits event from the socket.                  | `socket.emit(event, data)`           |
+| `@ServerEmitter(event?: string, to?: string)`  | Emits event to all clients.                        | `io.emit(event, data)`               |
+| `@SocketEmitter(event:? string)`  | Emits event to specific client.                  | `socket.emit(event, data)`           |
 
 #### How to use
 
@@ -241,7 +232,7 @@ The following decorators can be used to emit events to the client:
     }
     ```
 
-    The above code will emit a `message` event with the following data:
+    The above code will emit a `message` event with the following data as response to the client :
 
     ```json
         {
@@ -257,7 +248,7 @@ The following decorators can be used to emit events to the client:
         import { EmitterOption, SocketEmitter } from "@admandev/socketio-decorator"
         import { Socket } from "socket.io"
 
-        @SocketOn("get-latest-message")
+        @SocketOn("chat-message")
         @SocketEmitter() // No event name specified
         public sendMessage(socket: Socket): EmitterOptions {
             const isAllowedToSend = isUserAllowedToSendMessage(socket)
@@ -327,13 +318,9 @@ The following decorators can be used to emit events to the client:
 
 Emits events to all connected clients or to a specific room if the `to` parameter is provided.
 
-> [!WARNING]
-> This decorator must be used with a listener decorator (ServerOn or SocketOn) to work.
-
 **Usages** :
 
 ```typescript
-@SocketOn("message")
 @ServerEmitter("newMessage", "room1")
 public sendMessage() {
     return { message: "Hello, world!" }
@@ -341,7 +328,6 @@ public sendMessage() {
 ```
 
 ```typescript
-@SocketOn("message")
 @ServerEmitter()
 public sendMessage() {
     return new EmitterOption({
@@ -388,6 +374,59 @@ public getUser(socket: Socket) {
 }
 ```
 
+### Other decorators
+
+| Decorator | Description                                              |
+|-------------------------|----------------------------------------------------------|
+| `@UseSocketMiddleware(...ISocketMiddleware[])` | Applies one or more socket middleware to the event handler or controller class. |
+
+#### Examples
+
+---
+
+##### @UseSocketMiddleware(...ISocketMiddleware[])
+
+Applies one or more socket middlewares to the event handler or controller class.
+
+**Usage** :
+
+First create a [socket middleware](#socket-middleware) before choosing one of next steps.
+
+1. **Use it on an event handler method**:
+
+    ```typescript
+    @SocketOn("message")
+    @UseSocketMiddleware(MyMiddleware1, MyMiddleware2)
+    public onMessage(socket: Socket, data: any) {
+        console.log("Message received:", data)
+    }
+    ```
+
+    In this case, the `MyMiddleware1` and `MyMiddleware2` will be called before the `onMessage` event handler is executed.
+
+2. **Use it on a controller class**:
+
+    ```typescript
+    @UseSocketMiddleware(MyMiddleware)
+    export class MyController {
+        @SocketOn("event1")
+        public onEvent1(socket: Socket, data: any) {
+            console.log("Event 1 received:", data)
+        }
+
+        @SocketOn("event2")
+        public onEvent2(socket: Socket, data: any) {
+            console.log("Event 2 received:", data)
+        }
+    }
+    ```
+
+    In this case, the `MyMiddleware` will be applied to all event handlers in the `MyController` class.
+
+    > [!NOTE]
+    > This decorator is applied to socket listener handlers only (`@SocketOn`, `@SocketOnce`, `@SocketOnAny`, ...).
+    > It does not apply to server listeners (`@ServerOn`) or emitters.
+
 ## Middlewares
 
 You can use middlewares to execute code before  an event is handled. Middlewares can be used to perform tasks such as authentication or logging.
@@ -397,8 +436,6 @@ You can use middlewares to execute code before  an event is handled. Middlewares
 A Server Middleware is executed for each incoming connection.
 
 1. **Create a Middleware**
-
-   Create a file named `MyServerMiddleware.ts` and create a class that implements the `IServerMiddleware` interface:
 
     ```typescript
     export class MyServerMiddleware implements IServerMiddleware {        
@@ -428,8 +465,6 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
 
 1. **Create a Middleware**
 
-   Create a file named `MySocketMiddleware.ts` and create a class that implements the `ISocketMiddleware` interface:
-
     ```typescript
     import { ISocketMiddleware } from "@admandev/socketio-decorator"
     import { Event } from "socket.io"
@@ -442,24 +477,27 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
     }
     ```
 
-2. **Register the Middleware**
+2. **Use the Middleware**
 
-   Update the `app.ts` file to register the middleware:
+    Now you can use the socket middleware in 2 ways:
 
-    ```typescript
-    useSocketIoDecorator({
-        ...,
-        socketMiddlewares: [MySocketMiddleware], // Add the middleware here
-    })
-    ```
+    - **Globally**: This will apply the middleware to all events in your application.
+    Update the `app.ts` file to register the middleware:
+
+        ```typescript
+        useSocketIoDecorator({
+            ...,
+            socketMiddlewares: [MySocketMiddleware], // Add the middleware here
+        })
+        ```
+
+    - **Per event**: You can also use the middleware for a specific event by using the [@UseSocketMiddleware decorator](#other-decorators).
 
 ### Error handling middleware
 
 You can create a middleware to handle errors that occur during event handling and above middlewares.
 
 1. **Create an Error Middleware**
-
-   Create a file named `MyErrorMiddleware.ts` and create a class that implements the `IErrorMiddleware` interface:
 
     ```typescript
     import { IErrorMiddleware } from "@admandev/socketio-decorator";
@@ -530,6 +568,7 @@ You can use the `class-validator` library to validate the data received from the
 
     export class MessageData {
         @IsString()
+        @IsNotEmpty()
         message: string
     }
     ```
@@ -602,8 +641,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
         ...,
         currentUserProvider: (socket: Socket) => {
             const token = socket.handshake.auth.token
-            const user = userServices.getUserByToken(token)
-            return user
+            return userServices.getUserByToken(token)
         },
     })
     ```
@@ -638,16 +676,18 @@ useSocketIoDecorator({
 })
 ```
 
-Note: Your Container object must provide the `get` method to resolve dependencies.
+> [!NOTE]
+> Your Container object must provide the `get` method to resolve dependencies.
 
-Note 2: Your controllers and middlewares must be registered in the DI container.
+## 🧪 Example project
 
-**Important**: The `iocContainer` option is optional. If you don't provide it, Socketio Decorator will create a new instance of the controllers or middlewares and keep them in memory.
+Check out the full example using Express:
+👉 [Example on GitHub](https://github.com/AdmanDev/socketio-decorator/tree/master/examples/nodeexample)
 
-## Sample project
+## 🛠 Troubleshooting & Help
 
-You can find a sample project using express [here](https://github.com/AdmanDev/socketio-decorator/tree/master/examples/nodeexample).
+If you run into any issues or have suggestions, feel free to open an issue on GitHub:
 
-## Thanks
+🔗 [Socket.io Decorator Issues](https://github.com/AdmanDev/socketio-decorator/issues)
 
-Thank you for using Socketio Decorator. If you have any questions or suggestions, feel free to open an issue on the [GitHub repository](https://github.com/AdmanDev/socketio-decorator/issues).
+Thank you for using Socketio Decorator

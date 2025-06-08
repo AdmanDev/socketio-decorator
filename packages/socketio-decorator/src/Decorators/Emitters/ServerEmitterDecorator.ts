@@ -16,7 +16,6 @@ export function ServerEmitter (eventName?: string, to?: string,) {
 			methodName: propertyKey as string,
 			message: eventName ?? "",
 			to: to ?? "",
-			dataCheck: false
 		})
 	}
 }

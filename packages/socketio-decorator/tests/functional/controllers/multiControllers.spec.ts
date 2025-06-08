@@ -12,6 +12,7 @@ describe("> Multi controller tests", () => {
 	const errorMiddlewareSpy = jest.fn()
 	const firstControllerFnSpy = jest.fn()
 	const secondControllerFnSpy = jest.fn()
+	const notUsedControllerFnSpy = jest.fn()
 
 	class ErrorMiddleware implements IErrorMiddleware {
 		public handleError (error: Error, socket?: ServerSocket) {
@@ -52,6 +53,14 @@ describe("> Multi controller tests", () => {
 		public c2Action (socket: ServerSocket) {
 			secondControllerFnSpy(socket.id)
 			return `Action from ${this.name}`
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	class NotRegisteredController {
+		@SocketOn("message")
+		public onMessage (socket: ServerSocket) {
+			notUsedControllerFnSpy(socket.id)
 		}
 	}
 
@@ -143,6 +152,14 @@ describe("> Multi controller tests", () => {
 			expect(firstControllerFnSpy.mock.invocationCallOrder[0]).toBeLessThan(secondControllerFnSpy.mock.invocationCallOrder[0])
 		})
 
+		it("should not trigger events from not registered controllers", async () => {
+			const event = "message"
+
+			clientSocket.emit(event)
+			await waitFor(50)
+
+			expect(notUsedControllerFnSpy).not.toHaveBeenCalled()
+		})
 	})
 
 	describe("> Error handling tests", () => {

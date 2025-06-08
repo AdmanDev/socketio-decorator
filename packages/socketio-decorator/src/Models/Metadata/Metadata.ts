@@ -1,32 +1,29 @@
 import { EmitterMetadata } from "./EmiterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
+import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
 
-export type TreeRootMetadata = {
+export type ControllerMetadata = {
 	controllerTarget: new () => Any
 	controllerInstance?: Any
 	controllerName: string
-	methodMetadata: TreeMethodMetadata[]
+	methodMetadata: MethodMetadata[]
+	middlewaresMetadata: ClassSocketMiddlewareMetadata[]
 }
 
-export type TreeMethodMetadata = {
+export type MethodMetadata = {
 	methodName: string
-	metadata: TreeMethodMetadataItem
+	metadata: MethodMetadataItem
 }
 
-export type TreeMethodMetadataItem = {
+type MethodMetadataItem = {
 	ioMetadata: {
 		listenerMetadata: ListenerMetadata[]
 		emitterMetadata: EmitterMetadata[]
 	}
+	socketMiddlewareMetadata: SocketMiddlewareMetadata[]
 }
 
-export type Metadata = {
-	type: MetadataType
-	action: MetadataAction
+export type MetadataDescription = {
 	target: Object
 	methodName: string
-	dataCheck: boolean
 }
-
-export type MetadataType = "server" | "socket"
-export type MetadataAction = "on" | "once" | "onAny" | "onAnyOutgoing" | "emitto" | "emitSelf"
