@@ -49,8 +49,8 @@ describe("> System tests", () => {
 		const listenersRegistrarSpy = jest.spyOn(ListenersRegistrar, "registerListeners")
 		const groupedEventsRegistrationSpy = jest.spyOn(ListenersRegistrar, "applyGroupedSocketEventsRegistration")
 
-		it("should wrap controller methods and binds events in the correct order", () => {
-			useSocketIoDecorator({
+		it("should wrap controller methods and binds events in the correct order", async () => {
+			await useSocketIoDecorator({
 				controllers: [FirstController],
 				ioserver: {
 					on: jest.fn(),

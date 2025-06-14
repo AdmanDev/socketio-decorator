@@ -15,9 +15,10 @@ export type SiodConfig = {
 	 */
 	dataValidationEnabled?: boolean
 	/**
-	 * The controllers on which to bind the socket.io events
+	 * The controllers on which to bind the socket.io events.
+	 * This can be an array of class references or an array of strings that match the file paths of the controllers.
 	 */
-	controllers: Function[]
+	controllers: Function[] | string[]
 	/**
 	 * The socket.io server middlewares to use (io.use)
 	 */

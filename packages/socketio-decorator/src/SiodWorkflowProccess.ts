@@ -19,7 +19,7 @@ export class SiodWorkflowProcess {
 	 */
 	public static processAll () {
 		const metadata = getAllMetadata()
-			.filter(m => config.controllers.includes(m.controllerTarget))
+			.filter(m => config.controllers.includes(m.controllerTarget as Any))
 
 		ErrorMiddlewareWrapper.wrapAllMiddlewares()
 
