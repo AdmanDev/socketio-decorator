@@ -7,21 +7,23 @@ jest.mock("fs", () => ({
 	}))
 }))
 
-import { afterAll, describe, expect, it, jest } from "@jest/globals"
-import { SocketOn, useSocketIoDecorator } from "../../src"
+import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
+import { SocketOn, useSocketIoDecorator } from "../../src"
 import { ModuleUtils } from "../../src/Utils/ModuleUtils"
+import { IoCContainer } from "../../src/IoCContainer"
 
 const mockedImport = jest.spyOn(ModuleUtils, "import")
 
 describe("> Module auto import tests", () => {
 
-	afterAll(() => {
-		jest.resetModules()
+	beforeEach(() => {
+		IoCContainer["container"] = new Map()
 	})
 
 	describe("Controller auto import", () => {
 		const fakeControllerInstance = jest.fn()
+		const fakeControllerInstance2 = jest.fn()
 
 		class FakeController {
 			constructor () {
@@ -30,6 +32,15 @@ describe("> Module auto import tests", () => {
 
 			@SocketOn("message")
 			public onMessage () { /* A test */ }
+		}
+
+		class FakeController2 {
+			constructor () {
+				fakeControllerInstance2()
+			}
+
+			@SocketOn("message2")
+			public onMessage2 () { /* A test */ }
 		}
 
 		it("should import controllers from a given path", async () => {
@@ -48,7 +59,7 @@ describe("> Module auto import tests", () => {
 				.mockReturnValueOnce(false)
 
 			await useSocketIoDecorator({
-				controllers: ["/fake/path/*.js"],
+				controllers: [`${fakeDirPath}/*.js`],
 				ioserver: {
 					on: jest.fn(),
 				} as unknown as Server,
@@ -56,6 +67,39 @@ describe("> Module auto import tests", () => {
 
 			expect(fs.readdirSync).toHaveBeenCalledWith(fakeDirPath)
 			expect(fakeControllerInstance).toHaveBeenCalledTimes(1)
+		})
+
+		it("should import controllers from multiple paths", async () => {
+			const fakeDirPath1 = "/fake/1/path"
+			const fakeDirPath2 = "/fake/2/path"
+			const fakeControllerPath1 = `${fakeDirPath1}/controller1.js`
+			const fakeControllerPath2 = `${fakeDirPath2}/controller2.js`
+
+			const fs = await import("fs") as Any
+			fs.readdirSync
+				.mockReturnValueOnce([fakeControllerPath1])
+				.mockReturnValueOnce([fakeControllerPath2])
+
+			mockedImport
+				.mockResolvedValueOnce({
+					controller: FakeController
+				}).mockResolvedValueOnce({
+					controller: FakeController2
+				})
+
+			isFileMock.mockReturnValue(true)
+
+			await useSocketIoDecorator({
+				controllers: [`${fakeDirPath1}/*.js`, `${fakeDirPath2}/*.js`],
+				ioserver: {
+					on: jest.fn(),
+				} as unknown as Server,
+			})
+
+			expect(fs.readdirSync).toHaveBeenCalledWith(fakeDirPath1)
+			expect(fs.readdirSync).toHaveBeenCalledWith(fakeDirPath2)
+			expect(fakeControllerInstance).toHaveBeenCalledTimes(1)
+			expect(fakeControllerInstance2).toHaveBeenCalledTimes(1)
 		})
 	})
 })

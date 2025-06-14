@@ -17,7 +17,7 @@ export class ModuleUtils {
 
 		const controllerPaths = configCopy.controllers.filter(c => typeof c === "string")
 		if (controllerPaths.length > 0) {
-			configCopy.controllers = await ModuleUtils.resolveModulesFromPath(controllerPaths)
+			configCopy.controllers = await ModuleUtils.loadModulesFromPatterns(controllerPaths)
 		}
 
 		return configCopy
@@ -28,10 +28,12 @@ export class ModuleUtils {
 	 * @param {string[]} paths - An array of paths to resolve modules from.
 	 * @returns {Promise<Function[]>} - A promise that resolves to an array of imported modules.
 	 */
-	public static async resolveModulesFromPath (paths: string[]) {
-		let modules: Function[] = []
-		if (paths.length > 0) {
-			modules = await ModuleUtils.importModules(paths[0])
+	public static async loadModulesFromPatterns (paths: string[]) {
+		const modules: Function[] = []
+
+		for (const pathPattern of paths) {
+			const importedModules = await ModuleUtils.importModules(pathPattern)
+			modules.push(...importedModules)
 		}
 
 		return modules
@@ -39,18 +41,22 @@ export class ModuleUtils {
 
 	/**
 	 * Imports modules from the given path pattern
-	 * @param {string} modulePath - The glob pattern for finding modules
+	 * @param {string} pathPattern - The glob pattern for finding modules
 	 * @returns {Promise<Function[]>} - A promise that resolves to an array of imported modules
 	 */
-	public static async importModules (modulePath: string) {
-		const files = fs.readdirSync(path.dirname(modulePath))
+	public static async importModules (pathPattern: string) {
+		const files = fs.readdirSync(path.dirname(pathPattern))
 			.filter(file => {
-				const fullPath = path.join(path.dirname(modulePath), file)
+				const fullPath = path.join(path.dirname(pathPattern), file)
 				// Ensure file matches pattern - convert glob pattern to regex
-				const pattern = path.basename(modulePath).replace(/\*/g, ".*")
-				return new RegExp(`^${pattern}$`).test(file) && fs.statSync(fullPath).isFile()
+				const pattern = path.basename(pathPattern).replace(/\*/g, ".*")
+
+				const isFile = fs.statSync(fullPath).isFile()
+				const isFileMatchingPattern = new RegExp(`^${pattern}$`).test(file)
+
+				return isFileMatchingPattern && isFile
 			})
-			.map(file => path.join(path.dirname(modulePath), file))
+			.map(file => path.join(path.dirname(pathPattern), file))
 
 		const modules: Function[] = []
 		for (const file of files) {
