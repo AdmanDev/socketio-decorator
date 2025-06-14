@@ -108,6 +108,15 @@ To get started, follow these steps:
     });
     ```
 
+    You can also auto import controllers from a directory:
+
+    ```typescript
+    useSocketIoDecorator({
+        controllers: [path.join(__dirname, "/controllers/*.js")],
+        ...
+    });
+    ```
+
 ## Decorators
 
 ### Listening for Events
