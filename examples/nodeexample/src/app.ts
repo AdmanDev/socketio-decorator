@@ -3,11 +3,10 @@ import { useSocketIoDecorator } from "@admandev/socketio-decorator"
 import express from "express"
 import http from "http"
 import { Server, Socket } from "socket.io"
-import { SocketController } from "./mySocketController"
 import { MyServerMiddleware } from "./MyServerMiddleware"
 import { MySocketMiddleware } from "./MySocketMiddleware"
-import { MySecondSocketController } from "./mySecondSocketController"
 import { MyErrorMiddleware } from "./myErrorMiddleware"
+import path from "path"
 
 const app = express()
 const server = http.createServer(app)
@@ -21,10 +20,7 @@ const io = new Server(server)
 useSocketIoDecorator({
 	ioserver: io,
 	dataValidationEnabled: true,
-	controllers: [
-		SocketController,
-		MySecondSocketController
-	],
+	controllers: [path.join(__dirname, "/controllers/*.js")],
 	serverMiddlewares: [MyServerMiddleware],
 	socketMiddlewares: [MySocketMiddleware],
 	errorMiddleware: MyErrorMiddleware,
