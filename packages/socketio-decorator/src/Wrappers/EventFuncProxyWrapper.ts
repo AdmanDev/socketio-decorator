@@ -1,5 +1,6 @@
 import { SiodInvalidMetadataError } from "../Models/Errors/SiodInvalidMetadataError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
+import { MethodArgValueType } from "../Models/Metadata/MethodArgMetadata"
 import { getReflectMethodMetadata } from "../reflectLetadataFunc"
 
 /**
@@ -15,7 +16,8 @@ export class EventFuncProxyWrapper {
 		const originalHandler = controller[methodName] as (...args: unknown[]) => Promise<unknown>
 
 		const proxy: EventFuncProxyType = async (proxyArgs) => {
-			return await originalHandler.apply(controller, proxyArgs.args)
+			const finalArgs = EventFuncProxyWrapper.buildFinalHandlerArgs(proxyArgs)
+			return await originalHandler.apply(controller, finalArgs)
 		}
 
 		controller[methodName] = proxy
@@ -63,5 +65,26 @@ export class EventFuncProxyWrapper {
 		}
 
 		return new EventFuncProxyArgs(args, methodMetadata, "", null)
+	}
+
+	/**
+	 * Builds the final arguments for the handler
+	 * @param {EventFuncProxyArgs} args The proxy args
+	 * @returns {unknown[]} The final arguments
+	 */
+	private static buildFinalHandlerArgs (args: EventFuncProxyArgs) {
+		const argsMetadata = args.methodMetadata.argsMetadata
+
+		const finalArgs: unknown[] = [...args.args]
+
+		const argsReference: Record<MethodArgValueType, unknown> = {
+			socket: args.socket,
+		}
+
+		for (const meta of argsMetadata) {
+			finalArgs[meta.parameterIndex] = argsReference[meta.valueType]
+		}
+
+		return finalArgs
 	}
 }

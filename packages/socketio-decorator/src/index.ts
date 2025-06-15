@@ -12,6 +12,8 @@ export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
+export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"
+
 // Hooks
 export * from "./Others/Hooks"
 

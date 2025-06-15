@@ -7,6 +7,7 @@ import { SiodConfig } from "./Models/SiodConfig"
 import { MetadataUtils } from "./Utils/MetadataUtils"
 import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
 import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
+import { MethodArgMetadata } from "./Models/Metadata/MethodArgMetadata"
 
 const controllerMetadata: ControllerMetadata[] = []
 const binderEvents: EventBinder[] = []
@@ -57,7 +58,8 @@ function getOrCreateMethodMetadata (target: Object, methodName: string) {
 					emitterMetadata: [],
 				},
 				socketMiddlewareMetadata: []
-			}
+			},
+			argsMetadata: []
 		}
 
 		controllerMetadata.methodMetadata.push(newMethodMetadata)
@@ -116,6 +118,17 @@ export function addMethodSocketMiddlewareMetadata (metadata: SocketMiddlewareMet
 export function addClassSocketMiddlewareMetadata (metadata: ClassSocketMiddlewareMetadata) {
 	const controllerMetadata = getOrCreateControllerMetadata(metadata.target)
 	controllerMetadata.middlewaresMetadata.push(metadata)
+}
+
+/**
+ * Adds argument metadata to a method
+ * @param {object} target The target object
+ * @param {string} methodName The name of the method
+ * @param {MethodArgMetadata} argMetadata The argument metadata to add
+ */
+export function addMethodArgMetadata (target: Object, methodName: string, argMetadata: MethodArgMetadata) {
+	const methodMetadata = getOrCreateMethodMetadata(target, methodName)
+	methodMetadata.argsMetadata.push(argMetadata)
 }
 
 /**
