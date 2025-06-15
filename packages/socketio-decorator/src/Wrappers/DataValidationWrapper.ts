@@ -1,8 +1,8 @@
 import { ClassConstructor, plainToInstance } from "class-transformer"
-import { IoCContainer } from "../IoCContainer"
-import { config, getListenerMetadata } from "../globalMetadata"
 import { validate } from "class-validator"
+import { config } from "../globalMetadata"
 import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
+import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 
 /**
@@ -12,21 +12,25 @@ export class DataValidationWrapper {
 
 	/**
 	 * Wraps all listeners to add data validation layer
+	 * @param {ListenerMetadata[]} metadata The metadata of the listeners to wrap
+	 * @param {any} controllerInstance The controller instance
 	 */
-	public static wrapAllListeners () {
+	public static wrapListeners (metadata: ListenerMetadata[], controllerInstance: Any) {
 		if (!config.dataValidationEnabled) {
 			return
 		}
 
-		const metadata = getListenerMetadata()
-		metadata.forEach(DataValidationWrapper.prepareDataValidationLayerAndWrap)
+		metadata.forEach(m => {
+			DataValidationWrapper.prepareDataValidationLayerAndWrap(m, controllerInstance)
+		})
 	}
 
 	/**
 	 * Prepares data validation layer and wraps listener methods
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata of method to wrap
+	 * @param {any} controllerInstance The controller instance
 	 */
-	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata) {
+	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: Any) {
 		if (listenerMetadata.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", listenerMetadata.target, listenerMetadata.methodName)
 
@@ -34,7 +38,6 @@ export class DataValidationWrapper {
 				return
 			}
 
-			const controllerInstance = IoCContainer.getInstance<Any>(listenerMetadata.target.constructor, config.iocContainer)
 			const originalMethod = controllerInstance[listenerMetadata.methodName]
 
 			DataValidationWrapper.wrapMethod(listenerMetadata, controllerInstance, originalMethod, paramTypes)
@@ -60,14 +63,15 @@ export class DataValidationWrapper {
 	 */
 	private static wrapMethod (listenerMetadata: ListenerMetadata, controllerInstance: Any, originalMethod: Function, paramTypes: ClassConstructor<unknown>[]) {
 		// eslint-disable-next-line jsdoc/require-jsdoc
-		controllerInstance[listenerMetadata.methodName] = async function (...args: Any[]) {
-			const dataArgInx = args.findIndex(a => a?.constructor === Object)
+		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
+			const ioArgs = proxyArgs.args
+			const dataArgInx = ioArgs.findIndex(a => a?.constructor === Object)
 
 			if (dataArgInx === -1) {
 				throw new SiodImcomigDataError("Imcomig data object type is not valid (data validation)")
 			}
 
-			const dataValue = args[dataArgInx]
+			const dataValue = ioArgs[dataArgInx]
 			const dataType = paramTypes[dataArgInx]
 
 			const dataInstance = plainToInstance(dataType, dataValue)
@@ -83,7 +87,9 @@ export class DataValidationWrapper {
 				throw new SiodImcomigDataError(errorMessage, dataValue, errors)
 			}
 
-			return await originalMethod.apply(controllerInstance, args)
+			return await originalMethod.apply(controllerInstance, [proxyArgs])
 		}
+
+		controllerInstance[listenerMetadata.methodName] = wrappedMethod
 	}
 }

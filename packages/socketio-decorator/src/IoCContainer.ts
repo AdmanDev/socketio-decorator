@@ -1,5 +1,5 @@
+import { config } from "./globalMetadata"
 import { ClassConstructorType } from "./Models/ClassConstructorType"
-import { IoCProvider } from "./Models/IocProvider"
 
 /**
  * Defines the IoC container manager
@@ -10,24 +10,23 @@ export class IoCContainer {
 	/**
 	 * Get all instances of the services
 	 * @param {Function} services The services to get instances of
-	 * @param {IoCProvider} userContainer The user IoC container
 	 * @typedef T The instance type
 	 * @returns {Array} The instances of the services
 	 */
-	public static getInstances<T> (services: Function[], userContainer?: IoCProvider) {
+	public static getInstances<T> (services: Function[]) {
 		return services.map((service) => {
-			return IoCContainer.getInstance<T>(service, userContainer)
+			return IoCContainer.getInstance<T>(service)
 		})
 	}
 
 	/**
 	 * Get an instance of a service
 	 * @param {Function} service The service to get an instance of
-	 * @param {IoCProvider} userContainer The user IoC container
 	 * @typedef T The instance type
 	 * @returns {T} The instance of the service
 	 */
-	public static getInstance<T> (service: Function, userContainer?: IoCProvider) {
+	public static getInstance<T> (service: Function) {
+		const userContainer = config.iocContainer
 		if (userContainer) {
 			return userContainer.get(service as ClassConstructorType<typeof service>) as T
 		}

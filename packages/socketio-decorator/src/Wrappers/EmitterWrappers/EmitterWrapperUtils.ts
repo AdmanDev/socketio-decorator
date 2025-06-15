@@ -1,7 +1,6 @@
-import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
 import { EmitterOption } from "../../Models/DecoratorOptions/EmitterOption"
+import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
 import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
-import { Metadata } from "../../Models/Metadata/Metadata"
 
 /**
  * Defines utils for emitter wrappers
@@ -25,12 +24,12 @@ export class EmitterWrapperUtils {
 
 	/**
 	 * Gets the emitter options
-	 * @param {Metadata} metadata The emitter metadata
+	 * @param {EmitterMetadata} metadata The emitter metadata
 	 * @param {unknown} methodResult The method result
 	 * @returns {EmitterOption[]} The emitter options
 	 */
-	public static getEmitterOptions (metadata: Metadata, methodResult: unknown) {
-		const { to, message } = metadata as EmitterMetadata
+	public static getEmitterOptions (metadata: EmitterMetadata, methodResult: unknown) {
+		const { to, message } = metadata
 
 		const emitterOptionsCollection: EmitterOption[] = []
 

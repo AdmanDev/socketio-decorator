@@ -1,8 +1,9 @@
-import { IoActionHandler } from "./IoActionHandler"
-import { addEventBinder, config, getAllEventBinders, getListenerMetadata } from "../globalMetadata"
-import { ControllerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { Metadata } from "../Models/Metadata/Metadata"
+import { addEventBinder, config, getAllEventBinders } from "../globalMetadata"
+import { EventFuncProxyType } from "../Models/EventFuncProxyType"
+import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { MethodMetadata } from "../Models/Metadata/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
+import { IoActionHandler } from "./IoActionHandler"
 
 /**
  * A class to register listeners controllers
@@ -11,14 +12,15 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server and socket listeners.
+	 * @param {MethodMetadata[]} metadata - The method metadata of the listeners to register
+	 * @param {any} controllerInstance - The controller instance
 	 */
-	public static registerListeners () {
-		const metadatas = getListenerMetadata()
-
-		const controllerMetadatas = MetadataUtils.getControllerMetadata(config, metadatas)
-
-		ListenersRegistrar.registerServerListeners(controllerMetadatas)
-		ListenersRegistrar.setupSocketListeners(controllerMetadatas)
+	public static registerListeners (metadata: MethodMetadata[], controllerInstance: Any) {
+		metadata.forEach(methodMetadata => {
+			const listenerMetadata = methodMetadata.metadata.ioMetadata.listenerMetadata
+			ListenersRegistrar.registerServerListeners(methodMetadata, listenerMetadata, controllerInstance)
+			ListenersRegistrar.setupSocketListeners(methodMetadata, listenerMetadata, controllerInstance)
+		})
 	}
 
 	/**
@@ -36,32 +38,35 @@ export class ListenersRegistrar {
 
 	/**
 	 * Registers server listeners
-	 * @param {ControllerMetadata[]} controllerMetadata Metadata of controllers
+	 * @param {MethodMetadata} methodMetadata Metadata of the method
+	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
+	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static registerServerListeners (controllerMetadata: ControllerMetadata[]) {
-		MetadataUtils.mapMetadata(controllerMetadata, "server", (metadata, controllerInstance, method) => {
-			IoActionHandler.callServerAction(config.ioserver, metadata, controllerInstance, method)
+	private static registerServerListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
+		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "server", controllerInstance, (metadata, method) => {
+			IoActionHandler.callServerAction(config.ioserver, methodMetadata, metadata, controllerInstance, method)
 		})
 	}
 
 	/**
 	 * Setups socket listeners
-	 * @param {ControllerMetadata[]} controllerMetadata Metadata of controllers
+	 * @param {MethodMetadata} methodMetadata Metadata of the method
+	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
+	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static setupSocketListeners (controllerMetadata: ControllerMetadata[]) {
-		const filteredMetadata: {method: Function, controllerInstance: Any, metadata: Metadata}[] = []
+	private static setupSocketListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
+		const filteredMetadata: {method: EventFuncProxyType, metadata: ListenerMetadata}[] = []
 
-		MetadataUtils.mapMetadata(controllerMetadata, "socket", (metadata, controllerInstance, method) => {
+		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "socket", controllerInstance, (metadata, method) => {
 			filteredMetadata.push({
-				controllerInstance,
 				method,
 				metadata
 			})
 		})
 
 		addEventBinder("connection", (socket) => {
-			filteredMetadata.forEach(({controllerInstance, method, metadata}) => {
-				IoActionHandler.callSocketAction(socket, metadata, controllerInstance, method)
+			filteredMetadata.forEach(({method, metadata}) => {
+				IoActionHandler.callSocketAction(socket, methodMetadata, metadata, controllerInstance, method)
 			})
 		})
 	}

@@ -63,15 +63,16 @@ describe("> ServerEmitter decorator", () => {
 				errorMiddleware: ErrorMiddleware
 			},
 			{
-				onServerListen: done,
+				onServerListen: () => {
+					controllerInstance = IoCContainer.getInstance<ServerEmitterController>(ServerEmitterController)
+					done()
+				},
 				onServerSocketConnection: (socket) => {
 					serverSocket = socket
 					serverSocket.join(defaultRoom)
 				}
 			}
 		)
-
-		controllerInstance = IoCContainer.getInstance<ServerEmitterController>(ServerEmitterController)
 	})
 
 	beforeEach((done) => {

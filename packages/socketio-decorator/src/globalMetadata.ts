@@ -1,27 +1,85 @@
 import { Socket } from "socket.io"
 import { EventBinder } from "./Models/EventBinder"
-import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
 import { EmitterMetadata } from "./Models/Metadata/EmiterMetadata"
+import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
+import { MethodMetadata, ControllerMetadata } from "./Models/Metadata/Metadata"
 import { SiodConfig } from "./Models/SiodConfig"
-import { Metadata } from "./Models/Metadata/Metadata"
+import { MetadataUtils } from "./Utils/MetadataUtils"
+import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
+import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
 
-const ioMetadata = {
-	listener: [] as ListenerMetadata[],
-	emitters: [] as EmitterMetadata[]
-}
+const controllerMetadata: ControllerMetadata[] = []
 const binderEvents: EventBinder[] = []
 export let config: SiodConfig
 
 /**
- * Gets all the metadata
- * @returns {Metadata[]} The global metadata
+ * Gets or creates the controller metadata for a given target.
+ * @param {object} target - The target object.
+ * @returns {ControllerMetadata} The controller metadata for the target.
  */
-export function getAllMetadata () {
-	return [...ioMetadata.listener, ...ioMetadata.emitters] as Metadata[]
+function getOrCreateControllerMetadata (target: Object) {
+	const targetClass = MetadataUtils.getTargetClass(target)
+	const metadata = controllerMetadata.find((m) => m.controllerTarget === targetClass)
+
+	if (!metadata) {
+		const controllerName = MetadataUtils.getTargetName(target)
+
+		const newMetadata: ControllerMetadata = {
+			controllerTarget: targetClass,
+			controllerName,
+			methodMetadata: [],
+			middlewaresMetadata: []
+		}
+
+		controllerMetadata.push(newMetadata)
+
+		return newMetadata
+	}
+
+	return metadata
 }
 
 /**
- * Adds listener metadata to the global metadata 
+ * Gets or creates the method metadata for a given target and method name.
+ * @param {object} target - The target object.
+ * @param {string} methodName - The name of the method.
+ * @returns {MethodMetadata} The method metadata for the target and method name.
+ */
+function getOrCreateMethodMetadata (target: Object, methodName: string) {
+	const controllerMetadata = getOrCreateControllerMetadata(target)
+	const methodMetadata = controllerMetadata.methodMetadata.find((m) => m.methodName === methodName)
+	if (!methodMetadata) {
+		const newMethodMetadata: MethodMetadata = {
+			methodName,
+			metadata: {
+				ioMetadata: {
+					listenerMetadata: [],
+					emitterMetadata: [],
+				},
+				socketMiddlewareMetadata: []
+			}
+		}
+
+		controllerMetadata.methodMetadata.push(newMethodMetadata)
+
+		defineReflectMethodMetadata(target, newMethodMetadata)
+
+		return newMethodMetadata
+	}
+
+	return methodMetadata
+}
+
+/**
+ * Gets all the metadata
+ * @returns {ControllerMetadata[]} The global metadata
+ */
+export function getAllMetadata () {
+	return [...controllerMetadata]
+}
+
+/**
+ * Adds listener metadata to the method
  * @param {ListenerMetadata} metadata The metadata to add
  */
 export function addListenerMetadata (metadata: ListenerMetadata) {
@@ -29,31 +87,35 @@ export function addListenerMetadata (metadata: ListenerMetadata) {
 		metadata.dataCheck = false
 	}
 
-	ioMetadata.listener.push(metadata)
+	const methodMetadata = getOrCreateMethodMetadata(metadata.target, metadata.methodName)
+	methodMetadata.metadata.ioMetadata.listenerMetadata.push(metadata)
 }
 
 /**
- * Gets the listener metadata array
- * @returns {ListenerMetadata[]} The global metadata array
- */
-export function getListenerMetadata () {
-	return [...ioMetadata.listener]
-}
-
-/**
- * Adds emitter metadata to the global metadata 
+ * Adds emitter metadata to the method
  * @param {EmitterMetadata} metadata The metadata to add
  */
 export function addEmitterMetadata (metadata: EmitterMetadata) {
-	ioMetadata.emitters.push(metadata)
+	const methodMetadata = getOrCreateMethodMetadata(metadata.target, metadata.methodName)
+	methodMetadata.metadata.ioMetadata.emitterMetadata.push(metadata)
 }
 
 /**
- * Gets the emitter metadata array
- * @returns {ListenerMetadata[]} The global metadata array
+ * Adds socket middleware metadata to the method
+ * @param {SocketMiddlewareMetadata} metadata The metadata to add
  */
-export function getEmitterMetadata () {
-	return [...ioMetadata.emitters]
+export function addMethodSocketMiddlewareMetadata (metadata: SocketMiddlewareMetadata) {
+	const methodMetadata = getOrCreateMethodMetadata(metadata.target, metadata.methodName)
+	methodMetadata.metadata.socketMiddlewareMetadata.push(metadata)
+}
+
+/**
+ * Adds class socket middleware metadata to the class methods
+ * @param {ClassSocketMiddlewareMetadata} metadata The metadata to add
+ */
+export function addClassSocketMiddlewareMetadata (metadata: ClassSocketMiddlewareMetadata) {
+	const controllerMetadata = getOrCreateControllerMetadata(metadata.target)
+	controllerMetadata.middlewaresMetadata.push(metadata)
 }
 
 /**

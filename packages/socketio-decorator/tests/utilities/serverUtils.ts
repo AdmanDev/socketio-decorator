@@ -21,20 +21,20 @@ export function createServer (siodConfig: Omit<SiodConfig, "ioserver">, serverEv
 	useSocketIoDecorator({
 		...siodConfig,
 		ioserver: ioServer,
-	})
+	}).then(() => {
+		httpServer.on("error", (err) => {
+			console.error(err)
+		})
 
-	httpServer.on("error", (err) => {
-		console.error(err)
-	})
+		httpServer.listen(() => {
+			port = (httpServer.address() as Any).port
 
-	httpServer.listen(() => {
-		port = (httpServer.address() as Any).port
+			if (serverEventCallbacks.onServerSocketConnection) {
+				ioServer.on("connection", serverEventCallbacks.onServerSocketConnection)
+			}
 
-		if (serverEventCallbacks.onServerSocketConnection) {
-			ioServer.on("connection", serverEventCallbacks.onServerSocketConnection)
-		}
-
-		serverEventCallbacks.onServerListen?.()
+			serverEventCallbacks.onServerListen?.()
+		})
 	})
 
 	return ioServer

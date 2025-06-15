@@ -1,6 +1,6 @@
-import { EmitterOption, ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
-import { MessageRequest } from "./messageRequest";
+import { MessageRequest } from "../messageRequest";
 
 export class SocketController {
     @ServerOn("connection")
