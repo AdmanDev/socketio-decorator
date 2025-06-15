@@ -1,15 +1,15 @@
-import { ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { CurrentSocket, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 import { MessageRequest } from "../messageRequest";
 
 export class SocketController {
     @ServerOn("connection")
-    public onConnection(socket: Socket) {
+    public onConnection(@CurrentSocket() socket: Socket) {
       console.log("Socket connected with socket id", socket.id)
     }
 
 	@SocketOn("message")
-	public onMessage(socket: Socket, data: MessageRequest) {
+	public onMessage(data: MessageRequest) {
 		console.log("Message", data.message)
 	}
 
@@ -23,7 +23,7 @@ export class SocketController {
 	}
 
 	@SocketOn("disconnect")
-	public onDisconnect(socket: Socket) {
+	public onDisconnect(@CurrentSocket() socket: Socket) {
 		console.log("Socket disconnected - socket id :", socket.id)
 	}
 
