@@ -3,8 +3,9 @@ import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { SocketOn, CurrentSocket } from "../../../../src"
 import { createServer, createSocketClient } from "../../../utilities/serverUtils"
+import { MessageData } from "../../../types/socketData"
 
-describe("> CurrentSocket Decorator", () => {
+describe("> DisableParamInjection option tests", () => {
 	let io: Server
 	let clientSocket: ClientSocket
 
@@ -12,8 +13,8 @@ describe("> CurrentSocket Decorator", () => {
 
 	class ControllerTest {
 		@SocketOn("simple-test")
-		public onSimpleTest (someParam: undefined, @CurrentSocket() socket: ServerSocket) {
-			simpleTestFn(someParam, socket.id)
+		public onSimpleTest (socket: ServerSocket, @CurrentSocket() data: MessageData) {
+			simpleTestFn(socket.id, data)
 			socket.emit("simple-test-resp")
 		}
 	}
@@ -22,7 +23,7 @@ describe("> CurrentSocket Decorator", () => {
 		io = createServer(
 			{
 				controllers: [ControllerTest],
-				disableParamInjection: false
+				disableParamInjection: true
 			},
 			{
 				onServerListen: done
@@ -43,13 +44,17 @@ describe("> CurrentSocket Decorator", () => {
 	})
 
 	describe("> Functional tests", () => {
-		it("should inject socket into the method parameter", (done) => {
+		it("should not inject socket into the method parameter and provide raw arguments when disableParamInjection is true", (done) => {
+			const data: MessageData = {
+				message: "Hello, world!"
+			}
+
 			clientSocket.on("simple-test-resp", () => {
-				expect(simpleTestFn).toHaveBeenCalledWith(undefined, clientSocket.id)
+				expect(simpleTestFn).toHaveBeenCalledWith(clientSocket.id, data)
 				done()
 			})
 
-			clientSocket.emit("simple-test")
+			clientSocket.emit("simple-test", data)
 		})
 	})
 })

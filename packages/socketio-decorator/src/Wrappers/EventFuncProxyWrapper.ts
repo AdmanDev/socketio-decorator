@@ -1,3 +1,4 @@
+import { config } from "../globalMetadata"
 import { SiodInvalidMetadataError } from "../Models/Errors/SiodInvalidMetadataError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { MethodArgValueType } from "../Models/Metadata/MethodArgMetadata"
@@ -73,9 +74,14 @@ export class EventFuncProxyWrapper {
 	 * @returns {unknown[]} The final arguments
 	 */
 	private static buildFinalHandlerArgs (args: EventFuncProxyArgs) {
+		// TODO: remove this check when the config.disableParamInjection is removed
+		if (config.disableParamInjection) {
+			return args.args
+		}
+
 		const argsMetadata = args.methodMetadata.argsMetadata
 
-		const finalArgs: unknown[] = [...args.args]
+		const finalArgs: unknown[] = []
 
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
