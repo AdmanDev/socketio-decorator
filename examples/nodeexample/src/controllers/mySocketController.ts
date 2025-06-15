@@ -1,4 +1,4 @@
-import { EmitterOption, ServerEmitter, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 import { MessageRequest } from "../messageRequest";
 
