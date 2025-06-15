@@ -55,9 +55,9 @@ export class SocketMiddlewareDecoratorWrapper {
 	 */
 	private static wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any) {
 		const methodName = metadata.methodName
-		const middlewareInsances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares).toReversed()
+		const middlewareInstances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares).reverse()
 
-		middlewareInsances.forEach((middleware) => {
+		middlewareInstances.forEach((middleware) => {
 			const method = controllerInstance[methodName]
 
 			// eslint-disable-next-line jsdoc/require-jsdoc
