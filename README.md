@@ -61,13 +61,13 @@ To get started, follow these steps:
 
     export class SocketController {
         @ServerOn("connection")
-        public onConnection(socket: Socket) {
+        public onConnection(@CurrentSocket() socket: Socket) {
             console.log("Socket connected with socket id", socket.id);
         }
 
         @SocketOn("message")
-        public onMessage(socket: Socket, @Data() data: any) {
-            console.log("Message received:", data);
+        public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
+            console.log("Message received:", data, "from socket id:", socket.id);
         }
 
         // Async / Await is supported
@@ -146,7 +146,7 @@ Listens for server events.
 
 ```typescript
 @ServerOn("connection")
-public onConnection(socket: Socket) {
+public onConnection(@CurrentSocket() socket: Socket) {
     console.log("Socket connected with socket id", socket.id);
 }
 ```
@@ -163,7 +163,7 @@ Listens for events emitted by the client.
 
 ```typescript
 @SocketOn("message")
-public onMessage(socket: Socket, @Data() data: any) {
+public onMessage(@Data() data: any) {
     console.log("Message received:", data);
 }
 ```
@@ -180,7 +180,7 @@ Listens for events emitted by the client only once.
 
 ```typescript
 @SocketOnce("message")
-public onMessage(socket: Socket, @Data() data: any) {
+public onMessage(@Data() data: any) {
     console.log("Message received:", data);
 }
 ```
@@ -197,7 +197,7 @@ Listens for any event emitted by the client.
 
 ```typescript
 @SocketOnAny()
-public onAnyEvent(socket: Socket, event: string, @Data() data: any) {
+public onAnyEvent(@EventName() event: string, @Data() data: any) {
     console.log("Any event received:", event, data);
 }
 ```
@@ -214,7 +214,7 @@ Listens for any outgoing event
 
 ```typescript
 @SocketOnAnyOutgoing()
-public onAnyOutgoingEvent(socket: Socket, event: string, @Data() data: any) {
+public onAnyOutgoingEvent(@EventName() event: string, @Data() data: any) {
     console.log("Any outgoing event received:", event, data);
 }
 ```
@@ -260,11 +260,11 @@ The following decorators can be used to emit events to the client:
 
         @SocketOn("chat-message")
         @SocketEmitter() // No event name specified
-        public sendMessage(socket: Socket): EmitterOptions {
+        public sendMessage(@CurrentSocket() socket: Socket): EmitterOptions {
             const isAllowedToSend = isUserAllowedToSendMessage(socket)
             return new EmitterOption({
                 to: "room1",
-                message: "newMessage",
+                message: "newMessage", // Event name set here
                 data: { message: "Hello, world!" },
                 disableEmit: !isAllowedToSend,
             })
@@ -279,7 +279,7 @@ The following decorators can be used to emit events to the client:
         ```typescript
         @SocketOn("multiple-events")
         @ServerEmitter()
-        onMultipleEvents(socket: Socket) {
+        onMultipleEvents(@CurrentSocket() socket: Socket) {
             socket.join("multiple-events");
             const events: EmitterOption[] = [
                 new EmitterOption({
@@ -367,7 +367,7 @@ Emits event to the current client.
 ```typescript
 @SocketOn("get-user")
 @SocketEmitter("get-user-resp")
-public getUser(socket: Socket) {
+public getUser(@CurrentSocket() socket: Socket) {
     return useCurrentUser(socket)
 }
 ```
@@ -375,7 +375,7 @@ public getUser(socket: Socket) {
 ```typescript
 @SocketOn("get-user")
 @SocketEmitter()
-public getUser(socket: Socket) {
+public getUser(@CurrentSocket() socket: Socket) {
     return new EmitterOption({
         to: socket.id,
         message: "get-user-resp",
@@ -392,6 +392,7 @@ The following decorators can be used to inject parameters into the event handler
 |-----------|----------------------------------------------------------|
 | `@CurrentSocket()` | Injects the current socket instance that is handling the message. |
 | `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
+| `@EventName()` | Injects the name of the event message that triggered the handler. |
 
 #### Examples
 
@@ -439,6 +440,24 @@ This is useful when the client sends multiple arguments:
 ```typescript
 // Client side
 socket.emit("chat-message", "Hello everyone!", "gaming-lobby");
+```
+
+---
+
+##### @EventName()
+
+Injects the name of the event message that triggered the handler.
+
+**Usage** :
+
+```typescript
+@SocketOn("user-joined")
+@SocketOn("user-left")
+public trackUserActivity(@EventName() event: string) {
+    const action = event === "user-joined" ? "joined the chat" : "left the chat"; 
+
+    console.log(`User ${action}`);
+}
 ```
 
 ### Other decorators
@@ -722,7 +741,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
     import { Socket } from "socket.io"
 
     @SocketOn("message")
-    public onMessage(socket: Socket, @Data() data: any) {
+    public onMessage(@CurrentSocket() socket: Socket) {
         const user = useCurrentUser(socket)
         console.log("Message received from user:", user)
     }

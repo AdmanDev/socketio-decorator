@@ -1,4 +1,4 @@
-import { CurrentSocket, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { CurrentSocket, Data, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 import { MessageRequest } from "../messageRequest";
 
@@ -9,7 +9,7 @@ export class SocketController {
     }
 
 	@SocketOn("message")
-	public onMessage(data: MessageRequest) {
+	public onMessage(@Data() data: MessageRequest) {
 		console.log("Message", data.message)
 	}
 
