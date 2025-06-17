@@ -100,6 +100,7 @@ export class EventFuncProxyWrapper {
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
 			data: args.args,
+			eventName: args.eventName,
 		}
 
 		switch (argMetadata.valueType) {

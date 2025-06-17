@@ -6,6 +6,8 @@ export type MethodArgMetadata = {
 	} | {
 		valueType: "data"
 		dataIndex: number
+	} | {
+		valueType: "eventName"
 	}
 )
 

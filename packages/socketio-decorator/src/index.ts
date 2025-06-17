@@ -14,6 +14,7 @@ export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
 export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"
 export * from "./Decorators/ArgsInjection/DataDecorator"
+export * from "./Decorators/ArgsInjection/EventNameDecorator"
 
 // Hooks
 export * from "./Others/Hooks"

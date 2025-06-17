@@ -1,4 +1,4 @@
-import { CurrentSocket, EmitterOption, ServerEmitter, SocketOn, SocketOnAny, SocketOnAnyOutgoing, SocketOnce, useIoServer } from "@admandev/socketio-decorator";
+import { CurrentSocket, Data, EmitterOption, EventName, ServerEmitter, SocketOn, SocketOnAny, SocketOnAnyOutgoing, SocketOnce, useIoServer } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class MySecondSocketController {
@@ -11,12 +11,12 @@ export class MySecondSocketController {
     }
 
     @SocketOnAny()
-    onAnyEvent(event: string, data: any) {
+    onAnyEvent(@EventName() event: string, @Data() data: any) {
         console.log(`SecondSocketController: onAnyEvent (${event})`, data);
     }
 
     @SocketOnAnyOutgoing()
-    onAnyOutgoingEvent(event: string, data: any) {
+    onAnyOutgoingEvent(@EventName() event: string, @Data() data: any) {
         console.log(`SecondSocketController: onAnyOutgoingEvent (${event})`, data);
     }
 
