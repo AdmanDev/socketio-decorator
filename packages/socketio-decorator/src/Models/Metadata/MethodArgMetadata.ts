@@ -1,6 +1,12 @@
 export type MethodArgMetadata = {
 	parameterIndex: number
-	valueType: MethodArgValueType
-}
+} & (
+	{
+		valueType: "socket"
+	} | {
+		valueType: "data"
+		dataIndex: number
+	}
+)
 
-export type MethodArgValueType = "socket"
+export type MethodArgValueType = MethodArgMetadata["valueType"]

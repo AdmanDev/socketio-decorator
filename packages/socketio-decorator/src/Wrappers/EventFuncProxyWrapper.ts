@@ -1,7 +1,7 @@
 import { config } from "../globalMetadata"
 import { SiodInvalidMetadataError } from "../Models/Errors/SiodInvalidMetadataError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
-import { MethodArgValueType } from "../Models/Metadata/MethodArgMetadata"
+import { MethodArgMetadata, MethodArgValueType } from "../Models/Metadata/MethodArgMetadata"
 import { getReflectMethodMetadata } from "../reflectLetadataFunc"
 
 /**
@@ -83,14 +83,32 @@ export class EventFuncProxyWrapper {
 
 		const finalArgs: unknown[] = []
 
-		const argsReference: Record<MethodArgValueType, unknown> = {
-			socket: args.socket,
-		}
-
 		for (const meta of argsMetadata) {
-			finalArgs[meta.parameterIndex] = argsReference[meta.valueType]
+			finalArgs[meta.parameterIndex] = EventFuncProxyWrapper.getArgValue(args, meta)
 		}
 
 		return finalArgs
+	}
+
+	/**
+	 * Gets the value of the argument based on the metadata
+	 * @param {EventFuncProxyArgs} args The proxy args
+	 * @param {MethodArgMetadata} argMetadata The argument metadata
+	 * @returns {unknown} The value of the argument
+	 */
+	private static getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
+		const argsReference: Record<MethodArgValueType, unknown> = {
+			socket: args.socket,
+			data: args.args,
+		}
+
+		switch (argMetadata.valueType) {
+			case "data":
+				// Index 0 is the socket, so we need to add +1 to the dataIndex
+				return args.args[argMetadata.dataIndex + 1] // TODO: REMOVE +1 when the config.disableParamInjection is removed
+
+			default:
+				return argsReference[argMetadata.valueType]
+		}
 	}
 }
