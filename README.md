@@ -390,15 +390,31 @@ The following decorators can be used to inject parameters into the event handler
 
 | Decorator | Description                                              |
 |-----------|----------------------------------------------------------|
+| `@CurrentSocket()` | Injects the current socket instance that is handling the message. |
 | `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
 
 #### Examples
 
 ---
 
+##### @CurrentSocket()
+
+Injects the current socket instance that is handling the message.
+
+**Usage** :
+
+```typescript
+@SocketOn("joinGame")
+public onJoinGame(@CurrentSocket() socket: Socket) {
+    socket.join("gameRoom");
+}
+```
+
+---
+
 ##### @Data(dataIndex?: number)
 
-Injects the data sent by the client into a handler method parameter.
+Injects the data sent by the client.
 
 **Usage** :
 
