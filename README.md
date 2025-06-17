@@ -12,6 +12,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Parameter injection](#parameter-injection-decorators)
   - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
   - [Server Middleware](#server-middleware)
@@ -55,7 +56,7 @@ To get started, follow these steps:
 1. **Create a Socket Controller**
 
     ```typescript
-    import { ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
+    import { Data, ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
     import { Socket } from "socket.io";
 
     export class SocketController {
@@ -65,7 +66,7 @@ To get started, follow these steps:
         }
 
         @SocketOn("message")
-        public onMessage(socket: Socket, data: any) {
+        public onMessage(socket: Socket, @Data() data: any) {
             console.log("Message received:", data);
         }
 
@@ -162,7 +163,7 @@ Listens for events emitted by the client.
 
 ```typescript
 @SocketOn("message")
-public onMessage(socket: Socket, data: any) {
+public onMessage(socket: Socket, @Data() data: any) {
     console.log("Message received:", data);
 }
 ```
@@ -179,7 +180,7 @@ Listens for events emitted by the client only once.
 
 ```typescript
 @SocketOnce("message")
-public onMessage(socket: Socket, data: any) {
+public onMessage(socket: Socket, @Data() data: any) {
     console.log("Message received:", data);
 }
 ```
@@ -196,7 +197,7 @@ Listens for any event emitted by the client.
 
 ```typescript
 @SocketOnAny()
-public onAnyEvent(socket: Socket, event: string, data: any) {
+public onAnyEvent(socket: Socket, event: string, @Data() data: any) {
     console.log("Any event received:", event, data);
 }
 ```
@@ -213,7 +214,7 @@ Listens for any outgoing event
 
 ```typescript
 @SocketOnAnyOutgoing()
-public onAnyOutgoingEvent(socket: Socket, event: string, data: any) {
+public onAnyOutgoingEvent(socket: Socket, event: string, @Data() data: any) {
     console.log("Any outgoing event received:", event, data);
 }
 ```
@@ -383,6 +384,47 @@ public getUser(socket: Socket) {
 }
 ```
 
+### Parameter injection decorators
+
+The following decorators can be used to inject parameters into the event handler methods:
+
+| Decorator | Description                                              |
+|-----------|----------------------------------------------------------|
+| `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
+
+#### Examples
+
+---
+
+##### @Data(dataIndex?: number)
+
+Injects the data sent by the client into a handler method parameter.
+
+**Usage** :
+
+```typescript
+@SocketOn("message")
+public onMessage(@Data() data: MessageData) {
+    console.log("Message received:", data.message)
+}
+```
+
+You can also specify the index of the data in the socket message if you want to inject a specific part of the data:
+
+```typescript
+@SocketOn("chat-message")
+public onChatMessage(@Data(0) message: string, @Data(1) roomId: string) {
+    console.log(`Received message: "${message}" for room: ${roomId}`);
+}
+```
+
+This is useful when the client sends multiple arguments:
+
+```typescript
+// Client side
+socket.emit("chat-message", "Hello everyone!", "gaming-lobby");
+```
+
 ### Other decorators
 
 | Decorator | Description                                              |
@@ -406,8 +448,8 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     ```typescript
     @SocketOn("message")
     @UseSocketMiddleware(MyMiddleware1, MyMiddleware2)
-    public onMessage(socket: Socket, data: any) {
-        console.log("Message received:", data)
+    public onMessage() {
+        console.log("Message received")
     }
     ```
 
@@ -419,13 +461,13 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     @UseSocketMiddleware(MyMiddleware)
     export class MyController {
         @SocketOn("event1")
-        public onEvent1(socket: Socket, data: any) {
-            console.log("Event 1 received:", data)
+        public onEvent1() {
+            console.log("Event 1 received")
         }
 
         @SocketOn("event2")
-        public onEvent2(socket: Socket, data: any) {
-            console.log("Event 2 received:", data)
+        public onEvent2() {
+            console.log("Event 2 received")
         }
     }
     ```
@@ -586,7 +628,7 @@ You can use the `class-validator` library to validate the data received from the
 
     ```typescript
     @SocketOn("message")
-    public onMessage(socket: Socket, data: MessageData) {
+    public onMessage(@Data() data: MessageData) {
         console.log("Message received:", data.message)
     }
     ```
@@ -602,7 +644,7 @@ You can disable validation for a specific handler by setting the `disableDataVal
 
 ```typescript
 @SocketOn("message", { disableDataValidation: true })
-public onMessage(socket: Socket, data: MessageData) {
+public onMessage(@Data() data: MessageData) {
     ...
 }
 ```
@@ -664,7 +706,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
     import { Socket } from "socket.io"
 
     @SocketOn("message")
-    public onMessage(socket: Socket, data: any) {
+    public onMessage(socket: Socket, @Data() data: any) {
         const user = useCurrentUser(socket)
         console.log("Message received from user:", user)
     }
