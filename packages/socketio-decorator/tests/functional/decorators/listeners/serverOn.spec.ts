@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest 
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { Server, Socket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { ServerOn } from "../../../../src"
+import { CurrentSocket, ServerOn } from "../../../../src"
 
 describe("> ServerOn decorator", () => {
 	let io: Server
@@ -13,7 +13,7 @@ describe("> ServerOn decorator", () => {
 	class ServerOnController {
 
 		@ServerOn("connection")
-		public onConnection (socket: Socket) {
+		public onConnection (@CurrentSocket() socket: Socket) {
 			connectionCallback(socket.id)
 		}
 	}

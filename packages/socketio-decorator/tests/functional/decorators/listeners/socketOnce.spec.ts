@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { IErrorMiddleware, SiodImcomigDataError, SocketOnce } from "../../../../src"
+import { CurrentSocket, Data, IErrorMiddleware, SiodImcomigDataError, SocketOnce } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
@@ -22,22 +22,22 @@ describe("> SocketOnce decorator", () => {
 
 	class SocketOnceController {
 		@SocketOnce("message")
-		public onMessage (socket: ServerSocket, data: MessageData) {
+		public onMessage (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerCallback(data, socket.id)
 		}
 
 		@SocketOnce("no-data-validation", { disableDataValidation: true })
-		public onNoDataValidation (socket: ServerSocket, data: MessageData) {
+		public onNoDataValidation (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerCallback(data, socket.id)
 		}
 
 		@SocketOnce("disconnecting")
-		public onDisconnecting (wrongData: MessageData) {
+		public onDisconnecting (@Data() wrongData: MessageData) {
 			disconnectCallback(wrongData)
 		}
 
 		@SocketOnce("disconnect")
-		public onDisconnect (wrongData: MessageData) {
+		public onDisconnect (@Data() wrongData: MessageData) {
 			disconnectCallback(wrongData)
 		}
 	}

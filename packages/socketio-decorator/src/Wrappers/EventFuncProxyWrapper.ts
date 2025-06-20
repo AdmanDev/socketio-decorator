@@ -65,7 +65,7 @@ export class EventFuncProxyWrapper {
 			throw new SiodInvalidMetadataError(`Method ${methodName} not found in ${controller.constructor.name}`)
 		}
 
-		return new EventFuncProxyArgs(args, methodMetadata, "", null)
+		return new EventFuncProxyArgs(args, args, methodMetadata, "", null)
 	}
 
 	/**
@@ -74,12 +74,15 @@ export class EventFuncProxyWrapper {
 	 * @returns {unknown[]} The final arguments
 	 */
 	private static buildFinalHandlerArgs (args: EventFuncProxyArgs) {
-		// TODO: remove this check when the config.disableParamInjection is removed
 		if (config.disableParamInjection) {
 			return args.args
 		}
 
 		const argsMetadata = args.methodMetadata.argsMetadata
+
+		if (args.methodMetadata.metadata.ioMetadata.listenerMetadata.length === 0) {
+			return args.args
+		}
 
 		const finalArgs: unknown[] = []
 
@@ -99,14 +102,13 @@ export class EventFuncProxyWrapper {
 	private static getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
-			data: args.args,
+			data: args.data,
 			eventName: args.eventName,
 		}
 
 		switch (argMetadata.valueType) {
 			case "data":
-				// Index 0 is the socket, so we need to add +1 to the dataIndex
-				return args.args[argMetadata.dataIndex + 1] // TODO: REMOVE +1 when the config.disableParamInjection is removed
+				return args.data[argMetadata.dataIndex]
 
 			default:
 				return argsReference[argMetadata.valueType]

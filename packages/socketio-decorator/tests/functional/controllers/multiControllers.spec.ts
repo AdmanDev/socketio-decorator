@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { IErrorMiddleware, SocketEmitter, SocketOn } from "../../../src"
+import { CurrentSocket, IErrorMiddleware, SocketEmitter, SocketOn } from "../../../src"
 import { createSocketClient, createServer } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
 
@@ -25,14 +25,14 @@ describe("> Multi controller tests", () => {
 
 		@SocketOn("message")
 		@SocketEmitter("c1MessageResp")
-		public onMessage (socket: ServerSocket) {
+		public onMessage (@CurrentSocket() socket: ServerSocket) {
 			firstControllerFnSpy(socket.id)
 			return `Hello from ${this.name}`
 		}
 
 		@SocketOn("c1Action")
 		@SocketEmitter("c1ActionResp")
-		public c1Action (socket: ServerSocket) {
+		public c1Action (@CurrentSocket() socket: ServerSocket) {
 			firstControllerFnSpy(socket.id)
 			return `Action from ${this.name}`
 		}
@@ -43,14 +43,14 @@ describe("> Multi controller tests", () => {
 
 		@SocketOn("message")
 		@SocketEmitter("c2MessageResp")
-		public onMessage (socket: ServerSocket) {
+		public onMessage (@CurrentSocket() socket: ServerSocket) {
 			secondControllerFnSpy(socket.id)
 			return `Hello from ${this.name}`
 		}
 
 		@SocketOn("c2Action")
 		@SocketEmitter("c2ActionResp")
-		public c2Action (socket: ServerSocket) {
+		public c2Action (@CurrentSocket() socket: ServerSocket) {
 			secondControllerFnSpy(socket.id)
 			return `Action from ${this.name}`
 		}
@@ -59,7 +59,7 @@ describe("> Multi controller tests", () => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	class NotRegisteredController {
 		@SocketOn("message")
-		public onMessage (socket: ServerSocket) {
+		public onMessage (@CurrentSocket() socket: ServerSocket) {
 			notUsedControllerFnSpy(socket.id)
 		}
 	}

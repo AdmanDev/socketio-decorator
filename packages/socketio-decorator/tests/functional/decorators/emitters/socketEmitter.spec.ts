@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { EmitterOption, IErrorMiddleware, SocketEmitter, SiodInvalidArgumentError, SocketOn } from "../../../../src"
+import { EmitterOption, IErrorMiddleware, SocketEmitter, SiodInvalidArgumentError, SocketOn, Data } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { Server, Socket as ServerSocket } from "socket.io"
@@ -25,13 +25,13 @@ describe("> SocketEmitter decorator", () => {
 
 		@SocketOn("testWithDecoratorParameter")
 		@SocketEmitter("testWithDecoratorParameterMsg")
-		public async testWithDecoratorParameter (socket: ServerSocket, data: MessageData) {
+		public async testWithDecoratorParameter (@Data() data: MessageData) {
 			return data
 		}
 
 		@SocketOn("testWithEmitOption")
 		@SocketEmitter()
-		public testWithEmitOptionObject (socket: ServerSocket, data: MessageData) {
+		public testWithEmitOptionObject (@Data() data: MessageData) {
 			return new EmitterOption({
 				message: "testWithEmitOptionMsg",
 				data
@@ -50,20 +50,20 @@ describe("> SocketEmitter decorator", () => {
 
 		@SocketOn("testWithMultipeEventsEmitterOptons")
 		@SocketEmitter()
-		public testWithMultipeEventsEmitterOptons (socket: ServerSocket, emitterOptions: EmitterOption[]) {
+		public testWithMultipeEventsEmitterOptons (@Data() emitterOptions: EmitterOption[]) {
 			const result = emitterOptions.map((option) => new EmitterOption(option))
 			return result
 		}
 
 		@SocketOn("testWithFalsyValue")
 		@SocketEmitter("testWithFalsyValueMsg")
-		public testWithFalsyValue (socket: ServerSocket, value: false | 0 | null | undefined) {
+		public testWithFalsyValue (@Data() value: false | 0 | null | undefined) {
 			return value
 		}
 
 		@SocketOn("testWithEmptyEventName")
 		@SocketEmitter()
-		public testWithEmptyEventName (socket: ServerSocket, data: MessageData) {
+		public testWithEmptyEventName (@Data() data: MessageData) {
 			return data
 		}
 
