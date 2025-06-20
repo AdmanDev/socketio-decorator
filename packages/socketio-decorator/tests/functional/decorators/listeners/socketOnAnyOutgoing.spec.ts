@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { IErrorMiddleware, SocketOnAnyOutgoing } from "../../../../src"
+import { CurrentSocket, Data, EventName, IErrorMiddleware, SocketOnAnyOutgoing } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { IoCContainer } from "../../../../src/IoCContainer"
@@ -28,7 +28,7 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 		}
 
 		@SocketOnAnyOutgoing()
-		public onMessage (socket: ServerSocket, event: string, data: unknown) {
+		public onMessage (@CurrentSocket() socket: ServerSocket, @EventName() event: string, @Data() data: unknown) {
 			socketOnAnyOutgoingSpy(socket.id, event, data)
 		}
 	}

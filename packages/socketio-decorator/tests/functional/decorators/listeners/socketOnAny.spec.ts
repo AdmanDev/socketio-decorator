@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { IErrorMiddleware, SiodImcomigDataError, SocketOnAny } from "../../../../src"
+import { CurrentSocket, Data, EventName, IErrorMiddleware, SiodImcomigDataError, SocketOnAny } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
@@ -22,12 +22,12 @@ describe("> SocketOnAny decorator", () => {
 
 	class SocketOnAnyController {
 		@SocketOnAny({ disableDataValidation: false })
-		public onMessage (socket: ServerSocket, event: string, data: MessageData) {
+		public onAny (@CurrentSocket() socket: ServerSocket, @EventName() event: string, @Data() data: MessageData) {
 			onMessageSpy(socket.id, event, data)
 		}
 
 		@SocketOnAny()
-		public onNoDataValidation (socket: ServerSocket, event: string, data: MessageData) {
+		public onNoDataValidation (@CurrentSocket() socket: ServerSocket, @EventName() event: string, @Data() data: MessageData) {
 			onNoDataValidationSpy(data, socket.id)
 		}
 	}

@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { EmitterOption, IErrorMiddleware, ServerEmitter, SiodImcomigDataError, SiodInvalidArgumentError, SocketEmitter, SocketOn } from "../../../src"
+import { CurrentSocket, Data, EmitterOption, IErrorMiddleware, ServerEmitter, SiodImcomigDataError, SiodInvalidArgumentError, SocketEmitter, SocketOn } from "../../../src"
 import { MessageData } from "../../types/socketData"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
@@ -23,13 +23,13 @@ describe("> Error middleware tests", () => {
 
 	class ErrorTestController {
 		@SocketOn("testControllerError")
-		public testControllerError (socket: ServerSocket) {
+		public testControllerError (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 			throw new Error(`test controller error : socket id ${socket.id}`)
 		}
 
 		@SocketOn("testWithData")
-		public testWithData (socket: ServerSocket, data: MessageData) {
+		public testWithData (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerFnSpy(data, socket.id)
 		}
 

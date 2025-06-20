@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
+import { CurrentSocket, Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
@@ -22,22 +22,22 @@ describe("> SocketOn decorator", () => {
 
 	class SocketOnController {
 		@SocketOn("message")
-		public onMessage (socket: ServerSocket, data: MessageData) {
+		public onMessage (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerFnSpy(data, socket.id)
 		}
 
 		@SocketOn("no-data-validation", { disableDataValidation: true })
-		public onNoDataValidation (socket: ServerSocket, data: MessageData) {
+		public onNoDataValidation (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerFnSpy(data, socket.id)
 		}
 
 		@SocketOn("disconnecting")
-		public onDisconnecting (wrongData: MessageData) {
+		public onDisconnecting (@CurrentSocket() socket: ServerSocket, @Data() wrongData: MessageData) {
 			disconnectSpy(wrongData)
 		}
 
 		@SocketOn("disconnect")
-		public onDisconnect (wrongData: MessageData) {
+		public onDisconnect (@CurrentSocket() socket: ServerSocket, @Data() wrongData: MessageData) {
 			disconnectSpy(wrongData)
 		}
 	}

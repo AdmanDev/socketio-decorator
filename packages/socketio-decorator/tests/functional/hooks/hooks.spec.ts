@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { SocketEmitter, SocketOn, useCurrentUser, useIoServer, useUserSocket } from "../../../src"
+import { CurrentSocket, SocketEmitter, SocketOn, useCurrentUser, useIoServer, useUserSocket } from "../../../src"
 import { createSocketClient, createServer } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
 
@@ -39,7 +39,7 @@ describe("> Hooks tests", () => {
 			class TestHookController {
 				@SocketOn("get-current-user")
 				@SocketEmitter("current-user-resp")
-				public getCurrentUser (socket: ServerSocket) {
+				public getCurrentUser (@CurrentSocket() socket: ServerSocket) {
 					return useCurrentUser(socket)
 				}
 			}
@@ -103,7 +103,7 @@ describe("> Hooks tests", () => {
 
 			class TestHookController {
 				@SocketOn("get-user-socket")
-				public getUserSocket (socket: ServerSocket) {
+				public getUserSocket (@CurrentSocket() socket: ServerSocket) {
 					controllerFnSpy(useUserSocket(socket.id)?.id)
 				}
 			}
@@ -137,7 +137,7 @@ describe("> Hooks tests", () => {
 
 			class TestHookController {
 				@SocketOn("get-user-socket")
-				public getUserSocket (socket: ServerSocket) {
+				public getUserSocket (@CurrentSocket() socket: ServerSocket) {
 					controllerFnSpy(useUserSocket(socket.id)?.id)
 				}
 			}

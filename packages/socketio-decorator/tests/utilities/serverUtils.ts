@@ -19,7 +19,6 @@ export function createServer (siodConfig: Omit<SiodConfig, "ioserver">, serverEv
 	const ioServer = new Server(httpServer)
 
 	useSocketIoDecorator({
-		disableParamInjection: true,
 		...siodConfig,
 		ioserver: ioServer,
 	}).then(() => {

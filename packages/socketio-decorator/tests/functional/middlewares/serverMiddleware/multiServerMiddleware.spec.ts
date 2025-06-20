@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
-import { IErrorMiddleware, IServerMiddleware, ServerOn, SocketEmitter } from "../../../../src"
+import { CurrentSocket, IErrorMiddleware, IServerMiddleware, ServerOn, SocketEmitter } from "../../../../src"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createSocketClient as createSocketClient, createServer } from "../../../utilities/serverUtils"
@@ -22,7 +22,7 @@ describe("> Multi ServerMiddleware decorator", () => {
 	class TestController {
 		@ServerOn("connection")
 		@SocketEmitter("connectionResp")
-		public onConnection (socket: ServerSocket) {
+		public onConnection (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 			return 1
 		}
