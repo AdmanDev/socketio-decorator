@@ -60,4 +60,5 @@ export type SiodConfig = {
 	 * @deprecated Will be removed in a future major version.
 	 */
 	disableParamInjection?: boolean // TODO: See TODO list before removing this
+	// TODO: Remove this from README
 }
