@@ -37,7 +37,7 @@ describe("> SocketOn decorator", () => {
 		}
 
 		@SocketOn("disconnect")
-		public onDisconnect (@CurrentSocket() socket: ServerSocket, @Data() wrongData: MessageData) {
+		public onDisconnect (@Data() wrongData: MessageData) {
 			disconnectSpy(wrongData)
 		}
 	}
