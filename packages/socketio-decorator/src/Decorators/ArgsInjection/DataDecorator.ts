@@ -1,4 +1,5 @@
 import { addMethodArgMetadata } from "../../globalMetadata"
+import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { MethodArgMetadata } from "../../Models/Metadata/MethodArgMetadata"
 
 /**
@@ -7,6 +8,10 @@ import { MethodArgMetadata } from "../../Models/Metadata/MethodArgMetadata"
  * @returns {Function} A decorator function.
  */
 export function Data (dataIndex = 0) {
+	if (typeof dataIndex !== "number" || dataIndex < 0) {
+		throw new SiodDecoratorError("Data index must be a non-negative number.")
+	}
+
 	return function (target: Object, propertyKey: string, parameterIndex: number) {
 		const argMetadata: MethodArgMetadata = {
 			parameterIndex,

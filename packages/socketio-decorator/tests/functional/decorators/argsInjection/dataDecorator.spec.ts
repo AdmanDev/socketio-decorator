@@ -5,6 +5,7 @@ import { Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../..
 import { MessageData, UserData } from "../../../types/socketData"
 import { createServer, createSocketClient } from "../../../utilities/serverUtils"
 import { waitFor } from "../../../utilities/testUtils"
+import { SiodDecoratorError } from "../../../../src/Models/Errors/SiodDecoratorError"
 
 describe("> Data Decorator", () => {
 	let io: Server
@@ -94,6 +95,26 @@ describe("> Data Decorator", () => {
 			await waitFor(50)
 
 			expect(simpleTestFn).toHaveBeenCalledWith(data0, data1)
+		})
+
+		it("should throw SiodDecoratorError when dataIndex is negative", () => {
+			expect(() => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				class TestClass {
+					public testMethod (@Data(-1) data: unknown) {
+						return data
+					}
+				}
+			}).toThrow(SiodDecoratorError)
+
+			expect(() => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				class TestClass {
+					public testMethod (@Data(-1) data: unknown) {
+						return data
+					}
+				}
+			}).toThrow("Data index must be a non-negative number.")
 		})
 	})
 
