@@ -56,18 +56,18 @@ To get started, follow these steps:
 1. **Create a Socket Controller**
 
     ```typescript
-    import { Data, ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
-    import { Socket } from "socket.io";
+    import { Data, ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator"
+    import { Socket } from "socket.io"
 
     export class SocketController {
         @ServerOn("connection")
         public onConnection(@CurrentSocket() socket: Socket) {
-            console.log("Socket connected with socket id", socket.id);
+            console.log("Socket connected with socket id", socket.id)
         }
 
         @SocketOn("message")
         public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
-            console.log("Message received:", data, "from socket id:", socket.id);
+            console.log("Message received:", data, "from socket id:", socket.id)
         }
 
         // Async / Await is supported
@@ -88,25 +88,25 @@ To get started, follow these steps:
    In your `app.ts` file, set up the server and use the Controller:
 
     ```typescript
-    import { useSocketIoDecorator } from "@admandev/socketio-decorator";
-    import express from "express";
-    import http from "http";
-    import { Server } from "socket.io";
-    import { SocketController } from "./SocketController";
+    import { useSocketIoDecorator } from "@admandev/socketio-decorator"
+    import express from "express"
+    import http from "http"
+    import { Server } from "socket.io"
+    import { SocketController } from "./SocketController"
 
-    const app = express();
-    const server = http.createServer(app);
+    const app = express()
+    const server = http.createServer(app)
 
-    const io = new Server(server);
+    const io = new Server(server)
 
     useSocketIoDecorator({
         ioserver: io,
         controllers: [SocketController],
-    });
+    })
 
     server.listen(3000, () => {
-        console.log("Server running on port 3000");
-    });
+        console.log("Server running on port 3000")
+    })
     ```
 
     You can also auto import controllers from a directory:
@@ -115,7 +115,7 @@ To get started, follow these steps:
     useSocketIoDecorator({
         controllers: [path.join(__dirname, "/controllers/*.js")],
         ...
-    });
+    })
     ```
 
 ## Decorators
@@ -147,7 +147,7 @@ Listens for server events.
 ```typescript
 @ServerOn("connection")
 public onConnection(@CurrentSocket() socket: Socket) {
-    console.log("Socket connected with socket id", socket.id);
+    console.log("Socket connected with socket id", socket.id)
 }
 ```
 
@@ -164,7 +164,7 @@ Listens for events emitted by the client.
 ```typescript
 @SocketOn("message")
 public onMessage(@Data() data: any) {
-    console.log("Message received:", data);
+    console.log("Message received:", data)
 }
 ```
 
@@ -181,7 +181,7 @@ Listens for events emitted by the client only once.
 ```typescript
 @SocketOnce("message")
 public onMessage(@Data() data: any) {
-    console.log("Message received:", data);
+    console.log("Message received:", data)
 }
 ```
 
@@ -198,7 +198,7 @@ Listens for any event emitted by the client.
 ```typescript
 @SocketOnAny()
 public onAnyEvent(@EventName() event: string, @Data() data: any) {
-    console.log("Any event received:", event, data);
+    console.log("Any event received:", event, data)
 }
 ```
 
@@ -215,7 +215,7 @@ Listens for any outgoing event
 ```typescript
 @SocketOnAnyOutgoing()
 public onAnyOutgoingEvent(@EventName() event: string, @Data() data: any) {
-    console.log("Any outgoing event received:", event, data);
+    console.log("Any outgoing event received:", event, data)
 }
 ```
 
@@ -280,7 +280,7 @@ The following decorators can be used to emit events to the client:
         @SocketOn("multiple-events")
         @ServerEmitter()
         onMultipleEvents(@CurrentSocket() socket: Socket) {
-            socket.join("multiple-events");
+            socket.join("multiple-events")
             const events: EmitterOption[] = [
                 new EmitterOption({
                     to: socket.id,
@@ -407,7 +407,7 @@ Injects the current socket instance that is handling the message.
 ```typescript
 @SocketOn("joinGame")
 public onJoinGame(@CurrentSocket() socket: Socket) {
-    socket.join("gameRoom");
+    socket.join("gameRoom")
 }
 ```
 
@@ -431,7 +431,7 @@ You can also specify the index of the data in the socket message if you want to 
 ```typescript
 @SocketOn("chat-message")
 public onChatMessage(@Data(0) message: string, @Data(1) roomId: string) {
-    console.log(`Received message: "${message}" for room: ${roomId}`);
+    console.log(`Received message: "${message}" for room: ${roomId}`)
 }
 ```
 
@@ -439,7 +439,7 @@ This is useful when the client sends multiple arguments:
 
 ```typescript
 // Client side
-socket.emit("chat-message", "Hello everyone!", "gaming-lobby");
+socket.emit("chat-message", "Hello everyone!", "gaming-lobby")
 ```
 
 ---
@@ -454,9 +454,9 @@ Injects the name of the event message that triggered the handler.
 @SocketOn("user-joined")
 @SocketOn("user-left")
 public trackUserActivity(@EventName() event: string) {
-    const action = event === "user-joined" ? "joined the chat" : "left the chat"; 
+    const action = event === "user-joined" ? "joined the chat" : "left the chat" 
 
-    console.log(`User ${action}`);
+    console.log(`User ${action}`)
 }
 ```
 
@@ -586,13 +586,13 @@ You can create a middleware to handle errors that occur during event handling an
 1. **Create an Error Middleware**
 
     ```typescript
-    import { IErrorMiddleware } from "@admandev/socketio-decorator";
-    import { Socket } from "socket.io";
+    import { IErrorMiddleware } from "@admandev/socketio-decorator"
+    import { Socket } from "socket.io"
 
     export class MyErrorMiddleware implements IErrorMiddleware{
         handleError (error: any, socket?: Socket) {
             // Handle the error here
-            console.log('Error middleware: ', error);
+            console.log('Error middleware: ', error)
         }
     }
     ```
@@ -777,3 +777,33 @@ If you run into any issues or have suggestions, feel free to open an issue on Gi
 🔗 [Socket.io Decorator Issues](https://github.com/AdmanDev/socketio-decorator/issues)
 
 Thank you for using Socketio Decorator
+
+## Migration 1.3.0 to 1.3.1+
+
+Starting from version 1.3.1, you need to use the parameter injection decorators (`@CurrentSocket()`, `@Data()`, `@EventName()`) to access the socket, data, and event name in your handlers:
+
+```typescript
+// Before (1.3.0)
+@SocketOn("message")
+public onMessage(socket: Socket, data: any) {
+    console.log("Message from:", socket.id, "data:", data)
+}
+
+// After (1.3.1+)
+@SocketOn("message")
+public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
+    console.log("Message from:", socket.id, "data:", data)
+}
+```
+
+If you need to temporarily maintain backward compatibility, you can use the `disableParamInjection` option:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    disableParamInjection: true,
+})
+```
+
+> [!WARNING]
+> The `disableParamInjection` option is deprecated and will be removed in a future version. We strongly recommend migrating to the decorator-based parameter injection approach.
