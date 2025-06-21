@@ -25,6 +25,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [UseIoServer hook](#useioserver-hook)
   - [UseCurrentUser hook](#usecurrentuser-hook)
 - [Dependency Injection](#dependency-injection)
+- [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
 ## Installation
 
