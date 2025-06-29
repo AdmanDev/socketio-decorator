@@ -72,7 +72,7 @@ export class DataValidationWrapper {
 
 				if (!dataValue) {
 					throw new SiodImcomigDataError(
-						`Data for parameter (${dataType.name}) at position ${paramMetadata.parameterIndex} is undefined`,
+						`Data for parameter (${dataType.name}) at position ${paramMetadata.parameterIndex} is undefined (dataIndex: ${paramMetadata.dataIndex})`,
 					)
 				}
 

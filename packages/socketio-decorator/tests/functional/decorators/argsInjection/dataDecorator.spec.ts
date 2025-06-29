@@ -40,6 +40,11 @@ describe("> Data Decorator", () => {
 		public onMultipleDataValidationTest (@Data() data0: MessageData, @Data(1) data1: UserData) {
 			simpleTestFn(data0, data1)
 		}
+
+		@SocketOn("test-with-data-index-out-of-bounds")
+		public onTestWithDataIndexOutOfBounds (@Data(999) data: MessageData) {
+			simpleTestFn(data)
+		}
 	}
 
 	beforeAll((done) => {
@@ -123,6 +128,17 @@ describe("> Data Decorator", () => {
 			const event = "simple-test"
 
 			clientSocket.emit(event)
+
+			await waitFor(50)
+
+			expect(simpleTestFn).not.toHaveBeenCalled()
+			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+		})
+
+		it("should throw SiodImcomigDataError when dataIndex is out of bounds", async () => {
+			const data: MessageData = { message: "Hello World" }
+			clientSocket.emit("test-with-data-index-out-of-bounds", data)
 
 			await waitFor(50)
 
