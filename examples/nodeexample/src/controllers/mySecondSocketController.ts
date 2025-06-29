@@ -1,9 +1,9 @@
-import { EmitterOption, ServerEmitter, SocketOn, SocketOnAny, SocketOnAnyOutgoing, SocketOnce, useIoServer } from "@admandev/socketio-decorator";
+import { CurrentSocket, Data, EmitterOption, EventName, ServerEmitter, SocketOn, SocketOnAny, SocketOnAnyOutgoing, SocketOnce, useIoServer } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 
 export class MySecondSocketController {
     @SocketOnce("my-once-event")
-    onMyOnceEvent(socket: Socket, data: any) {
+    onMyOnceEvent(data: any) {
         console.log("SecondSocketController: onMyOnceEvent", data);
 
         const io = useIoServer();
@@ -11,18 +11,18 @@ export class MySecondSocketController {
     }
 
     @SocketOnAny()
-    onAnyEvent(socket: Socket, event: string, data: any) {
+    onAnyEvent(@EventName() event: string, @Data() data: any) {
         console.log(`SecondSocketController: onAnyEvent (${event})`, data);
     }
 
     @SocketOnAnyOutgoing()
-    onAnyOutgoingEvent(socket: Socket, event: string, data: any) {
+    onAnyOutgoingEvent(@EventName() event: string, @Data() data: any) {
         console.log(`SecondSocketController: onAnyOutgoingEvent (${event})`, data);
     }
 
     @SocketOn("multiple-events")
     @ServerEmitter()
-    onMultipleEvents(socket: Socket) {
+    onMultipleEvents(@CurrentSocket() socket: Socket) {
         socket.join("multiple-events");
         const events: EmitterOption[] = [
             new EmitterOption({

@@ -1,5 +1,6 @@
 import { EmitterMetadata } from "./EmiterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
+import { MethodArgMetadata } from "./MethodArgMetadata"
 import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
 
 export type ControllerMetadata = {
@@ -13,6 +14,7 @@ export type ControllerMetadata = {
 export type MethodMetadata = {
 	methodName: string
 	metadata: MethodMetadataItem
+	argsMetadata: MethodArgMetadata[]
 }
 
 type MethodMetadataItem = {

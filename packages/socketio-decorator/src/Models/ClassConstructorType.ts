@@ -1,1 +1,1 @@
-export type ClassConstructorType<T> = { new (...args: unknown[]): T };
+export type ClassConstructorType<T> = { new (...args: unknown[]): T }

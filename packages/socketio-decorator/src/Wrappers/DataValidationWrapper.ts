@@ -61,30 +61,37 @@ export class DataValidationWrapper {
 	 * @param {Function} originalMethod - The original method of the controller
 	 * @param {ClassConstructor<unknown>[]} paramTypes - The paramTypes of the method to wrap
 	 */
-	private static wrapMethod (listenerMetadata: ListenerMetadata, controllerInstance: Any, originalMethod: Function, paramTypes: ClassConstructor<unknown>[]) {
-		// eslint-disable-next-line jsdoc/require-jsdoc
+	private static wrapMethod (
+		listenerMetadata: ListenerMetadata,
+		controllerInstance: Any,
+		originalMethod: Function,
+		paramTypes: ClassConstructor<unknown>[]
+	) {
 		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
-			const ioArgs = proxyArgs.args
-			const dataArgInx = ioArgs.findIndex(a => a?.constructor === Object)
+			const dataArgsMetadata = proxyArgs.methodMetadata.argsMetadata.filter(m => m.valueType === "data")
 
-			if (dataArgInx === -1) {
-				throw new SiodImcomigDataError("Imcomig data object type is not valid (data validation)")
-			}
+			for (const paramMetadata of dataArgsMetadata) {
+				const dataValue = proxyArgs.data[paramMetadata.dataIndex]
+				const dataType = paramTypes[paramMetadata.parameterIndex]
 
-			const dataValue = ioArgs[dataArgInx]
-			const dataType = paramTypes[dataArgInx]
-
-			const dataInstance = plainToInstance(dataType, dataValue)
-			const errors = await validate(dataInstance as Any)
-
-			if (errors.length > 0) {
-				let errorMessage = "Imcomig data is not valid"
-
-				if (!config.errorMiddleware) {
-					errorMessage += "\n You should implement an error middleware to handle this error"
+				if (!dataValue) {
+					throw new SiodImcomigDataError(
+						`Data for parameter (${dataType.name}) at position ${paramMetadata.parameterIndex} is undefined (dataIndex: ${paramMetadata.dataIndex})`,
+					)
 				}
 
-				throw new SiodImcomigDataError(errorMessage, dataValue, errors)
+				const dataInstance = plainToInstance(dataType, dataValue)
+				const errors = await validate(dataInstance as Any)
+
+				if (errors.length > 0) {
+					let errorMessage = "Incoming data is not valid"
+
+					if (!config.errorMiddleware) {
+						errorMessage += "\n You should implement an error middleware to handle this error"
+					}
+
+					throw new SiodImcomigDataError(errorMessage, dataValue, errors)
+				}
 			}
 
 			return await originalMethod.apply(controllerInstance, [proxyArgs])

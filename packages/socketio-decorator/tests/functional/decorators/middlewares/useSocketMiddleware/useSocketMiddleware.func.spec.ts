@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Event, Server, Socket as ServerSocket } from "socket.io"
-import { IErrorMiddleware, ISocketMiddleware, SocketOn, UseSocketMiddleware } from "../../../../../src"
+import { CurrentSocket, Data, IErrorMiddleware, ISocketMiddleware, SocketOn, UseSocketMiddleware } from "../../../../../src"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { expectCallOrder, waitFor } from "../../../../utilities/testUtils"
@@ -57,33 +57,33 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 	class DecoratorOnFunctionControllerTest {
 		@SocketOn("simpleMiddlewareTest")
 		@UseSocketMiddleware(FirstSocketMiddleware)
-		simpleMiddlewareTest (socket: ServerSocket, data: unknown) {
+		simpleMiddlewareTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			controllerFnSpy(socket.id, data)
 			socket.emit("simpleMiddlewareTestResp")
 		}
 
 		@SocketOn("multiSocketMiddlewareTest")
 		@UseSocketMiddleware(FirstSocketMiddleware, SecondSocketMiddleware)
-		multiSocketMiddlewareTest (socket: ServerSocket, data: unknown) {
+		multiSocketMiddlewareTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			controllerFnSpy(socket.id, data)
 			socket.emit("multiSocketMiddlewareTestResp")
 		}
 
 		@SocketOn("errorSingleMiddlewareTest")
 		@UseSocketMiddleware(ErrorSocketMiddleware)
-		errorSingleMiddlewareTest (socket: ServerSocket) {
+		errorSingleMiddlewareTest (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 		}
 
 		@SocketOn("errorOnFirstMiddlewareTest")
 		@UseSocketMiddleware(ErrorSocketMiddleware, SecondSocketMiddleware)
-		errorOnFirstMiddlewareTest (socket: ServerSocket) {
+		errorOnFirstMiddlewareTest (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 		}
 
 		@SocketOn("errorOnSecondMiddlewareTest")
 		@UseSocketMiddleware(FirstSocketMiddleware, ErrorSocketMiddleware)
-		errorOnSecondMiddlewareTest (socket: ServerSocket) {
+		errorOnSecondMiddlewareTest (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 		}
 	}

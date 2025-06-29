@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { IErrorMiddleware, ISocketMiddleware, ServerOn, SocketEmitter, SocketOn } from "../../../../src"
+import { CurrentSocket, IErrorMiddleware, ISocketMiddleware, ServerOn, SocketEmitter, SocketOn } from "../../../../src"
 import { Event, Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
@@ -41,13 +41,13 @@ describe("> Socket middleware tests", () => {
 	class SocketMiddlewareTestController {
 		@SocketOn("message")
 		@SocketEmitter("messageResp")
-		public onMessage (socket: ServerSocket) {
+		public onMessage (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 			return "Hello, world!"
 		}
 
 		@SocketOn("action")
-		public onAction (socket: ServerSocket) {
+		public onAction (@CurrentSocket() socket: ServerSocket) {
 			controllerFnSpy(socket.id)
 		}
 

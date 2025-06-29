@@ -9,7 +9,7 @@ let port = 8000
 export const ioServer: Server = {} as Server
 
 /**
- * Creates an express server with the given siodConfig.
+ * Creates an server with the given siodConfig.
  * @param {SiodConfig} siodConfig The configuration for socketio-decorator
  * @param {ServerEventCallbacks} serverEventCallbacks The callbacks for the server events
  * @returns {Server} The created socket server

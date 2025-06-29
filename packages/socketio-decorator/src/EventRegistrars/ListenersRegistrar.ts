@@ -42,7 +42,11 @@ export class ListenersRegistrar {
 	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static registerServerListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
+	private static registerServerListeners (
+		methodMetadata: MethodMetadata,
+		listenerMetadata: ListenerMetadata[],
+		controllerInstance: Any
+	) {
 		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "server", controllerInstance, (metadata, method) => {
 			IoActionHandler.callServerAction(config.ioserver, methodMetadata, metadata, controllerInstance, method)
 		})
@@ -54,8 +58,15 @@ export class ListenersRegistrar {
 	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
 	 * @param {any} controllerInstance Instance of the controller
 	 */
-	private static setupSocketListeners (methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata[], controllerInstance: Any) {
-		const filteredMetadata: {method: EventFuncProxyType, metadata: ListenerMetadata}[] = []
+	private static setupSocketListeners (
+		methodMetadata: MethodMetadata,
+		listenerMetadata: ListenerMetadata[],
+		controllerInstance: Any
+	) {
+		const filteredMetadata: {
+			method: EventFuncProxyType,
+			metadata: ListenerMetadata
+		}[] = []
 
 		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "socket", controllerInstance, (metadata, method) => {
 			filteredMetadata.push({

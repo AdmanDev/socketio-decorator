@@ -1,29 +1,29 @@
-import { ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { CurrentSocket, Data, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 import { MessageRequest } from "../messageRequest";
 
 export class SocketController {
     @ServerOn("connection")
-    public onConnection(socket: Socket) {
+    public onConnection(@CurrentSocket() socket: Socket) {
       console.log("Socket connected with socket id", socket.id)
     }
 
 	@SocketOn("message")
-	public onMessage(socket: Socket, data: MessageRequest) {
+	public onMessage(@Data() data: MessageRequest) {
 		console.log("Message", data.message)
 	}
 
 	@SocketOn("hello")
 	@SocketEmitter("hello-back")
 	public async onHello() {
-		await new Promise((resolve) => setTimeout(resolve, 2000))
+		await new Promise((resolve) => setTimeout(resolve, 500))
 		return {
 			message: "Hello you"
 		}
 	}
 
 	@SocketOn("disconnect")
-	public onDisconnect(socket: Socket) {
+	public onDisconnect(@CurrentSocket() socket: Socket) {
 		console.log("Socket disconnected - socket id :", socket.id)
 	}
 

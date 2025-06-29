@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest 
 import { Event, Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
-import { IErrorMiddleware, ISocketMiddleware, ServerOn, SocketOn, UseSocketMiddleware } from "../../../../../src"
+import { CurrentSocket, Data, IErrorMiddleware, ISocketMiddleware, ServerOn, SocketOn, UseSocketMiddleware } from "../../../../../src"
 import { MessageData } from "../../../../types/socketData"
 import { expectCallOrder, waitFor } from "../../../../utilities/testUtils"
 import { MiddlewareAction } from "../../../../types/middlewareAction"
@@ -69,7 +69,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	@UseSocketMiddleware(FirstSocketMiddleware)
 	class ControllerWithOneListenerTest {
 		@SocketOn("simpleEventTest")
-		simpleEventTest (socket: ServerSocket, data: unknown) {
+		simpleEventTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			listenerFnSpy(socket.id, data)
 			socket.emit("simpleMiddlewareTestResp")
 		}
@@ -82,13 +82,13 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	@UseSocketMiddleware(FirstSocketMiddleware)
 	class ControllerWithManyListenersTest {
 		@SocketOn("firstListenerTest")
-		firstListenerTest (socket: ServerSocket, data: unknown) {
+		firstListenerTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			listenerFnSpy(socket.id, data)
 			socket.emit("firstListenerTestResp")
 		}
 
 		@SocketOn("secondListenerTest")
-		secondListenerTest (socket: ServerSocket, data: unknown) {
+		secondListenerTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			secondListenerFnSpy(socket.id, data)
 			socket.emit("secondListenerTestResp")
 		}
@@ -97,7 +97,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	@UseSocketMiddleware(FirstSocketMiddleware, SecondSocketMiddleware)
 	class ControllerWithManyMiddlewaresTest {
 		@SocketOn("simpleEventWithManyMiddlewaresTest")
-		simpleEventWithManyMiddlewaresTest (socket: ServerSocket, data: unknown) {
+		simpleEventWithManyMiddlewaresTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			listenerFnSpy(socket.id, data)
 			socket.emit("simpleEventWithManyMiddlewaresTestResp")
 		}
@@ -110,7 +110,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	@UseSocketMiddleware(FirstSocketMiddleware, ErrorSocketMiddleware, SecondSocketMiddleware)
 	class ControllerWithErrorMiddlewareTest {
 		@SocketOn("errorEventTest")
-		errorEventTest (socket: ServerSocket, data: unknown) {
+		errorEventTest (@CurrentSocket() socket: ServerSocket, @Data() data: unknown) {
 			listenerFnSpy(socket.id, data)
 		}
 	}
@@ -118,12 +118,12 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	@UseSocketMiddleware(SocketMiddlewareForServerListenerTest)
 	class ControllerWithServerListenerTest {
 		@ServerOn("connection")
-		connection (socket: ServerSocket) {
+		connection (@CurrentSocket() socket: ServerSocket) {
 			connectionFnSpy(socket.id)
 		}
 
 		@SocketOn("serverListenerTest")
-		serverListenerTest (socket: ServerSocket) {
+		serverListenerTest (@CurrentSocket() socket: ServerSocket) {
 			listenerFnSpy(socket.id)
 			socket.emit("serverListenerTestResp")
 		}

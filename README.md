@@ -12,6 +12,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Parameter injection](#parameter-injection-decorators)
   - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
   - [Server Middleware](#server-middleware)
@@ -24,6 +25,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [UseIoServer hook](#useioserver-hook)
   - [UseCurrentUser hook](#usecurrentuser-hook)
 - [Dependency Injection](#dependency-injection)
+- [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
 ## Installation
 
@@ -55,18 +57,18 @@ To get started, follow these steps:
 1. **Create a Socket Controller**
 
     ```typescript
-    import { ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator";
-    import { Socket } from "socket.io";
+    import { Data, ServerOn, SocketOn, SocketEmitter } from "@admandev/socketio-decorator"
+    import { Socket } from "socket.io"
 
     export class SocketController {
         @ServerOn("connection")
-        public onConnection(socket: Socket) {
-            console.log("Socket connected with socket id", socket.id);
+        public onConnection(@CurrentSocket() socket: Socket) {
+            console.log("Socket connected with socket id", socket.id)
         }
 
         @SocketOn("message")
-        public onMessage(socket: Socket, data: any) {
-            console.log("Message received:", data);
+        public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
+            console.log("Message received:", data, "from socket id:", socket.id)
         }
 
         // Async / Await is supported
@@ -87,25 +89,25 @@ To get started, follow these steps:
    In your `app.ts` file, set up the server and use the Controller:
 
     ```typescript
-    import { useSocketIoDecorator } from "@admandev/socketio-decorator";
-    import express from "express";
-    import http from "http";
-    import { Server } from "socket.io";
-    import { SocketController } from "./SocketController";
+    import { useSocketIoDecorator } from "@admandev/socketio-decorator"
+    import express from "express"
+    import http from "http"
+    import { Server } from "socket.io"
+    import { SocketController } from "./SocketController"
 
-    const app = express();
-    const server = http.createServer(app);
+    const app = express()
+    const server = http.createServer(app)
 
-    const io = new Server(server);
+    const io = new Server(server)
 
     useSocketIoDecorator({
         ioserver: io,
         controllers: [SocketController],
-    });
+    })
 
     server.listen(3000, () => {
-        console.log("Server running on port 3000");
-    });
+        console.log("Server running on port 3000")
+    })
     ```
 
     You can also auto import controllers from a directory:
@@ -114,7 +116,7 @@ To get started, follow these steps:
     useSocketIoDecorator({
         controllers: [path.join(__dirname, "/controllers/*.js")],
         ...
-    });
+    })
     ```
 
 ## Decorators
@@ -145,8 +147,8 @@ Listens for server events.
 
 ```typescript
 @ServerOn("connection")
-public onConnection(socket: Socket) {
-    console.log("Socket connected with socket id", socket.id);
+public onConnection(@CurrentSocket() socket: Socket) {
+    console.log("Socket connected with socket id", socket.id)
 }
 ```
 
@@ -162,8 +164,8 @@ Listens for events emitted by the client.
 
 ```typescript
 @SocketOn("message")
-public onMessage(socket: Socket, data: any) {
-    console.log("Message received:", data);
+public onMessage(@Data() data: any) {
+    console.log("Message received:", data)
 }
 ```
 
@@ -179,8 +181,8 @@ Listens for events emitted by the client only once.
 
 ```typescript
 @SocketOnce("message")
-public onMessage(socket: Socket, data: any) {
-    console.log("Message received:", data);
+public onMessage(@Data() data: any) {
+    console.log("Message received:", data)
 }
 ```
 
@@ -196,8 +198,8 @@ Listens for any event emitted by the client.
 
 ```typescript
 @SocketOnAny()
-public onAnyEvent(socket: Socket, event: string, data: any) {
-    console.log("Any event received:", event, data);
+public onAnyEvent(@EventName() event: string, @Data() data: any) {
+    console.log("Any event received:", event, data)
 }
 ```
 
@@ -213,8 +215,8 @@ Listens for any outgoing event
 
 ```typescript
 @SocketOnAnyOutgoing()
-public onAnyOutgoingEvent(socket: Socket, event: string, data: any) {
-    console.log("Any outgoing event received:", event, data);
+public onAnyOutgoingEvent(@EventName() event: string, @Data() data: any) {
+    console.log("Any outgoing event received:", event, data)
 }
 ```
 
@@ -259,11 +261,11 @@ The following decorators can be used to emit events to the client:
 
         @SocketOn("chat-message")
         @SocketEmitter() // No event name specified
-        public sendMessage(socket: Socket): EmitterOptions {
+        public sendMessage(@CurrentSocket() socket: Socket): EmitterOptions {
             const isAllowedToSend = isUserAllowedToSendMessage(socket)
             return new EmitterOption({
                 to: "room1",
-                message: "newMessage",
+                message: "newMessage", // Event name set here
                 data: { message: "Hello, world!" },
                 disableEmit: !isAllowedToSend,
             })
@@ -278,8 +280,8 @@ The following decorators can be used to emit events to the client:
         ```typescript
         @SocketOn("multiple-events")
         @ServerEmitter()
-        onMultipleEvents(socket: Socket) {
-            socket.join("multiple-events");
+        onMultipleEvents(@CurrentSocket() socket: Socket) {
+            socket.join("multiple-events")
             const events: EmitterOption[] = [
                 new EmitterOption({
                     to: socket.id,
@@ -366,7 +368,7 @@ Emits event to the current client.
 ```typescript
 @SocketOn("get-user")
 @SocketEmitter("get-user-resp")
-public getUser(socket: Socket) {
+public getUser(@CurrentSocket() socket: Socket) {
     return useCurrentUser(socket)
 }
 ```
@@ -374,12 +376,88 @@ public getUser(socket: Socket) {
 ```typescript
 @SocketOn("get-user")
 @SocketEmitter()
-public getUser(socket: Socket) {
+public getUser(@CurrentSocket() socket: Socket) {
     return new EmitterOption({
         to: socket.id,
         message: "get-user-resp",
         data: useCurrentUser(socket),
     })
+}
+```
+
+### Parameter injection decorators
+
+The following decorators can be used to inject parameters into the event handler methods:
+
+| Decorator | Description                                              |
+|-----------|----------------------------------------------------------|
+| `@CurrentSocket()` | Injects the current socket instance that is handling the message. |
+| `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
+| `@EventName()` | Injects the name of the event message that triggered the handler. |
+
+#### Examples
+
+---
+
+##### @CurrentSocket()
+
+Injects the current socket instance that is handling the message.
+
+**Usage** :
+
+```typescript
+@SocketOn("joinGame")
+public onJoinGame(@CurrentSocket() socket: Socket) {
+    socket.join("gameRoom")
+}
+```
+
+---
+
+##### @Data(dataIndex?: number)
+
+Injects the data sent by the client.
+
+**Usage** :
+
+```typescript
+@SocketOn("message")
+public onMessage(@Data() data: MessageData) {
+    console.log("Message received:", data.message)
+}
+```
+
+You can also specify the index of the data in the socket message if you want to inject a specific part of the data:
+
+```typescript
+@SocketOn("chat-message")
+public onChatMessage(@Data(0) message: string, @Data(1) roomId: string) {
+    console.log(`Received message: "${message}" for room: ${roomId}`)
+}
+```
+
+This is useful when the client sends multiple arguments:
+
+```typescript
+// Client side
+socket.emit("chat-message", "Hello everyone!", "gaming-lobby")
+```
+
+---
+
+##### @EventName()
+
+Injects the name of the event message that triggered the handler.
+
+**Usage** :
+
+```typescript
+@SocketOn("user-joined")
+@SocketOn("user-left")
+public trackUserActivity(@EventName() event: string) {
+    const action = event === "user-joined" ? "joined the chat" : "left the chat" 
+
+    console.log(`User ${action}`)
 }
 ```
 
@@ -406,8 +484,8 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     ```typescript
     @SocketOn("message")
     @UseSocketMiddleware(MyMiddleware1, MyMiddleware2)
-    public onMessage(socket: Socket, data: any) {
-        console.log("Message received:", data)
+    public onMessage() {
+        console.log("Message received")
     }
     ```
 
@@ -419,13 +497,13 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     @UseSocketMiddleware(MyMiddleware)
     export class MyController {
         @SocketOn("event1")
-        public onEvent1(socket: Socket, data: any) {
-            console.log("Event 1 received:", data)
+        public onEvent1() {
+            console.log("Event 1 received")
         }
 
         @SocketOn("event2")
-        public onEvent2(socket: Socket, data: any) {
-            console.log("Event 2 received:", data)
+        public onEvent2() {
+            console.log("Event 2 received")
         }
     }
     ```
@@ -509,13 +587,13 @@ You can create a middleware to handle errors that occur during event handling an
 1. **Create an Error Middleware**
 
     ```typescript
-    import { IErrorMiddleware } from "@admandev/socketio-decorator";
-    import { Socket } from "socket.io";
+    import { IErrorMiddleware } from "@admandev/socketio-decorator"
+    import { Socket } from "socket.io"
 
     export class MyErrorMiddleware implements IErrorMiddleware{
         handleError (error: any, socket?: Socket) {
             // Handle the error here
-            console.log('Error middleware: ', error);
+            console.log('Error middleware: ', error)
         }
     }
     ```
@@ -586,7 +664,7 @@ You can use the `class-validator` library to validate the data received from the
 
     ```typescript
     @SocketOn("message")
-    public onMessage(socket: Socket, data: MessageData) {
+    public onMessage(@Data() data: MessageData) {
         console.log("Message received:", data.message)
     }
     ```
@@ -602,7 +680,7 @@ You can disable validation for a specific handler by setting the `disableDataVal
 
 ```typescript
 @SocketOn("message", { disableDataValidation: true })
-public onMessage(socket: Socket, data: MessageData) {
+public onMessage(@Data() data: MessageData) {
     ...
 }
 ```
@@ -664,7 +742,7 @@ The `useCurrentUser` hook provides the current user object. This hook is useful 
     import { Socket } from "socket.io"
 
     @SocketOn("message")
-    public onMessage(socket: Socket, data: any) {
+    public onMessage(@CurrentSocket() socket: Socket) {
         const user = useCurrentUser(socket)
         console.log("Message received from user:", user)
     }
@@ -700,3 +778,33 @@ If you run into any issues or have suggestions, feel free to open an issue on Gi
 🔗 [Socket.io Decorator Issues](https://github.com/AdmanDev/socketio-decorator/issues)
 
 Thank you for using Socketio Decorator
+
+## Migration 1.3.0 to 1.3.1+
+
+Starting from version 1.3.1, you need to use the parameter injection decorators (`@CurrentSocket()`, `@Data()`, `@EventName()`) to access the socket, data, and event name in your handlers:
+
+```typescript
+// Before (1.3.0)
+@SocketOn("message")
+public onMessage(socket: Socket, data: any) {
+    console.log("Message from:", socket.id, "data:", data)
+}
+
+// After (1.3.1+)
+@SocketOn("message")
+public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
+    console.log("Message from:", socket.id, "data:", data)
+}
+```
+
+If you need to temporarily maintain backward compatibility, you can use the `disableParamInjection` option:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    disableParamInjection: true,
+})
+```
+
+> [!WARNING]
+> The `disableParamInjection` option is deprecated and will be removed in a future version. We strongly recommend migrating to the decorator-based parameter injection approach.
