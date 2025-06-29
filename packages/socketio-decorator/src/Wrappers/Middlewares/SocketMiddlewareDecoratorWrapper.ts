@@ -60,7 +60,6 @@ export class SocketMiddlewareDecoratorWrapper {
 		middlewareInstances.forEach((middleware) => {
 			const method = controllerInstance[methodName]
 
-			// eslint-disable-next-line jsdoc/require-jsdoc
 			const socketMiddlewareProxy: EventFuncProxyType = async function (proxyArgs) {
 				const methodArgs = proxyArgs.args
 				const [, ...methodArgsWithoutSocket] = methodArgs

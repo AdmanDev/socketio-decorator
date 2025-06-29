@@ -266,7 +266,7 @@ describe("> ServerEmitter decorator", () => {
 
 			await waitFor(50)
 
-			expect(errorMiddlewareSpy).toBeCalledWith(expect.any(SiodInvalidArgumentError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodInvalidArgumentError))
 		})
 
 		it("should not emit when the controller throws an error", async () => {

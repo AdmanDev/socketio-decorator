@@ -44,7 +44,6 @@ export class ErrorMiddlewareWrapper {
 	public static wrapMethod (errorMiddleware: IErrorMiddleware, methodName: string, controllerInstance: Any) {
 		const originalMethod = controllerInstance[methodName]
 
-		// eslint-disable-next-line jsdoc/require-jsdoc
 		const wrappedMethod = async function (...args: unknown[]) {
 			try {
 				return await originalMethod.apply(controllerInstance, args)
@@ -63,7 +62,9 @@ export class ErrorMiddlewareWrapper {
 	 * @param {IErrorMiddleware} errorMiddleware The error middleware
 	 */
 	private static addMiddlewareToController (metadata: ControllerMetadata, errorMiddleware: IErrorMiddleware) {
-		const ioMetadata = metadata.methodMetadata.flatMap(m => [m.metadata.ioMetadata.listenerMetadata, m.metadata.ioMetadata.emitterMetadata].flat())
+		const ioMetadata = metadata.methodMetadata.flatMap(
+			m => [m.metadata.ioMetadata.listenerMetadata, m.metadata.ioMetadata.emitterMetadata].flat()
+		)
 
 		const unicMethods = ioMetadata
 			.map(m => m.methodName)

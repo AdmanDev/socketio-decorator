@@ -32,7 +32,6 @@ export class EventFuncProxyWrapper {
 	public static addFirstProxyLayer (controller: Any, methodName: string) {
 		const originalHandler = controller[methodName] as Function
 
-		// eslint-disable-next-line jsdoc/require-jsdoc
 		const proxy = async function (...args: unknown[]) {
 			let proxyArgs: EventFuncProxyArgs
 

@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable stylistic/max-len */
 import { Server, Socket } from "socket.io"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { MethodMetadata } from "../Models/Metadata/Metadata"
@@ -6,12 +6,10 @@ import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxy
 import { EventMapAction } from "../Models/Metadata/EventMappingDescription"
 
 type ServerAction = {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	[action in EventMapAction]: (ioserver: Server, eventName: string, metadata: MethodMetadata, controllerInstance: Any, method: EventFuncProxyType) => void
 }
 
 type SocketAction = {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	[action in EventMapAction]: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => void
 }
 
@@ -78,7 +76,7 @@ export class IoActionHandler {
 	/**
 	 * Call the appropriate io server action function
 	 * @param {Server} ioserver The socket.io server instance
-	 * @param {MethodMetadata} methodMetadata The method metadata 
+	 * @param {MethodMetadata} methodMetadata The method metadata
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata
 	 * @param {any} controller The controller instance
 	 * @param {Function} method The method to call
@@ -107,7 +105,7 @@ export class IoActionHandler {
 
 	/**
 	 * Validate if the given action is a valid io socket action
-	 * @param {string} action The action name 
+	 * @param {string} action The action name
 	 * @param {Function} [fn] The action function to validate
 	 * @throws {Error} If the action is invalid
 	 */
