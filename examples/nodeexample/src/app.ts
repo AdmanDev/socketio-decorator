@@ -3,9 +3,9 @@ import { useSocketIoDecorator } from "@admandev/socketio-decorator"
 import express from "express"
 import http from "http"
 import { Server, Socket } from "socket.io"
-import { MyServerMiddleware } from "./MyServerMiddleware"
-import { MySocketMiddleware } from "./MySocketMiddleware"
-import { MyErrorMiddleware } from "./myErrorMiddleware"
+import { MyServerMiddleware } from "./middlewares/MyServerMiddleware"
+import { MySocketMiddleware } from "./middlewares/MySocketMiddleware"
+import { MyErrorMiddleware } from "./middlewares/myErrorMiddleware"
 import path from "path"
 
 const app = express()

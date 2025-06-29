@@ -61,8 +61,12 @@ export class DataValidationWrapper {
 	 * @param {Function} originalMethod - The original method of the controller
 	 * @param {ClassConstructor<unknown>[]} paramTypes - The paramTypes of the method to wrap
 	 */
-	private static wrapMethod (listenerMetadata: ListenerMetadata, controllerInstance: Any, originalMethod: Function, paramTypes: ClassConstructor<unknown>[]) {
-		// eslint-disable-next-line jsdoc/require-jsdoc
+	private static wrapMethod (
+		listenerMetadata: ListenerMetadata,
+		controllerInstance: Any,
+		originalMethod: Function,
+		paramTypes: ClassConstructor<unknown>[]
+	) {
 		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
 			const dataArgsMetadata = proxyArgs.methodMetadata.argsMetadata.filter(m => m.valueType === "data")
 
