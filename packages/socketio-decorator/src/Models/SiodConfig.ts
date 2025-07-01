@@ -41,24 +41,4 @@ export type SiodConfig = {
 	 * @returns {Socket | undefined} The socket that matches the search argument
 	 */
 	searchUserSocket?: (arg: Any) => Socket | undefined
-	/**
-	 * Enables or disables parameter injection using decorators.
-	 *
-	 * When set to `true`, the legacy behavior is used:
-	 * - The handler receives the raw arguments as-is, typically: `(socket, ...data)`
-	 * - No parameter injection occurs — all arguments are mapped positionally.
-	 * - Decorators like `@CurrentSocket()` or `@Data()` are ignored.
-	 *
-	 * When set to `false` (default), the library uses metadata from parameter decorators
-	 * like `@CurrentSocket()` and `@Data()` to determine the arguments passed to handler methods.
-	 * This allows for flexible argument positioning and explicit parameter semantics.
-	 *
-	 * ⚠️ **This legacy mode is deprecated** and will be removed in a future major release.
-	 * It is strongly recommended to migrate to decorator-based parameter injection
-	 * for better readability, maintainability, and future compatibility.
-	 * @default false
-	 * @deprecated Will be removed in a future major version.
-	 */
-	disableParamInjection?: boolean // TODO: See TODO list before removing this
-	// TODO: Remove this from README
 }

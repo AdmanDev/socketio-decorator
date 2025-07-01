@@ -554,10 +554,10 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
 
     ```typescript
     import { ISocketMiddleware } from "@admandev/socketio-decorator"
-    import { Event } from "socket.io"
+    import { Event, Socket } from "socket.io"
 
     export class MySocketMiddleware implements ISocketMiddleware {
-        use([event, ...args]: Event, next: (err?: Error) => void): void {
+        use(socket: Socket, [event, ...args]: Event, next: (err?: Error) => void): void {
             console.log(`MySocketMiddleware triggered from ${event} event`)
             next()
         }
@@ -796,15 +796,3 @@ public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
     console.log("Message from:", socket.id, "data:", data)
 }
 ```
-
-If you need to temporarily maintain backward compatibility, you can use the `disableParamInjection` option:
-
-```typescript
-useSocketIoDecorator({
-    ...,
-    disableParamInjection: true,
-})
-```
-
-> [!WARNING]
-> The `disableParamInjection` option is deprecated and will be removed in a future version. We strongly recommend migrating to the decorator-based parameter injection approach.
