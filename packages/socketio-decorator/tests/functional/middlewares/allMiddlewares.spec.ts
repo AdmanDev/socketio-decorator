@@ -21,8 +21,8 @@ describe("> All Middlewares tests", () => {
 	}
 
 	class SocketMiddleware implements ISocketMiddleware {
-		public use (events: Event, next: (err?: Error) => void) {
-			socketMiddlewareSpy(events)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			socketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
@@ -81,7 +81,7 @@ describe("> All Middlewares tests", () => {
 				expect(serverMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id)
 
 				expect(socketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(socketMiddlewareSpy).toHaveBeenCalledWith([event])
+				expect(socketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event])
 
 				expect(serverMiddlewareSpy.mock.invocationCallOrder[0]).toBeLessThan(socketMiddlewareSpy.mock.invocationCallOrder[0])
 				expect(socketMiddlewareSpy.mock.invocationCallOrder[0]).toBeLessThan(controllerFnSpy.mock.invocationCallOrder[0])

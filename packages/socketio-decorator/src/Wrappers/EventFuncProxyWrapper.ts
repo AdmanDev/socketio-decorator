@@ -1,4 +1,3 @@
-import { config } from "../globalMetadata"
 import { SiodInvalidMetadataError } from "../Models/Errors/SiodInvalidMetadataError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { MethodArgMetadata, MethodArgValueType } from "../Models/Metadata/MethodArgMetadata"
@@ -64,7 +63,7 @@ export class EventFuncProxyWrapper {
 			throw new SiodInvalidMetadataError(`Method ${methodName} not found in ${controller.constructor.name}`)
 		}
 
-		return new EventFuncProxyArgs(args, args, methodMetadata, "", null)
+		return new EventFuncProxyArgs(args, methodMetadata, "", null)
 	}
 
 	/**
@@ -73,14 +72,10 @@ export class EventFuncProxyWrapper {
 	 * @returns {unknown[]} The final arguments
 	 */
 	private static buildFinalHandlerArgs (args: EventFuncProxyArgs) {
-		if (config.disableParamInjection) {
-			return args.args
-		}
-
 		const argsMetadata = args.methodMetadata.argsMetadata
 
 		if (args.methodMetadata.metadata.ioMetadata.listenerMetadata.length === 0) {
-			return args.args
+			return args.data
 		}
 
 		const finalArgs: unknown[] = []

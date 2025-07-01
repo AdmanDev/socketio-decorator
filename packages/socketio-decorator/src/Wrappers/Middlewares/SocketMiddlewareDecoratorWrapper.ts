@@ -61,11 +61,8 @@ export class SocketMiddlewareDecoratorWrapper {
 			const method = controllerInstance[methodName]
 
 			const socketMiddlewareProxy: EventFuncProxyType = async function (proxyArgs) {
-				const methodArgs = proxyArgs.args
-				const [, ...methodArgsWithoutSocket] = methodArgs
-
 				const middlewareResult = new Promise((resolve) => {
-					middleware.use([proxyArgs.eventName, ...methodArgsWithoutSocket], resolve)
+					middleware.use(proxyArgs.socket!, [proxyArgs.eventName, ...proxyArgs.data], resolve)
 				})
 
 				const error = await middlewareResult

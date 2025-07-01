@@ -28,8 +28,8 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	}
 
 	class ErrorSocketMiddleware implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void): void {
-			errorSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, event: Event, next: (err?: Error) => void): void {
+			errorSocketMiddlewareSpy(socket.id, event)
 
 			const action = event[1] as MiddlewareAction
 
@@ -46,22 +46,22 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 	}
 
 	class FirstSocketMiddleware implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void) {
-			firstSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			firstSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
 
 	class SecondSocketMiddleware implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void) {
-			secondSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			secondSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
 
 	class SocketMiddlewareForServerListenerTest implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void) {
-			serverListenerTestSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			serverListenerTestSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
@@ -166,7 +166,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 
 			clientSocket.on("simpleMiddlewareTestResp", () => {
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(listenerFnSpy).toHaveBeenCalledTimes(1)
 				expect(listenerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
@@ -192,7 +192,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 			await waitFor(50)
 
 			expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(2)
-			expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([firstEvent, data])
+			expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [firstEvent, data])
 
 			expect(listenerFnSpy).toHaveBeenCalledTimes(1)
 			expect(listenerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
@@ -210,10 +210,10 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 
 			clientSocket.on("simpleEventWithManyMiddlewaresTestResp", () => {
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(secondSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(listenerFnSpy).toHaveBeenCalledTimes(1)
 				expect(listenerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
@@ -235,7 +235,7 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 				expect(connectionFnSpy).toHaveBeenCalledTimes(1)
 
 				expect(serverListenerTestSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(serverListenerTestSocketMiddlewareSpy).toHaveBeenCalledWith([event])
+				expect(serverListenerTestSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event])
 
 				done()
 			})
