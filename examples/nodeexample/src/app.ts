@@ -29,8 +29,8 @@ useSocketIoDecorator({
 			id: socket.id
 		}
 	},
-	searchUserSocket: (id: string) => {
-		return io.sockets.sockets.get(id)
+	searchUserSocket: async (id: string) => {
+		return Promise.resolve(io.sockets.sockets.get(id) || null)
 	}
 })
 
