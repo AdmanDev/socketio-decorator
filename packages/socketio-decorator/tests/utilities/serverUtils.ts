@@ -6,7 +6,6 @@ import { useSocketIoDecorator } from "../../src/main"
 import { RegisterEventAndEmitParams, ServerEventCallbacks } from "../types/functionsReturnTypes"
 
 let port = 8000
-export const ioServer: Server = {} as Server
 
 /**
  * Creates an server with the given siodConfig.

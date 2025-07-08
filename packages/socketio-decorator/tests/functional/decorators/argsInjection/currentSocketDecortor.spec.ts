@@ -21,8 +21,7 @@ describe("> CurrentSocket Decorator", () => {
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [ControllerTest],
-				disableParamInjection: false
+				controllers: [ControllerTest]
 			},
 			{
 				onServerListen: done

@@ -11,12 +11,13 @@ export function useIoServer (): Server {
 
 /**
  * Get the current user from the socket instance
+ * @deprecated This hook is deprecated and will be removed in future versions. Use `@CurrentUser()` decorator instead.
  * @param {Socket} socket The socket instance
  * @returns {TUser | null} The current user
  * @template TUser The user type
  */
 export function useCurrentUser<TUser> (socket: Socket) {
-	if (!config.currentUserProvider) {
+	if (!config.currentUserProvider) { // TODO: remove this hook
 		return null
 	}
 
