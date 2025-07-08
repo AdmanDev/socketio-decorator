@@ -34,7 +34,7 @@ export type SiodConfig = {
 	/**
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
 	 */
-	currentUserProvider?: (socket: Socket) => Any
+	currentUserProvider?: (socket: Socket) => Promise<Any>
 	/**
 	 * Search for a user socket that matches the search argument
 	 * @param {any} arg The search argument
