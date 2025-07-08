@@ -25,15 +25,15 @@ export async function useCurrentUser<TUser> (socket: Socket) {
 }
 
 /**
- * Get the socket instance from a user
+ * Get the socket instance from some argument
  * @param {T} arg The argument to search the socket
  * @template T The argument type
- * @returns {Socket | undefined} The socket instance
+ * @returns {Promise<Socket | null>} The socket instance
  */
-export function useUserSocket<T> (arg: T): Socket | undefined {
+export async function useUserSocket<T> (arg: T) {
 	if (!config.searchUserSocket) {
-		return undefined
+		return null
 	}
 
-	return config.searchUserSocket(arg)
+	return await config.searchUserSocket(arg)
 }

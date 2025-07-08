@@ -33,12 +33,14 @@ export type SiodConfig = {
 	errorMiddleware?: Function
 	/**
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
+	 * @returns {Promise<TUser | null>} The current user if found, or null if not found
+	 * @template TUser The user type
 	 */
 	currentUserProvider?: (socket: Socket) => Promise<Any>
 	/**
 	 * Search for a user socket that matches the search argument
 	 * @param {any} arg The search argument
-	 * @returns {Socket | undefined} The socket that matches the search argument
+	 * @returns {Promise<Socket | null>} The socket that matches the search argument
 	 */
-	searchUserSocket?: (arg: Any) => Socket | undefined
+	searchUserSocket?: (arg: Any) => Promise<Socket | null>
 }

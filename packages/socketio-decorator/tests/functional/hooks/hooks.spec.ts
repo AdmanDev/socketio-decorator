@@ -104,15 +104,16 @@ describe("> Hooks tests", () => {
 
 			class TestHookController {
 				@SocketOn("get-user-socket")
-				public getUserSocket (@CurrentSocket() socket: ServerSocket) {
-					controllerFnSpy(useUserSocket(socket.id)?.id)
+				public async getUserSocket (@CurrentSocket() socket: ServerSocket) {
+					const userSocket = await useUserSocket(socket.id)
+					controllerFnSpy(userSocket?.id)
 				}
 			}
 
 			io = createServer(
 				{
 					controllers: [TestHookController],
-					searchUserSocket: (userId: string) => io.sockets.sockets.get(userId)
+					searchUserSocket: async (userId: string) => Promise.resolve(io.sockets.sockets.get(userId) || null)
 				},
 				{
 					onServerListen: () => {
@@ -133,13 +134,14 @@ describe("> Hooks tests", () => {
 			}
 		})
 
-		it("should get undefined if the searchUserSocket function isn't defined", (done) => {
+		it("should get null if the searchUserSocket function isn't defined", (done) => {
 			const controllerFnSpy = jest.fn()
 
 			class TestHookController {
 				@SocketOn("get-user-socket")
-				public getUserSocket (@CurrentSocket() socket: ServerSocket) {
-					controllerFnSpy(useUserSocket(socket.id)?.id)
+				public async getUserSocket (@CurrentSocket() socket: ServerSocket) {
+					const userSocket = await useUserSocket(socket.id)
+					controllerFnSpy(userSocket)
 				}
 			}
 
@@ -160,7 +162,7 @@ describe("> Hooks tests", () => {
 				await waitFor(50)
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
-				expect(controllerFnSpy).toHaveBeenCalledWith(undefined)
+				expect(controllerFnSpy).toHaveBeenCalledWith(null)
 
 				done()
 			}

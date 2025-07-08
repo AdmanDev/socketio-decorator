@@ -23,6 +23,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
+  - [UseUserSocket hook](#useusersocket-hook)
 - [Dependency Injection](#dependency-injection)
 - [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
@@ -757,6 +758,36 @@ import { Server } from "socket.io"
 
 const io: Server = useIoServer()
 ```
+
+---
+
+### UseUserSocket hook
+
+The `useUserSocket` hook allows you to retrieve a specific connected socket instance based on a search argument (e.g., user ID).
+
+1. **Setup the `searchUserSocket` function**
+
+   In the `app.ts` file, provide a function that searches for a user socket based on an argument:
+
+    ```typescript
+    useSocketIoDecorator({
+        ...,
+        // Here we decide that the search argument is the user ID but you can use any other argument type
+        searchUserSocket: async (userId: string) => {
+            const allSockets = Array.from(io.sockets.sockets.values())
+            return allSockets.find(socket => socket.user.id === userId) || null
+        },
+    })
+    ```
+
+2. **Use the `useUserSocket` hook anywhere**
+
+    ```typescript
+    import { useUserSocket } from "@admandev/socketio-decorator"
+    import { Socket } from "socket.io"
+
+    const userSocket: Socket | null = await useUserSocket(userId)
+    ```
 
 ## Dependency Injection
 
