@@ -39,15 +39,15 @@ describe("> Hooks tests", () => {
 			class TestHookController {
 				@SocketOn("get-current-user")
 				@SocketEmitter("current-user-resp")
-				public getCurrentUser (@CurrentSocket() socket: ServerSocket) {
-					return useCurrentUser(socket)
+				public async getCurrentUser (@CurrentSocket() socket: ServerSocket) {
+					return await useCurrentUser(socket)
 				}
 			}
 
 			io = createServer(
 				{
 					controllers: [TestHookController],
-					currentUserProvider: (socket) => ({ id: socket.id })
+					currentUserProvider: (socket) => Promise.resolve({ id: socket.id })
 				},
 				{
 					onServerListen: () => {
@@ -70,8 +70,9 @@ describe("> Hooks tests", () => {
 			class TestHookController {
 				@SocketOn("get-current-user")
 				@SocketEmitter("current-user-resp")
-				public getCurrentUser (socket: ServerSocket) {
-					return { user: useCurrentUser(socket)}
+				public async getCurrentUser (socket: ServerSocket) {
+					const user = await useCurrentUser(socket)
+					return { user }
 				}
 			}
 

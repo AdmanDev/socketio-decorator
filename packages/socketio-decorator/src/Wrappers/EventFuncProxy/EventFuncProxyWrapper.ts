@@ -16,7 +16,7 @@ export class EventFuncProxyWrapper {
 		const originalHandler = controller[methodName] as (...args: unknown[]) => Promise<unknown>
 
 		const proxy: EventFuncProxyType = async (proxyArgs) => {
-			const finalArgs = EventFuncArgProvider.buildFinalHandlerArgs(proxyArgs)
+			const finalArgs = await EventFuncArgProvider.buildFinalHandlerArgs(proxyArgs)
 			return await originalHandler.apply(controller, finalArgs)
 		}
 

@@ -35,13 +35,13 @@ describe("> CurrentUser Decorator", () => {
     		{
     			controllers: [ControllerTest],
     			errorMiddleware: ErrorMiddleware,
-    			currentUserProvider: (socket: ServerSocket) => {
+    			currentUserProvider: async (socket: ServerSocket) => {
     				const user: User = {
     					id: socket.id,
     					name: "Test User"
     				}
 
-    				return user
+    				return Promise.resolve(user)
     			}
     		},
     		{

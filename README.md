@@ -484,9 +484,9 @@ Injects the current user object into an event handler parameter.
     ```typescript
     useSocketIoDecorator({
         ...,
-        currentUserProvider: (socket: Socket) => {
+        currentUserProvider: async (socket: Socket) => {
             const token = socket.handshake.auth.token
-            return userServices.getUserByToken(token)
+            return await userServices.getUserByToken(token)
         },
     })
     ```

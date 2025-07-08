@@ -5,6 +5,7 @@ import { CurrentSocket, Data, EventName, IErrorMiddleware, SocketOnAnyOutgoing }
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { IoCContainer } from "../../../../src/IoCContainer"
+import { waitFor } from "../../../utilities/testUtils"
 
 describe("> SocketOnAnyOutgoing decorator", () => {
 	let io: Server
@@ -61,12 +62,14 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 	})
 
 	describe("> Functional tests", () => {
-		it("should register a listener for any outgoing event and dispatch the data to the controller", () => {
+		it("should register a listener for any outgoing event and dispatch the data to the controller", async () => {
 			const data: MessageData = { message: "Hello ma'am" }
 
 			const controller = IoCContainer.getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
 
 			controller.sendMessage(data)
+
+			await waitFor(50)
 
 			expect(errorMiddlewareCallback).not.toHaveBeenCalled()
 			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledTimes(1)
@@ -75,12 +78,14 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 	})
 
 	describe("> Data validation tests", () => {
-		it("should not throw an error if the data is not valid", () => {
+		it("should not throw an error if the data is not valid", async () => {
 			const data = { wrong: "data" }
 
 			const controller = IoCContainer.getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
 
 			controller.sendMessage(data as Any)
+
+			await waitFor(50)
 
 			expect(errorMiddlewareCallback).not.toHaveBeenCalled()
 			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledTimes(1)

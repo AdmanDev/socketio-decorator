@@ -11,9 +11,9 @@ export class EventFuncArgProvider {
 	/**
 	 * Builds the final arguments for the handler
 	 * @param {EventFuncProxyArgs} args The proxy args
-	 * @returns {unknown[]} The final arguments
+	 * @returns {Promise<unknown[]>} The final arguments
 	 */
-	public static buildFinalHandlerArgs (args: EventFuncProxyArgs) {
+	public static async buildFinalHandlerArgs (args: EventFuncProxyArgs) {
 		const argsMetadata = args.methodMetadata.argsMetadata
 
 		if (args.methodMetadata.metadata.ioMetadata.listenerMetadata.length === 0) {
@@ -23,7 +23,7 @@ export class EventFuncArgProvider {
 		const finalArgs: unknown[] = []
 
 		for (const meta of argsMetadata) {
-			finalArgs[meta.parameterIndex] = EventFuncArgProvider.getArgValue(args, meta)
+			finalArgs[meta.parameterIndex] = await EventFuncArgProvider.getArgValue(args, meta)
 		}
 
 		return finalArgs
@@ -33,15 +33,15 @@ export class EventFuncArgProvider {
 	 * Gets the value of the argument based on the metadata
 	 * @param {EventFuncProxyArgs} args The proxy args
 	 * @param {MethodArgMetadata} argMetadata The argument metadata
-	 * @returns {unknown} The value of the argument
+	 * @returns {Promise<unknown>} The value of the argument
 	 */
-	private static getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
+	private static async getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
 
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
 			data: args.data,
 			eventName: args.eventName,
-			currentUser: this.getCurrentUserArg(argMetadata, args.socket)
+			currentUser: await this.getCurrentUserArg(argMetadata, args.socket)
 		}
 
 		switch (argMetadata.valueType) {
@@ -57,11 +57,11 @@ export class EventFuncArgProvider {
 	 * Gets the current user argument from the socket
 	 * @param {MethodArgMetadata} argMetadata The argument metadata
 	 * @param {Socket | null} socket The socket instance
-	 * @returns {unknown | null} The current user value
+	 * @returns {Promise<unknown | null>} The current user value
 	 */
-	private static getCurrentUserArg (argMetadata: MethodArgMetadata, socket: Socket | null) {
+	private static async getCurrentUserArg (argMetadata: MethodArgMetadata, socket: Socket | null) {
 		if (argMetadata.valueType !== "currentUser") {
-			return null
+			return Promise.resolve(null)
 		}
 
 		if (!config.currentUserProvider) {
@@ -75,7 +75,7 @@ export class EventFuncArgProvider {
 		let currentUser: unknown = null
 
 		if (config.currentUserProvider) {
-			currentUser = config.currentUserProvider(socket)
+			currentUser = await config.currentUserProvider(socket)
 		}
 
 		return currentUser
