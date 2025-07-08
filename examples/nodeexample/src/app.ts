@@ -24,10 +24,10 @@ useSocketIoDecorator({
 	serverMiddlewares: [MyServerMiddleware],
 	socketMiddlewares: [MySocketMiddleware],
 	errorMiddleware: MyErrorMiddleware,
-	currentUserProvider: (socket: Socket) => {
-		return {
+	currentUserProvider: async (socket: Socket) => {
+		return Promise.resolve({
 			id: socket.id
-		}
+		})
 	},
 	searchUserSocket: async (id: string) => {
 		return Promise.resolve(io.sockets.sockets.get(id) || null)
