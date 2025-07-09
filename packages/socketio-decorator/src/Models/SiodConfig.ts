@@ -32,7 +32,7 @@ export type SiodConfig = {
 	 */
 	errorMiddleware?: Function
 	/**
-	 * The current user provider that will be used to get the current user from useCurrentUser hook
+	 * The current user provider that will be used to get the current user from CurrentUser decorator.
 	 * @returns {Promise<TUser | null>} The current user if found, or null if not found
 	 * @template TUser The user type
 	 */

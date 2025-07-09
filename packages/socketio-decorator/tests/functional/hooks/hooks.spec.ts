@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { CurrentSocket, SocketEmitter, SocketOn, useCurrentUser, useIoServer, useUserSocket } from "../../../src"
-import { createSocketClient, createServer } from "../../utilities/serverUtils"
+import { CurrentSocket, SocketOn, useIoServer, useUserSocket } from "../../../src"
+import { createServer, createSocketClient } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
 
 describe("> Hooks tests", () => {
@@ -30,70 +30,6 @@ describe("> Hooks tests", () => {
 
 				expect(ioServer).toBe(io)
 				done()
-			}
-		})
-	})
-
-	describe("> useCurrentUser hook tests", () => {
-		it("should get the current user from the socket instance", (done) => {
-			class TestHookController {
-				@SocketOn("get-current-user")
-				@SocketEmitter("current-user-resp")
-				public async getCurrentUser (@CurrentSocket() socket: ServerSocket) {
-					return await useCurrentUser(socket)
-				}
-			}
-
-			io = createServer(
-				{
-					controllers: [TestHookController],
-					currentUserProvider: (socket) => Promise.resolve({ id: socket.id })
-				},
-				{
-					onServerListen: () => {
-						clientSocket = createSocketClient(onSocketConnect)
-					}
-				}
-			)
-
-			const onSocketConnect = () => {
-				clientSocket.on("current-user-resp", (user) => {
-					expect(user).toEqual({ id: clientSocket.id })
-					done()
-				})
-
-				clientSocket.emit("get-current-user")
-			}
-		})
-
-		it("should get null if the current user provider isn't defined", (done) => {
-			class TestHookController {
-				@SocketOn("get-current-user")
-				@SocketEmitter("current-user-resp")
-				public async getCurrentUser (socket: ServerSocket) {
-					const user = await useCurrentUser(socket)
-					return { user }
-				}
-			}
-
-			io = createServer(
-				{
-					controllers: [TestHookController],
-				},
-				{
-					onServerListen: () => {
-						clientSocket = createSocketClient(onSocketConnect)
-					}
-				}
-			)
-
-			const onSocketConnect = () => {
-				clientSocket.on("current-user-resp", (user) => {
-					expect(user).toEqual({ user: null })
-					done()
-				})
-
-				clientSocket.emit("get-current-user")
 			}
 		})
 	})
