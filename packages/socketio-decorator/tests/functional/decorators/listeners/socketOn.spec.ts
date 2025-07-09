@@ -4,6 +4,7 @@ import { Socket as ClientSocket } from "socket.io-client"
 import { CurrentSocket, Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
+import { waitFor } from "../../../utilities/testUtils"
 
 describe("> SocketOn decorator", () => {
 	let io: Server
@@ -158,7 +159,8 @@ describe("> SocketOn decorator", () => {
 		it("should not validate the data on DISCONNECT and DISCONNECTING event", (done) => {
 			disconnectSpy.mockClear()
 
-			serverSocket.on("disconnect", () => {
+			serverSocket.on("disconnect", async () => {
+				await waitFor(50)
 				expect(errorMiddlewareSpy).not.toHaveBeenCalled()
 				expect(disconnectSpy).toHaveBeenCalled()
 

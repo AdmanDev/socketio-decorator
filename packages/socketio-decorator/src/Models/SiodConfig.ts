@@ -33,32 +33,14 @@ export type SiodConfig = {
 	errorMiddleware?: Function
 	/**
 	 * The current user provider that will be used to get the current user from useCurrentUser hook
+	 * @returns {Promise<TUser | null>} The current user if found, or null if not found
+	 * @template TUser The user type
 	 */
-	currentUserProvider?: (socket: Socket) => Any
+	currentUserProvider?: (socket: Socket) => Promise<Any>
 	/**
 	 * Search for a user socket that matches the search argument
 	 * @param {any} arg The search argument
-	 * @returns {Socket | undefined} The socket that matches the search argument
+	 * @returns {Promise<Socket | null>} The socket that matches the search argument
 	 */
-	searchUserSocket?: (arg: Any) => Socket | undefined
-	/**
-	 * Enables or disables parameter injection using decorators.
-	 *
-	 * When set to `true`, the legacy behavior is used:
-	 * - The handler receives the raw arguments as-is, typically: `(socket, ...data)`
-	 * - No parameter injection occurs — all arguments are mapped positionally.
-	 * - Decorators like `@CurrentSocket()` or `@Data()` are ignored.
-	 *
-	 * When set to `false` (default), the library uses metadata from parameter decorators
-	 * like `@CurrentSocket()` and `@Data()` to determine the arguments passed to handler methods.
-	 * This allows for flexible argument positioning and explicit parameter semantics.
-	 *
-	 * ⚠️ **This legacy mode is deprecated** and will be removed in a future major release.
-	 * It is strongly recommended to migrate to decorator-based parameter injection
-	 * for better readability, maintainability, and future compatibility.
-	 * @default false
-	 * @deprecated Will be removed in a future major version.
-	 */
-	disableParamInjection?: boolean // TODO: See TODO list before removing this
-	// TODO: Remove this from README
+	searchUserSocket?: (arg: Any) => Promise<Socket | null>
 }

@@ -7,14 +7,12 @@ import { MethodMetadata } from "./Metadata/Metadata"
 export class EventFuncProxyArgs {
 	/**
 	 * Initializes a new instance of the EventFuncProxyArgs class.
-	 * @param {unknown[]} args Arguments to pass to the original method
 	 * @param {unknown[]} data Data sent by the client
 	 * @param {MethodMetadata} methodMetadata The metadata method
 	 * @param {string} eventName The socket event name
 	 * @param {Socket | null} socket Current client socket
 	 */
 	constructor (
-		public args: unknown[], // TODO: Delete this and use data instead
 		public data: unknown[],
 		public methodMetadata: MethodMetadata,
 		public eventName: string,

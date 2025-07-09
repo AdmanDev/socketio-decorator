@@ -26,7 +26,7 @@ export class IoActionHandler {
 		server: {
 			on: (ioserver: Server, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
 				ioserver.on(eventName, (socket: Socket) => {
-					const proxyArgs = new EventFuncProxyArgs([socket], [], metadata, eventName, socket)
+					const proxyArgs = new EventFuncProxyArgs([], metadata, eventName, socket)
 					method.apply(controller, [proxyArgs])
 				})
 			},
@@ -34,20 +34,19 @@ export class IoActionHandler {
 		socket: {
 			on: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
 				socket.on(eventName, (...data: unknown[]) => {
-					const proxyArgs = new EventFuncProxyArgs([socket, ...data], data, metadata, eventName, socket)
+					const proxyArgs = new EventFuncProxyArgs(data, metadata, eventName, socket)
 					method.apply(controller, [proxyArgs])
 				})
 			},
 			once: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
 				socket.once(eventName, (...data: unknown[]) => {
-					const proxyArgs = new EventFuncProxyArgs([socket, ...data], data, metadata, eventName, socket)
+					const proxyArgs = new EventFuncProxyArgs(data, metadata, eventName, socket)
 					method.apply(controller, [proxyArgs])
 				})
 			},
 			onAny: (socket: Socket, _: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
 				socket.onAny((eventName: string, ...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(
-						[socket, eventName, ...data],
 						data,
 						metadata,
 						eventName,
@@ -60,7 +59,6 @@ export class IoActionHandler {
 			onAnyOutgoing: (socket: Socket, _: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
 				socket.onAnyOutgoing((eventName: string, ...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(
-						[socket, eventName, ...data],
 						data,
 						metadata,
 						eventName,

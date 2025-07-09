@@ -7,7 +7,7 @@ import { DataValidationWrapper } from "./Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "./Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "./Wrappers/ErrorMiddlewareWrapper"
-import { EventFuncProxyWrapper } from "./Wrappers/EventFuncProxyWrapper"
+import { EventFuncProxyWrapper } from "./Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "./Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 
 /**

@@ -8,6 +8,8 @@ export type MethodArgMetadata = {
 		dataIndex: number
 	} | {
 		valueType: "eventName"
+	} | {
+		valueType: "currentUser"
 	}
 )
 

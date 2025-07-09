@@ -23,7 +23,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
-  - [UseCurrentUser hook](#usecurrentuser-hook)
+  - [UseUserSocket hook](#useusersocket-hook)
 - [Dependency Injection](#dependency-injection)
 - [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
@@ -366,21 +366,29 @@ Emits event to the current client.
 **Usage** :
 
 ```typescript
-@SocketOn("get-user")
-@SocketEmitter("get-user-resp")
-public getUser(@CurrentSocket() socket: Socket) {
-    return useCurrentUser(socket)
+@SocketOn("join-room")
+@SocketEmitter("room-joined")
+public joinRoom(@CurrentSocket() socket: Socket) {
+    socket.join("myRoom")
+    return {
+        info: `You have successfully joined room myRoom`,
+        roomId: "myRoom"
+    }
 }
 ```
 
 ```typescript
-@SocketOn("get-user")
+@SocketOn("join-room")
 @SocketEmitter()
-public getUser(@CurrentSocket() socket: Socket) {
+public joinRoom(@CurrentSocket() socket: Socket) {
+    socket.join("myRoom")
     return new EmitterOption({
         to: socket.id,
-        message: "get-user-resp",
-        data: useCurrentUser(socket),
+        message: "room-joined",
+        data: {
+            info: `You have successfully joined room myRoom`,
+            roomId: "myRoom"
+        },
     })
 }
 ```
@@ -394,6 +402,7 @@ The following decorators can be used to inject parameters into the event handler
 | `@CurrentSocket()` | Injects the current socket instance that is handling the message. |
 | `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
 | `@EventName()` | Injects the name of the event message that triggered the handler. |
+| `@CurrentUser()` | Injects the current user object. |
 
 #### Examples
 
@@ -460,6 +469,41 @@ public trackUserActivity(@EventName() event: string) {
     console.log(`User ${action}`)
 }
 ```
+
+---
+
+##### @CurrentUser()
+
+Injects the current user object into an event handler parameter.
+
+**Usage** :
+
+1. **Create the `currentUserProvider`**
+
+   In the `app.ts` file, create a function that returns the current user object:
+
+    ```typescript
+    useSocketIoDecorator({
+        ...,
+        currentUserProvider: async (socket: Socket) => {
+            const token = socket.handshake.auth.token
+            return await userServices.getUserByToken(token)
+        },
+    })
+    ```
+
+2. **Use the `CurrentUser` decoratoar**
+
+   In the event handler, use the `CurrentUser` decorator to get the current user object:
+
+    ```typescript
+    import { CurrentUser, SocketOn } from "@admandev/socketio-decorator"
+
+    @SocketOn("message")
+    public onMessage(@CurrentUser() user: User) {
+        console.log("Message received from user:", user.name)
+    }
+    ```
 
 ### Other decorators
 
@@ -554,10 +598,10 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
 
     ```typescript
     import { ISocketMiddleware } from "@admandev/socketio-decorator"
-    import { Event } from "socket.io"
+    import { Event, Socket } from "socket.io"
 
     export class MySocketMiddleware implements ISocketMiddleware {
-        use([event, ...args]: Event, next: (err?: Error) => void): void {
+        use(socket: Socket, [event, ...args]: Event, next: (err?: Error) => void): void {
             console.log(`MySocketMiddleware triggered from ${event} event`)
             next()
         }
@@ -715,37 +759,34 @@ import { Server } from "socket.io"
 const io: Server = useIoServer()
 ```
 
-### UseCurrentUser hook
+---
 
-The `useCurrentUser` hook provides the current user object. This hook is useful when you want to get the current user object in the event handler.
+### UseUserSocket hook
 
-1. **Create the `currentUserProvider`**
+The `useUserSocket` hook allows you to retrieve a specific connected socket instance based on a search argument (e.g., user ID).
 
-   In the `app.ts` file, create a function that returns the current user object:
+1. **Setup the `searchUserSocket` function**
+
+   In the `app.ts` file, provide a function that searches for a user socket based on an argument:
 
     ```typescript
     useSocketIoDecorator({
         ...,
-        currentUserProvider: (socket: Socket) => {
-            const token = socket.handshake.auth.token
-            return userServices.getUserByToken(token)
+        // Here we decide that the search argument is the user ID but you can use any other argument type
+        searchUserSocket: async (userId: string) => {
+            const allSockets = Array.from(io.sockets.sockets.values())
+            return allSockets.find(socket => socket.user.id === userId) || null
         },
     })
     ```
 
-2. **Use the `useCurrentUser` hook**
-
-   In the event handler, use the `useCurrentUser` hook to get the current user object:
+2. **Use the `useUserSocket` hook anywhere**
 
     ```typescript
-    import { useCurrentUser, SocketOn } from "@admandev/socketio-decorator"
+    import { useUserSocket } from "@admandev/socketio-decorator"
     import { Socket } from "socket.io"
 
-    @SocketOn("message")
-    public onMessage(@CurrentSocket() socket: Socket) {
-        const user = useCurrentUser(socket)
-        console.log("Message received from user:", user)
-    }
+    const userSocket: Socket | null = await useUserSocket(userId)
     ```
 
 ## Dependency Injection
@@ -796,15 +837,3 @@ public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
     console.log("Message from:", socket.id, "data:", data)
 }
 ```
-
-If you need to temporarily maintain backward compatibility, you can use the `disableParamInjection` option:
-
-```typescript
-useSocketIoDecorator({
-    ...,
-    disableParamInjection: true,
-})
-```
-
-> [!WARNING]
-> The `disableParamInjection` option is deprecated and will be removed in a future version. We strongly recommend migrating to the decorator-based parameter injection approach.

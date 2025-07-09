@@ -11,28 +11,29 @@ export function useIoServer (): Server {
 
 /**
  * Get the current user from the socket instance
+ * @deprecated This hook is deprecated and will be removed in future versions. Use `@CurrentUser()` decorator instead.
  * @param {Socket} socket The socket instance
- * @returns {TUser | null} The current user
+ * @returns {Promise<TUser | null>} The current user
  * @template TUser The user type
  */
-export function useCurrentUser<TUser> (socket: Socket) {
-	if (!config.currentUserProvider) {
-		return null
+export async function useCurrentUser<TUser> (socket: Socket) {
+	if (!config.currentUserProvider) { // TODO: remove this hook
+		return Promise.resolve(null)
 	}
 
-	return config.currentUserProvider(socket) as TUser | null
+	return await config.currentUserProvider(socket) as TUser | null
 }
 
 /**
- * Get the socket instance from a user
+ * Get the socket instance from some argument
  * @param {T} arg The argument to search the socket
  * @template T The argument type
- * @returns {Socket | undefined} The socket instance
+ * @returns {Promise<Socket | null>} The socket instance
  */
-export function useUserSocket<T> (arg: T): Socket | undefined {
+export async function useUserSocket<T> (arg: T) {
 	if (!config.searchUserSocket) {
-		return undefined
+		return null
 	}
 
-	return config.searchUserSocket(arg)
+	return await config.searchUserSocket(arg)
 }

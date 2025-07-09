@@ -20,16 +20,16 @@ describe("> Multi socket middleware tests", () => {
 	}
 
 	class FirstSocketMiddleware implements ISocketMiddleware {
-		public use (events: Event, next: (err?: Error) => void) {
-			firstSocketMiddlewareSpy(events)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			firstSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 
 	}
 
 	class SecondSocketMiddleware implements ISocketMiddleware {
-		public use (events: Event, next: (err?: Error) => void) {
-			secondSocketMiddlewareSpy(events)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			secondSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 
@@ -79,10 +79,10 @@ describe("> Multi socket middleware tests", () => {
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event])
+				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event])
 
 				expect(secondSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith([event])
+				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event])
 
 				expect(firstSocketMiddlewareSpy.mock.invocationCallOrder[0]).toBeLessThan(secondSocketMiddlewareSpy.mock.invocationCallOrder[0])
 				expect(secondSocketMiddlewareSpy.mock.invocationCallOrder[0]).toBeLessThan(controllerFnSpy.mock.invocationCallOrder[0])

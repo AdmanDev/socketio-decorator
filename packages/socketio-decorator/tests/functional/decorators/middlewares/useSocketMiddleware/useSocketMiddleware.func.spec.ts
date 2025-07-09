@@ -23,22 +23,22 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 	}
 
 	class FirstSocketMiddleware implements ISocketMiddleware {
-		public use (events: Event, next: (err?: Error) => void): void {
-			firstSocketMiddlewareSpy(events)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void): void {
+			firstSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
 
 	class SecondSocketMiddleware implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void): void {
-			secondSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void): void {
+			secondSocketMiddlewareSpy(socket.id, events)
 			next()
 		}
 	}
 
 	class ErrorSocketMiddleware implements ISocketMiddleware {
-		public use (event: Event, next: (err?: Error) => void): void {
-			errorSocketMiddlewareSpy(event)
+		public use (socket: ServerSocket, event: Event, next: (err?: Error) => void): void {
+			errorSocketMiddlewareSpy(socket.id, event)
 
 			const action = event[1] as MiddlewareAction
 
@@ -119,7 +119,7 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 
 			clientSocket.on("simpleMiddlewareTestResp", () => {
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
@@ -138,10 +138,10 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 
 			clientSocket.on("multiSocketMiddlewareTestResp", () => {
 				expect(firstSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(firstSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(secondSocketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith([event, data])
+				expect(secondSocketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event, data])
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
