@@ -21,8 +21,8 @@ describe("> Socket middleware tests", () => {
 	}
 
 	class SocketMiddleware implements ISocketMiddleware {
-		public use (events: Event, next: (err?: Error) => void) {
-			socketMiddlewareSpy(events)
+		public use (socket: ServerSocket, events: Event, next: (err?: Error) => void) {
+			socketMiddlewareSpy(socket.id, events)
 
 			const action = events[0] as MiddlewareAction
 
@@ -96,7 +96,7 @@ describe("> Socket middleware tests", () => {
 				expect(errorMiddlewareSpy).not.toHaveBeenCalled()
 
 				expect(socketMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(socketMiddlewareSpy).toHaveBeenCalledWith([event])
+				expect(socketMiddlewareSpy).toHaveBeenCalledWith(clientSocket.id, [event])
 
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 				expect(socketMiddlewareSpy.mock.invocationCallOrder[0]).toBeLessThan(controllerFnSpy.mock.invocationCallOrder[0])
@@ -129,7 +129,7 @@ describe("> Socket middleware tests", () => {
 			await waitFor(50)
 
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(new Error("error thrown"), undefined)
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(new Error("error thrown"), clientSocket.id)
 			expect(controllerFnSpy).not.toHaveBeenCalled()
 		})
 

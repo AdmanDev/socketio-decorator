@@ -1,6 +1,5 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals"
+import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
-import { Socket as ClientSocket } from "socket.io-client"
 import { SocketOn, useSocketIoDecorator } from "../../src"
 import { ListenersRegistrar } from "../../src/EventRegistrars/ListenersRegistrar"
 import { MiddlewaresRegistrar } from "../../src/EventRegistrars/MiddlewaresRegistrar"
@@ -11,22 +10,11 @@ import { DataValidationWrapper } from "../../src/Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/SocketEmitterWrapper"
 import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrapper"
-import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxyWrapper"
+import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 import { expectCallOrder } from "../utilities/testUtils"
 
 describe("> System tests", () => {
-	let io: Server
-	let clientSocket: ClientSocket
-
-	afterEach(() => {
-		clientSocket?.disconnect()
-	})
-
-	afterAll(() => {
-		io?.close()
-	})
-
 	class FirstController {
 
 		@SocketOn("message")

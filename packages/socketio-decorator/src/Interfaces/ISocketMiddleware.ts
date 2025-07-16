@@ -1,4 +1,4 @@
-import { Event } from "socket.io"
+import { Event, Socket } from "socket.io"
 
 /**
  * Defines the socket middleware interface
@@ -6,8 +6,9 @@ import { Event } from "socket.io"
 export type ISocketMiddleware = {
 	/**
 	 * The middleware function to use
+	 * @param {Socket} socket The socket instance
 	 * @param {Event} event The socket event object
 	 * @param {Function} next The next function to call
 	 */
-	use: (event: Event, next: (err?: Error) => void) => void
+	use: (socket: Socket, event: Event, next: (err?: Error) => void) => void
 }
