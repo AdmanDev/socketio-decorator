@@ -14,20 +14,31 @@ const binderEvents: EventBinder[] = []
 export let config: SiodConfig
 
 /**
+ * Gets the controller metadata for a given target.
+ * @param {object} target - The target object.
+ * @returns {ControllerMetadata} The controller metadata for the target.
+ */
+export function getControllerMetadata (target: Object) {
+	const targetClass = MetadataUtils.getTargetClass(target)
+	return controllerMetadata.find((m) => m.controllerTarget === targetClass)
+}
+
+/**
  * Gets or creates the controller metadata for a given target.
  * @param {object} target - The target object.
  * @returns {ControllerMetadata} The controller metadata for the target.
  */
 function getOrCreateControllerMetadata (target: Object) {
-	const targetClass = MetadataUtils.getTargetClass(target)
-	const metadata = controllerMetadata.find((m) => m.controllerTarget === targetClass)
+	const metadata = getControllerMetadata(target)
 
 	if (!metadata) {
+		const targetClass = MetadataUtils.getTargetClass(target)
 		const controllerName = MetadataUtils.getTargetName(target)
 
 		const newMetadata: ControllerMetadata = {
 			controllerTarget: targetClass,
 			controllerName,
+			namespace: "/",
 			methodMetadata: [],
 			middlewaresMetadata: []
 		}
@@ -78,6 +89,25 @@ function getOrCreateMethodMetadata (target: Object, methodName: string) {
  */
 export function getAllMetadata () {
 	return [...controllerMetadata]
+}
+
+/**
+ * Updates the controller metadata for a given target
+ * @param {object} target - The target object.
+ * @param {Partial<ControllerMetadata>} metadata - The metadata to update.
+ */
+export function updateControllerMetadata (target: Object, metadata: Partial<ControllerMetadata>) {
+	const targetMetadata = getOrCreateControllerMetadata(target)
+
+	const targetClass = MetadataUtils.getTargetClass(target)
+	const metadataIndex = controllerMetadata.findIndex((m) => m.controllerTarget === targetClass)
+
+	if (metadataIndex !== -1) {
+		controllerMetadata[metadataIndex] = {
+			...targetMetadata,
+			...metadata
+		}
+	}
 }
 
 /**
@@ -133,28 +163,30 @@ export function addMethodArgMetadata (target: Object, methodName: string, argMet
 
 /**
  * Adds a event binder to the global binder events array
+ * @param {string} namespace The namespace of the event
  * @param {string} event The event name
  * @param {Function} bindMethod The method to execute when the event is triggered
  */
-export function addEventBinder (event: string, bindMethod: (socket: Socket) => void) {
+export function addEventBinder (namespace: string, event: string, bindMethod: (socket: Socket) => void) {
 	binderEvents.push({
 		eventName: event,
+		namespace,
 		method: bindMethod
 	})
 }
 
 /**
  * Gets the global event binders array
- * @returns {Record<string, Function[]>} The binder events grouped by event name
+ * @returns {Record<string, EventBinder[]>} The binder events grouped by event name
  */
 export function getAllEventBinders () {
 	return binderEvents.reduce((acc, event) => {
 		if (!acc[event.eventName]) {
 			acc[event.eventName] = []
 		}
-		acc[event.eventName].push(event.method)
+		acc[event.eventName].push(event)
 		return acc
-	}, {} as Record<string, Function[]>)
+	}, {} as Record<string, EventBinder[]>)
 }
 
 /**

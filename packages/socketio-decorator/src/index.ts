@@ -17,6 +17,8 @@ export * from "./Decorators/ArgsInjection/CurrentUserDecorator"
 export * from "./Decorators/ArgsInjection/DataDecorator"
 export * from "./Decorators/ArgsInjection/EventNameDecorator"
 
+export * from "./Decorators/Others/SocketNamespaceDecorator"
+
 // Hooks
 export * from "./Others/Hooks"
 
