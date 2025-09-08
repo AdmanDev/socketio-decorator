@@ -1,4 +1,4 @@
-import { addEventBinder, config, getAllEventBinders } from "../globalMetadata"
+import { addEventBinder, config, getAllEventBinders, getControllerMetadata } from "../globalMetadata"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { MethodMetadata } from "../Models/Metadata/Metadata"
@@ -30,8 +30,18 @@ export class ListenersRegistrar {
 		const binderEvents = getAllEventBinders()
 		Object.keys(binderEvents)
 			.forEach(event => {
-				config.ioserver.on(event, (socket) => {
-					binderEvents[event].forEach(method => method(socket))
+				const groupedEventByNamespace = binderEvents[event].reduce((acc, eventBinder) => {
+					if (!acc[eventBinder.namespace]) {
+						acc[eventBinder.namespace] = []
+					}
+					acc[eventBinder.namespace].push(eventBinder.method)
+					return acc
+				}, {} as Record<string, Function[]>)
+
+				Object.keys(groupedEventByNamespace).forEach(namespace => {
+					config.ioserver.of(namespace).on(event, (socket) => {
+						groupedEventByNamespace[namespace].forEach(method => method(socket))
+					})
 				})
 			})
 	}
@@ -75,7 +85,10 @@ export class ListenersRegistrar {
 			})
 		})
 
-		addEventBinder("connection", (socket) => {
+		const controllerMetadata = getControllerMetadata(controllerInstance)
+		const namespace = controllerMetadata?.namespace || "/"
+
+		addEventBinder(namespace, "connection", (socket) => {
 			filteredMetadata.forEach(({method, metadata}) => {
 				IoActionHandler.callSocketAction(socket, methodMetadata, metadata, controllerInstance, method)
 			})

@@ -59,6 +59,10 @@ export class MetadataUtils {
 	 * @returns {ClassConstructorType<typeof target>} The class constructor of the target.
 	 */
 	public static getTargetClass (target: Object) {
+		if (typeof target === "function") {
+			return target as ClassConstructorType<typeof target>
+		}
+
 		return target.constructor as ClassConstructorType<typeof target>
 	}
 

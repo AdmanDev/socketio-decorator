@@ -1,12 +1,13 @@
 /* eslint-disable stylistic/max-len */
 import { Server, Socket } from "socket.io"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { MethodMetadata } from "../Models/Metadata/Metadata"
+import { ControllerMetadata, MethodMetadata } from "../Models/Metadata/Metadata"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { EventMapAction } from "../Models/Metadata/EventMappingDescription"
+import { getControllerMetadata } from "../globalMetadata"
 
 type ServerAction = {
-	[action in EventMapAction]: (ioserver: Server, eventName: string, metadata: MethodMetadata, controllerInstance: Any, method: EventFuncProxyType) => void
+	[action in EventMapAction]: (ioserver: Server, eventName: string, metadata: MethodMetadata, controllerMetadata: ControllerMetadata, method: EventFuncProxyType) => void
 }
 
 type SocketAction = {
@@ -24,11 +25,13 @@ type IoActionFnBinder = {
 export class IoActionHandler {
 	private static readonly ioFns: IoActionFnBinder = {
 		server: {
-			on: (ioserver: Server, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
-				ioserver.on(eventName, (socket: Socket) => {
-					const proxyArgs = new EventFuncProxyArgs([], metadata, eventName, socket)
-					method.apply(controller, [proxyArgs])
-				})
+			on: (ioserver: Server, eventName: string, metadata: MethodMetadata, controllerMetadata: ControllerMetadata, method: EventFuncProxyType) => {
+				ioserver
+					.of(controllerMetadata.namespace)
+					.on(eventName, (socket: Socket) => {
+						const proxyArgs = new EventFuncProxyArgs([], metadata, eventName, socket)
+						method.apply(controllerMetadata.controllerInstance, [proxyArgs])
+					})
 			},
 		},
 		socket: {
@@ -83,7 +86,9 @@ export class IoActionHandler {
 		const fn = IoActionHandler.ioFns.server[listenerMetadata.action]
 		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
-		fn?.(ioserver, listenerMetadata.eventName, methodMetadata, controller, method)
+		const controllerMetadata = getControllerMetadata(listenerMetadata.target)
+
+		fn?.(ioserver, listenerMetadata.eventName, methodMetadata, controllerMetadata!, method)
 	}
 
 	/**

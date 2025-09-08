@@ -62,6 +62,7 @@ describe("> Module auto import tests", () => {
 				controllers: [`${fakeDirPath}/*.js`],
 				ioserver: {
 					on: jest.fn(),
+					of: jest.fn().mockReturnThis()
 				} as unknown as Server,
 			})
 
@@ -93,6 +94,7 @@ describe("> Module auto import tests", () => {
 				controllers: [`${fakeDirPath1}/*.js`, `${fakeDirPath2}/*.js`],
 				ioserver: {
 					on: jest.fn(),
+					of: jest.fn().mockReturnThis()
 				} as unknown as Server,
 			})
 

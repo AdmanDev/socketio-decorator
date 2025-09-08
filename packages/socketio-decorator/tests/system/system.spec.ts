@@ -42,6 +42,7 @@ describe("> System tests", () => {
 				controllers: [FirstController],
 				ioserver: {
 					on: jest.fn(),
+					of: jest.fn().mockReturnThis()
 				} as unknown as Server,
 			})
 

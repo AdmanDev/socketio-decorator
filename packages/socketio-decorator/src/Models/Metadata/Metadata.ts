@@ -7,6 +7,7 @@ export type ControllerMetadata = {
 	controllerTarget: new () => Any
 	controllerInstance?: Any
 	controllerName: string
+	namespace: string
 	methodMetadata: MethodMetadata[]
 	middlewaresMetadata: ClassSocketMiddlewareMetadata[]
 }

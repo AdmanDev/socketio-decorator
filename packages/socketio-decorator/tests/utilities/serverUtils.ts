@@ -5,7 +5,7 @@ import { SiodConfig } from "../../src/Models/SiodConfig"
 import { useSocketIoDecorator } from "../../src/main"
 import { RegisterEventAndEmitParams, ServerEventCallbacks } from "../types/functionsReturnTypes"
 
-let port = 8000
+export let port = 8000
 
 /**
  * Creates an server with the given siodConfig.
