@@ -510,6 +510,7 @@ Injects the current user object into an event handler parameter.
 | Decorator | Description                                              |
 |-------------------------|----------------------------------------------------------|
 | `@UseSocketMiddleware(...ISocketMiddleware[])` | Applies one or more socket middleware to the event handler or controller class. |
+| `@SocketNamespace(namespace: string)` | Defines a namespace for a socket controller |
 
 #### Examples
 
@@ -557,6 +558,29 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     > [!NOTE]
     > This decorator is applied to socket listener handlers only (`@SocketOn`, `@SocketOnce`, `@SocketOnAny`, ...).
     > It does not apply to server listeners (`@ServerOn`) or emitters.
+
+---
+
+##### @SocketNamespace(namespace: string)
+
+**Equivalent in basic Socket.io:** `io.of(namespace)`
+
+Defines a namespace for a socket controller. All socket events in this controller will be handled within this namespace. Learn more about [Socket.IO namespaces](https://socket.io/docs/v4/namespaces/).
+
+**Usage** :
+
+```typescript
+@SocketNamespace("/my-namespace")
+export class MyNamespaceController {
+    @SocketOn("message")
+    public onMessage(@Data() data: MessageRequest) {
+        console.log("Message in my-namespace", data.message)
+    }
+}
+```
+
+> [!WARNING]
+> The namespace must start with "/" or it will throw a `SiodDecoratorError`.
 
 ## Middlewares
 
