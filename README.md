@@ -17,6 +17,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Middlewares](#middlewares)
   - [Server Middleware](#server-middleware)
   - [Socket Middleware](#socket-middleware)
+  - [Namespace middleware](#namespace-middleware)
   - [Error handling middleware](#error-handling-middleware)
 - [Data validation](#data-validation)
   - [Setup](#setup)
@@ -510,6 +511,8 @@ Injects the current user object into an event handler parameter.
 | Decorator | Description                                              |
 |-------------------------|----------------------------------------------------------|
 | `@UseSocketMiddleware(...ISocketMiddleware[])` | Applies one or more socket middleware to the event handler or controller class. |
+| `@SocketNamespace(namespace: string)` | Defines a namespace for a socket controller |
+| `@MiddlewareOption(options: MiddlewareOptionType)` | Applies options to a middleware. |
 
 #### Examples
 
@@ -557,6 +560,41 @@ First create a [socket middleware](#socket-middleware) before choosing one of ne
     > [!NOTE]
     > This decorator is applied to socket listener handlers only (`@SocketOn`, `@SocketOnce`, `@SocketOnAny`, ...).
     > It does not apply to server listeners (`@ServerOn`) or emitters.
+
+---
+
+##### @SocketNamespace(namespace: string)
+
+**Equivalent in basic Socket.io:** `io.of(namespace)`
+
+Defines a namespace for a socket controller. All socket events in this controller will be handled within this namespace. Learn more about [Socket.IO namespaces](https://socket.io/docs/v4/namespaces/).
+
+**Usage** :
+
+```typescript
+@SocketNamespace("/my-namespace")
+export class MyNamespaceController {
+    @SocketOn("message")
+    public onMessage(@Data() data: MessageRequest) {
+        console.log("Message in my-namespace", data.message)
+    }
+}
+```
+
+> [!WARNING]
+> The namespace must start with "/" or it will throw a `SiodDecoratorError`.
+
+---
+
+##### @MiddlewareOption(options: MiddlewareOptionType)
+
+Applies options to a middleware.
+
+**Middleware options**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| [`namespace`](#namespace-middleware) | string | The namespace to which the middleware should be applied. |
 
 ## Middlewares
 
@@ -623,6 +661,27 @@ A Socket Middleware is like Server Middleware but it is called for each incoming
         ```
 
     - **Per event**: You can also use the middleware for a specific event by using the [@UseSocketMiddleware decorator](#other-decorators).
+
+### Namespace middleware
+
+You can scope a middleware to a specific namespace using the `@MiddlewareOption` decorator. This is particularly useful when using the `@SocketNamespace` decorator to organize your controllers by namespaces.
+
+```typescript
+@MiddlewareOption({ namespace: "/orders" })
+class OrderMiddleware implements IServerMiddleware {
+    public use(socket: Socket, next: (err?: unknown) => void) {
+        // This middleware will only be executed for connections to the "/orders" namespace
+        console.log("New connection to /orders namespace")
+        next()
+    }
+}
+```
+
+In this example:
+
+- The `OrderMiddleware` will only be executed for connections to the "/orders" namespace
+- Other namespaces (or the default namespace) will not trigger this middleware
+- This works for both Server and Socket middlewares (globally only)
 
 ### Error handling middleware
 
