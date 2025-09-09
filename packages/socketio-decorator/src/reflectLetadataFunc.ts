@@ -1,6 +1,8 @@
+import { MiddlewareOptionType } from "./Models/DecoratorOptions/MiddlewareOptionType"
 import { MethodMetadata } from "./Models/Metadata/Metadata"
 
 const METHOD_METADATA_KEY = "siod:method-metadata"
+const MIDDLEWARE_OPTION_KEY = "siod:middleware-option"
 
 /**
  * Defines the method metadata for a event method handler.
@@ -19,4 +21,22 @@ export function defineReflectMethodMetadata (target: Object, methodMetadata: Met
  */
 export function getReflectMethodMetadata (target: Object, methodName: string) {
 	return Reflect.getMetadata(METHOD_METADATA_KEY, target, methodName) as MethodMetadata | undefined
+}
+
+/**
+ * Defines the middleware option metadata for a middleware class.
+ * @param {Function} target - The target class.
+ * @param {MiddlewareOptionType} option - The middleware option.
+ */
+export function defineReflectMiddlewareOptionMetadata (target: Function, option: MiddlewareOptionType) {
+	Reflect.defineMetadata(MIDDLEWARE_OPTION_KEY, option, target)
+}
+
+/**
+ * Gets the middleware option metadata for a middleware class.
+ * @param {Function} target - The target class.
+ * @returns {MiddlewareOptionType | undefined} The middleware option, or undefined if none.
+ */
+export function getReflectMiddlewareOptionMetadata (target: Function) {
+	return Reflect.getMetadata(MIDDLEWARE_OPTION_KEY, target) as MiddlewareOptionType | undefined
 }
