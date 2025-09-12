@@ -18,6 +18,7 @@ export * from "./Decorators/ArgsInjection/DataDecorator"
 export * from "./Decorators/ArgsInjection/EventNameDecorator"
 
 export * from "./Decorators/Others/SocketNamespaceDecorator"
+export * from "./Decorators/Others/ThrottleDecorator"
 
 // Hooks
 export * from "./Others/Hooks"
@@ -29,9 +30,11 @@ export * from "./Interfaces/IErrorMiddleware"
 
 // Models
 export * from "./Models/SiodConfig"
+export * from "./Models/ThrottleConfig"
 export * from "./Models/DecoratorOptions/EmitterOption"
 export * from "./Models/DecoratorOptions/DecoratorOptions"
 
 // Errors
 export * from "./Models/Errors/SiodImcomigDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
+export * from "./Models/Errors/SiodThrottleError"

@@ -8,6 +8,7 @@ import { MetadataUtils } from "./Utils/MetadataUtils"
 import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
 import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
 import { MethodArgMetadata } from "./Models/Metadata/MethodArgMetadata"
+import { ClassThrottleMetadata, ThrottleMetadata } from "./Models/Metadata/ThrottleMetadata"
 
 const controllerMetadata: ControllerMetadata[] = []
 const binderEvents: EventBinder[] = []
@@ -159,6 +160,24 @@ export function addClassSocketMiddlewareMetadata (metadata: ClassSocketMiddlewar
 export function addMethodArgMetadata (target: Object, methodName: string, argMetadata: MethodArgMetadata) {
 	const methodMetadata = getOrCreateMethodMetadata(target, methodName)
 	methodMetadata.argsMetadata.push(argMetadata)
+}
+
+/**
+ * Adds class throttle metadata to a controller
+ * @param {ClassThrottleMetadata} metadata The metadata to add
+ */
+export function addClassThrottleMetadata (metadata: ClassThrottleMetadata) {
+	const controllerMetadata = getOrCreateControllerMetadata(metadata.target)
+	controllerMetadata.throttleMetadata = metadata
+}
+
+/**
+ * Adds method throttle metadata to a method
+ * @param {ThrottleMetadata} metadata The metadata to add
+ */
+export function addMethodThrottleMetadata (metadata: ThrottleMetadata) {
+	const methodMetadata = getOrCreateMethodMetadata(metadata.target, metadata.methodName)
+	methodMetadata.metadata.throttleMetadata = metadata
 }
 
 /**

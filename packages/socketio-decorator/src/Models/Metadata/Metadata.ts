@@ -2,6 +2,7 @@ import { EmitterMetadata } from "./EmiterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
 import { MethodArgMetadata } from "./MethodArgMetadata"
 import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
+import { ClassThrottleMetadata, ThrottleMetadata } from "./ThrottleMetadata"
 
 export type ControllerMetadata = {
 	controllerTarget: new () => Any
@@ -10,6 +11,7 @@ export type ControllerMetadata = {
 	namespace: string
 	methodMetadata: MethodMetadata[]
 	middlewaresMetadata: ClassSocketMiddlewareMetadata[]
+	throttleMetadata?: ClassThrottleMetadata
 }
 
 export type MethodMetadata = {
@@ -24,6 +26,7 @@ type MethodMetadataItem = {
 		emitterMetadata: EmitterMetadata[]
 	}
 	socketMiddlewareMetadata: SocketMiddlewareMetadata[]
+	throttleMetadata?: ThrottleMetadata
 }
 
 export type MetadataDescription = {
