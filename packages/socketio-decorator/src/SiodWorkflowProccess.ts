@@ -9,6 +9,7 @@ import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWr
 import { ErrorMiddlewareWrapper } from "./Wrappers/ErrorMiddlewareWrapper"
 import { EventFuncProxyWrapper } from "./Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "./Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
+import { ThrottleManager } from "./Wrappers/throttle/ThrottleManager"
 import { ThrottleWrapper } from "./Wrappers/throttle/ThrottleWrapper"
 
 /**
@@ -109,6 +110,7 @@ export class SiodWorkflowProcess {
 	 */
 	private static bindThrottle (metadata: ControllerMetadata) {
 		ThrottleWrapper.wrap(metadata)
+		ThrottleManager.startPeriodicCleanup(config.throttleConfig?.cleanupIntervalMs)
 	}
 
 	/**

@@ -78,7 +78,9 @@ describe("> Throttle decorator", () => {
 
 			it("Should block requests exceeding the limit", async () => {
 				clientSocket.emit("unique-event")
+				await waitFor(50)
 				clientSocket.emit("unique-event")
+				await waitFor(50)
 				clientSocket.emit("unique-event")
 
 				await waitFor(200)
@@ -121,7 +123,9 @@ describe("> Throttle decorator", () => {
 
 			it.each(["class-event-1", "class-event-2"])("should block requests exceeding the limit for %s", async (eventName) => {
 				clientSocket.emit(eventName)
+				await waitFor(50)
 				clientSocket.emit(eventName)
+				await waitFor(50)
 				clientSocket.emit(eventName)
 
 				await waitFor(200)
@@ -133,11 +137,17 @@ describe("> Throttle decorator", () => {
 
 			it("should block requests exceeding the limit for each event", async () => {
 				clientSocket.emit("class-event-1")
+				await waitFor(50)
 				clientSocket.emit("class-event-1")
+				await waitFor(50)
 				clientSocket.emit("class-event-1")
 
+				await waitFor(100)
+
 				clientSocket.emit("class-event-2")
+				await waitFor(50)
 				clientSocket.emit("class-event-2")
+				await waitFor(50)
 				clientSocket.emit("class-event-2")
 
 				await waitFor(200)
@@ -177,12 +187,15 @@ describe("> Throttle decorator", () => {
 
 			it("Should have independent limits for class-event-1 and class-event-2", async () => {
 				clientSocket.emit("class-event-1")
+				await waitFor(50)
 				clientSocket.emit("class-event-1")
+				await waitFor(50)
 				clientSocket.emit("class-event-1")
 
-				await waitFor(200)
+				await waitFor(100)
 
 				clientSocket.emit("class-event-2")
+				await waitFor(50)
 				clientSocket.emit("class-event-2")
 
 				await waitFor(200)

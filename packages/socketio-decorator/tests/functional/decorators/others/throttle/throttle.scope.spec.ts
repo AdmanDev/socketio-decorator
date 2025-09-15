@@ -47,8 +47,10 @@ describe("> Throttle scope tests", () => {
 				controllers: [NoCustomThrottleControllerTest, CustomClassThrottleControllerTest],
 				errorMiddleware: ErrorMiddleware,
 				throttleConfig: {
-					limit: 5,
-					timeWindowMs: 1000
+					rateLimitConfig: {
+						limit: 5,
+						timeWindowMs: 1000
+					}
 				}
 			},
 			{
@@ -88,6 +90,7 @@ describe("> Throttle scope tests", () => {
 			it("should apply the custom class throttle to the controller methods", async () => {
 				for (let i = 0; i < 4; i++) {
 					clientSocket.emit("custom-class-throttle-event")
+					await waitFor(50)
 				}
 
 				await waitFor(200)
@@ -102,6 +105,7 @@ describe("> Throttle scope tests", () => {
 			it("should apply the custom method throttle to the controller method", async () => {
 				for (let i = 0; i < 8; i++) {
 					clientSocket.emit("custom-method-throttle-event")
+					await waitFor(50)
 				}
 
 				await waitFor(200)

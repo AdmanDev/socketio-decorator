@@ -27,6 +27,7 @@ export * from "./Others/Hooks"
 export * from "./Interfaces/IServerMiddleware"
 export * from "./Interfaces/ISocketMiddleware"
 export * from "./Interfaces/IErrorMiddleware"
+export * from "./Interfaces/IThrottleStorage"
 
 // Models
 export * from "./Models/SiodConfig"
@@ -38,3 +39,6 @@ export * from "./Models/DecoratorOptions/DecoratorOptions"
 export * from "./Models/Errors/SiodImcomigDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
 export * from "./Models/Errors/SiodThrottleError"
+
+// Others
+export * from "./Wrappers/throttle/InMemoryThrottleStorage"

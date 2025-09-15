@@ -13,11 +13,11 @@ export class ThrottleWrapper {
 	 * @param {ControllerMetadata} metadata - The controller metadata
 	 */
 	public static wrap (metadata: ControllerMetadata) {
-		if (config.throttleConfig && !metadata.throttleMetadata) {
+		if (config.throttleConfig?.rateLimitConfig && !metadata.throttleMetadata) {
 			metadata.throttleMetadata = {
 				target: metadata.controllerTarget,
-				limit: config.throttleConfig.limit,
-				timeWindowMs: config.throttleConfig.timeWindowMs
+				limit: config.throttleConfig.rateLimitConfig.limit,
+				timeWindowMs: config.throttleConfig.rateLimitConfig.timeWindowMs
 			}
 		}
 

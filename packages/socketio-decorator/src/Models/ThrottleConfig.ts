@@ -1,13 +1,28 @@
+import { IThrottleStorage } from "../Interfaces/IThrottleStorage"
+
 /**
  * Defines the configuration for event throttling.
  */
 export type ThrottleConfig = {
 	/**
-	 * The maximum number of allowed calls within the specified time window.
+	 * The throttle rate limiting configuration.
 	 */
-	limit: number
+	rateLimitConfig?: {
+		/**
+		 * The maximum number of allowed calls within the specified time window.
+		 */
+		limit: number
+		/**
+		 * The duration of the time window in milliseconds.
+		 */
+		timeWindowMs: number
+	}
 	/**
-	 * The duration of the time window in milliseconds.
+	 * Interval in milliseconds to perform periodic cleanup of expired throttle data. Default is 3600000 (1 hour).
 	 */
-	timeWindowMs: number
+	cleanupIntervalMs?: number
+	/**
+	 * The throttle data store to use. Defaults to InMemoryThrottleStore.
+	 */
+	store?: new() => IThrottleStorage
 }

@@ -1,13 +1,26 @@
+import { config } from "../../globalMetadata"
+import { IThrottleStorage } from "../../Interfaces/IThrottleStorage"
+import { IoCContainer } from "../../IoCContainer"
 import { SiodThrottleError } from "../../Models/Errors/SiodThrottleError"
+import { InMemoryThrottleStorage } from "./InMemoryThrottleStorage"
 
 /**
  * Manages throttling state and checks for all socket events
  */
 export class ThrottleManager {
-	private static store = new Map<string, Map<string, {
-		count: number
-		resetTime: number
-	}>>()
+	private static storeInstance: IThrottleStorage | null = null
+
+	/**
+	 * Get the throttle store instance (singleton)
+	 * @returns {IThrottleStorage} The throttle store instance
+	 */
+	private static get store () {
+		if (!this.storeInstance) {
+			const IoCContainerClass = config.throttleConfig?.store || InMemoryThrottleStorage
+			this.storeInstance = IoCContainer.getInstance<IThrottleStorage>(IoCContainerClass)
+		}
+		return this.storeInstance
+	}
 
 	/**
 	 * Check if a request should be throttled
@@ -25,15 +38,13 @@ export class ThrottleManager {
 	): Promise<void> {
 		const now = Date.now()
 
-		const socketStore = this.store.get(socketId) || new Map()
-		const eventData = socketStore.get(eventName)
+		const eventData = await this.store.get(socketId, eventName)
 
 		if (!eventData || eventData.resetTime <= now) {
-			socketStore.set(eventName, {
+			await this.store.set(socketId, eventName, {
 				count: 1,
 				resetTime: now + windowMs
 			})
-			this.store.set(socketId, socketStore)
 			return
 		}
 
@@ -43,32 +54,15 @@ export class ThrottleManager {
 		}
 
 		eventData.count++
-		socketStore.set(eventName, eventData)
-	}
-
-	/**
-	 * Clean up expired throttle data
-	 */
-	public static cleanup (): void {
-		const now = Date.now()
-		for (const [socketId, socketStore] of this.store) {
-			for (const [eventName, data] of socketStore) {
-				if (data.resetTime <= now) {
-					socketStore.delete(eventName)
-				}
-			}
-			if (socketStore.size === 0) {
-				this.store.delete(socketId)
-			}
-		}
+		await this.store.set(socketId, eventName, eventData)
 	}
 
 	/**
 	 * Start periodic cleanup of expired throttle data
-	 * @param {number} interval Cleanup interval in milliseconds (default: 60000)
+	 * @param {number} interval Cleanup interval in milliseconds (default: 3600000 ms = 1 hour)
 	 * @returns {number} The interval timer
 	 */
-	public static startPeriodicCleanup (interval: number = 60000): NodeJS.Timeout {
-		return setInterval(() => this.cleanup(), interval)
+	public static startPeriodicCleanup (interval: number = 3600000): NodeJS.Timeout {
+		return setInterval(() => this.store.cleanup(), interval)
 	}
 }
