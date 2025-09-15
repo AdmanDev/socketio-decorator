@@ -19,6 +19,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [Socket Middleware](#socket-middleware)
   - [Namespace middleware](#namespace-middleware)
   - [Error handling middleware](#error-handling-middleware)
+- [Rate Limiting](#rate-limiting)
 - [Data validation](#data-validation)
   - [Setup](#setup)
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
@@ -513,6 +514,7 @@ Injects the current user object into an event handler parameter.
 | `@UseSocketMiddleware(...ISocketMiddleware[])` | Applies one or more socket middleware to the event handler or controller class. |
 | `@SocketNamespace(namespace: string)` | Defines a namespace for a socket controller |
 | `@MiddlewareOption(options: MiddlewareOptionType)` | Applies options to a middleware. |
+| `@Throttle(limit: number, timeWindowMs: number)` | Applies rate limiting to a controller or event handler. ( [See Rate Limiting](#rate-limiting)) |
 
 #### Examples
 
@@ -711,6 +713,186 @@ You can create a middleware to handle errors that occur during event handling an
           errorMiddleware: MyErrorMiddleware, // Add the unique error middleware here
      })
      ```
+
+## Rate Limiting
+
+You can use rate limiting to control how many requests a client can make within a specific time window. This helps protect your application from abuse and ensures fair resource usage.
+
+### Global Rate Limiting
+
+To enable rate limiting globally for all controllers:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    throttleConfig: {
+        rateLimitConfig: {
+            limit: 100,        // Maximum number of requests
+            timeWindowMs: 60000 // Time window in milliseconds (1 minute)
+        },
+        // Optional: cleanup interval for expired throttle data (default: 1 hour)
+        cleanupIntervalMs: 3600000,
+        // Optional: custom storage implementation
+        store: InMemoryThrottleStorage // By default, uses in-memory storage
+    }
+})
+```
+
+### Class-Level Rate Limiting
+
+Apply rate limiting to all socket events in a controller:
+
+```typescript
+@Throttle(10, 60000) // Max 10 requests per minute
+class UserController {
+    @SocketOn("update-profile")
+    public updateProfile() { }
+
+    @SocketOn("change-settings")
+    public changeSettings() { }
+
+    @SocketOn("upload-avatar")
+    public uploadAvatar() { }
+}
+```
+
+### Method-Level Rate Limiting
+
+Use the `@Throttle` decorator to apply rate limiting to specific methods:
+
+```typescript
+class ChatController {
+    @SocketOn("message")
+    @Throttle(5, 1000) // Max 5 requests per second
+    public sendMessage(@Data() message: string) {
+        console.log("Message received:", message)
+    }
+}
+```
+
+### Priority and Scope
+
+Rate limiting follows a hierarchy where more specific configurations override broader ones:
+
+1. **Method-level** (Highest Priority): `@Throttle` decorator on individual methods
+2. **Class-level** (Medium Priority): `@Throttle` decorator on controller classes  
+3. **Global** (Lowest Priority): `throttleConfig` in `useSocketIoDecorator`
+
+```typescript
+// Global configuration (lowest priority)
+useSocketIoDecorator({
+    throttleConfig: {
+        rateLimitConfig: { limit: 100, timeWindowMs: 60000 }
+    }
+})
+
+// Class-level configuration (medium priority)
+@Throttle(20, 60000) // Overrides global config for this controller
+class ChatController {
+    
+    @SocketOn("message")
+    public sendMessage() {
+        // Uses class-level: 20 requests per minute
+    }
+
+    @SocketOn("upload")
+    @Throttle(5, 300000) // Method-level (highest priority)
+    public uploadFile() {
+        // Uses method-level: 5 requests per 5 minutes
+        // Overrides both class and global configs
+    }
+}
+```
+
+### Error Handling
+
+Rate limit errors are thrown as `SiodThrottleError`. Handle them using an [error middleware](#error-handling-middleware):
+
+```typescript
+class ErrorMiddleware implements IErrorMiddleware {
+    handleError(error: unknown) {
+        if (error instanceof SiodThrottleError) {
+            console.error("Rate limit exceeded. Retry in:", error.remainingTime, "ms")
+        }
+    }
+}
+```
+
+### Important Notes
+
+- Rate limits are applied per client ID
+- Each event has its own independent rate limit counter
+- Class-level rate limits can be overridden by method-level decorators
+- Global configuration applies to all controllers without explicit `@Throttle` decorators
+- Rate limit data is automatically cleaned up based on `cleanupIntervalMs`
+
+### Custom Storage Implementation
+
+By default, rate limiting data is stored in memory using `InMemoryThrottleStorage`. However, you can implement your own storage solution (e.g., Redis, Database) by implementing the `IThrottleStorage` interface.
+
+Example implementation using Redis:
+
+```typescript
+class RedisThrottleStorage implements IThrottleStorage {
+    private static readonly redis = new Redis("You url")
+    private readonly prefix = "throttle"
+
+    // Get the throttle entry for a specific client and event
+    public async get(clientId: string, event: string): Promise<ThrottleEntry | undefined> {
+        try {
+            const key = this.getKey(clientId, event)
+            const data = await RedisThrottleStore.redis.get(key)
+
+            if (!data) {
+                return undefined
+            }
+
+            return JSON.parse(data) as ThrottleEntry
+        } catch (error) {
+            console.error("Redis get error:", error)
+            return undefined
+        }
+    }
+
+    // Set / update the throttle entry for a specific client and event
+    public async set(clientId: string, event: string, entry: ThrottleEntry): Promise<void> {
+        try {
+            const key = this.getKey(clientId, event)
+            const ttl = Math.max(0, entry.resetTime - Date.now()) // in ms
+
+            // Save the entry with automatic expiration
+            if (ttl > 0) {
+                await RedisThrottleStore.redis.set(key, JSON.stringify(entry), "PX", ttl)
+            }
+        } catch (error) {
+            console.error("Redis set error:", error)
+        }
+    }
+
+    // Cleanup method to remove expired entries
+    public async cleanup(): Promise<void> {
+        // Redis handles expiration automatically with TTL → nothing to do here.
+        // But we can flush if needed (optional)
+        // await this.redis.flushall()
+        return Promise.resolve()
+    }
+
+    private getKey(clientId: string, event: string): string {
+        return `${this.prefix}:${clientId}:${event}`
+    }
+}
+```
+
+Then configure it in your application:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    throttleConfig: {
+        store: RedisThrottleStorage // Your custom storage class
+    }
+})
+```
 
 ## Data validation
 
