@@ -84,7 +84,7 @@ export class ThrottleWrapper {
 				return method.apply(controllerInstance, [proxyArgs])
 			}
 
-			await ThrottleManager.checkThrottle(socket.id, eventName, metadata.limit, metadata.timeWindowMs)
+			await ThrottleManager.checkThrottle(socket, eventName, metadata.limit, metadata.timeWindowMs)
 			return method.apply(controllerInstance, [proxyArgs])
 		}
 

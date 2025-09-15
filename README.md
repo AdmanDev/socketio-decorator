@@ -734,6 +734,10 @@ useSocketIoDecorator({
         cleanupIntervalMs: 3600000,
         // Optional: custom storage implementation
         store: InMemoryThrottleStorage // By default, uses in-memory storage
+        getUserIdentifier: (socket) => {
+            // Return any unique identifier for the user
+            return "By default, it uses the socket id"
+        }
     }
 })
 ```
@@ -803,6 +807,27 @@ class ChatController {
     }
 }
 ```
+
+### Custom User Identification
+
+By default, rate limiting uses the socket ID to identify clients. However, since socket IDs change when users reconnect, you might want to use a more persistent identifier (e.g., user ID, session ID). You can configure this through the `getUserIdentifier` option:
+
+```typescript
+useSocketIoDecorator({
+    throttleConfig: {
+       ...,
+        // Custom user identification function
+        getUserIdentifier: (socket) => {
+            return "Return any unique identifier for the user"
+        }
+    }
+})
+```
+
+The `getUserIdentifier` function:
+
+- Receives the socket instance as parameter
+- Should return a string or Promise
 
 ### Error Handling
 
