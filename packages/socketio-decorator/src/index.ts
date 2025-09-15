@@ -39,6 +39,3 @@ export * from "./Models/DecoratorOptions/DecoratorOptions"
 export * from "./Models/Errors/SiodImcomigDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
 export * from "./Models/Errors/SiodThrottleError"
-
-// Others
-export * from "./Wrappers/throttle/InMemoryThrottleStorage"

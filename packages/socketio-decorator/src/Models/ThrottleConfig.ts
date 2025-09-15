@@ -5,7 +5,7 @@ import { IThrottleStorage } from "../Interfaces/IThrottleStorage"
  */
 export type ThrottleConfig = {
 	/**
-	 * The throttle rate limiting configuration.
+	 * The rate limiting configuration.
 	 */
 	rateLimitConfig?: {
 		/**
@@ -22,7 +22,7 @@ export type ThrottleConfig = {
 	 */
 	cleanupIntervalMs?: number
 	/**
-	 * The throttle data store to use. Defaults to InMemoryThrottleStore.
+	 * The throttle data store to use. By default, it uses in-memory storage.
 	 */
 	store?: new() => IThrottleStorage
 }

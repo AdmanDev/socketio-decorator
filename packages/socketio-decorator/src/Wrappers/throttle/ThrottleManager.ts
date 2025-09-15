@@ -16,32 +16,32 @@ export class ThrottleManager {
 	 */
 	private static get store () {
 		if (!this.storeInstance) {
-			const IoCContainerClass = config.throttleConfig?.store || InMemoryThrottleStorage
-			this.storeInstance = IoCContainer.getInstance<IThrottleStorage>(IoCContainerClass)
+			const ThrottleStorageClass = config.throttleConfig?.store || InMemoryThrottleStorage
+			this.storeInstance = IoCContainer.getInstance<IThrottleStorage>(ThrottleStorageClass)
 		}
 		return this.storeInstance
 	}
 
 	/**
 	 * Check if a request should be throttled
-	 * @param {string} socketId The socket ID
+	 * @param {string} clientId The client ID
 	 * @param {string} eventName The event name
 	 * @param {number} limit Maximum requests allowed
 	 * @param {number} windowMs Time window in milliseconds
 	 * @returns {Promise<void>} Promise that resolves if the request is allowed, rejects with ThrottleError if throttled
 	 */
 	public static async checkThrottle (
-		socketId: string,
+		clientId: string,
 		eventName: string,
 		limit: number,
 		windowMs: number
 	): Promise<void> {
 		const now = Date.now()
 
-		const eventData = await this.store.get(socketId, eventName)
+		const eventData = await this.store.get(clientId, eventName)
 
 		if (!eventData || eventData.resetTime <= now) {
-			await this.store.set(socketId, eventName, {
+			await this.store.set(clientId, eventName, {
 				count: 1,
 				resetTime: now + windowMs
 			})
@@ -54,7 +54,7 @@ export class ThrottleManager {
 		}
 
 		eventData.count++
-		await this.store.set(socketId, eventName, eventData)
+		await this.store.set(clientId, eventName, eventData)
 	}
 
 	/**

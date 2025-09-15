@@ -32,6 +32,9 @@ export type SiodConfig = {
 	 * The error middleware that will be used to catch errors in your handlers.
 	 */
 	errorMiddleware?: Function
+	/**
+	 * The event throttling configuration.
+	 */
 	throttleConfig?: ThrottleConfig
 	/**
 	 * The current user provider that will be used to get the current user from CurrentUser decorator.

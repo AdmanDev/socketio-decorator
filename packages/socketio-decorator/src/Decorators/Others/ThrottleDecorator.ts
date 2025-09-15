@@ -3,7 +3,7 @@ import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { DecoratorUtils } from "../../Utils/DecoratorUtils"
 
 /**
- * Throttle decorator to limit the number of requests to a method
+ * Throttle decorator to limit the number of requests to a specific event or all events in a controller.
  * @param {number} limit The maximum number of requests allowed within the time window
  * @param {number} timeWindowMs The time window in milliseconds
  * @returns {Function} The decorator
