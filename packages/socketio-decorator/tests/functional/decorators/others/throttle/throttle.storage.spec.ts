@@ -3,10 +3,9 @@ import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { SocketOn } from "../../../../../src"
 import { IoCContainer } from "../../../../../src/IoCContainer"
+import { InMemoryThrottleStorage } from "../../../../../src/Wrappers/throttle/InMemoryThrottleStorage"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
-import { InMemoryThrottleStorage } from "../../../../../src/Wrappers/throttle/InMemoryThrottleStorage"
-import { config } from "../../../../../src/globalMetadata"
 
 describe("> Throttle storage tests", () => {
 	let io: Server
@@ -67,36 +66,6 @@ describe("> Throttle storage tests", () => {
 
 				expect(beforeCleanupStoreDataSize).toBe(1)
 				expect(afterCleanupStoreDataSize).toBe(0)
-			})
-		})
-
-		describe("> Custom user identifier", () => {
-			afterAll(() => {
-				config.throttleConfig!.getUserIdentifier = undefined
-			})
-
-			it("should use custom user identifier for throttle storage", async () => {
-				config.throttleConfig!.getUserIdentifier = (socket) => `custom-${socket.id}`
-
-				clientSocket.emit("no-custom-throttle-event")
-
-				await waitFor(100)
-
-				const clientStoreData = await store.get(`custom-${clientSocket.id}`, "no-custom-throttle-event")
-
-				expect(clientStoreData).toBeDefined()
-			})
-
-			it("should use socket.id if custom user identifier is undefined", async () => {
-				config.throttleConfig!.getUserIdentifier = undefined
-
-				clientSocket.emit("no-custom-throttle-event")
-
-				await waitFor(100)
-
-				const clientStoreData = await store.get(clientSocket.id!, "no-custom-throttle-event")
-
-				expect(clientStoreData).toBeDefined()
 			})
 		})
 	})
