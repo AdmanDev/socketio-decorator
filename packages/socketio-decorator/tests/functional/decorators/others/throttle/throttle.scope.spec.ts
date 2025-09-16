@@ -4,6 +4,7 @@ import { Socket as ClientSocket } from "socket.io-client"
 import { IErrorMiddleware, SocketOn, Throttle, SiodThrottleError } from "../../../../../src"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
+import { config } from "../../../../../src/globalMetadata"
 
 describe("> Throttle scope tests", () => {
 	let io: Server
@@ -60,6 +61,7 @@ describe("> Throttle scope tests", () => {
 	})
 
 	beforeEach((done) => {
+		config.throttleConfig!.getUserIdentifier = undefined
 		clientSocket = createSocketClient(done)
 	})
 
