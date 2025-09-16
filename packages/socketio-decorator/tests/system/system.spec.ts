@@ -13,6 +13,8 @@ import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrappe
 import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 import { expectCallOrder } from "../utilities/testUtils"
+import { ThrottleWrapper } from "../../src/Wrappers/throttle/ThrottleWrapper"
+import { ThrottleManager } from "../../src/Wrappers/throttle/ThrottleManager"
 
 describe("> System tests", () => {
 	class FirstController {
@@ -31,6 +33,9 @@ describe("> System tests", () => {
 		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
 		const useSocketMiddlewareMethodWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addMethodSocketMiddleware")
 		const useSocketMiddlewareClassWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addSocketMiddlewareToManyClassMethods")
+		const throttleMethodWrapperSpy = jest.spyOn(ThrottleWrapper, "addMethodThrottle")
+		const throttleClassWrapperSpy = jest.spyOn(ThrottleWrapper, "addClassThrottle")
+		const throttlePeriodicCleanupSpy = jest.spyOn(ThrottleManager, "startPeriodicCleanup")
 		const controllerErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapController")
 		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllMiddlewares")
 		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
@@ -54,6 +59,9 @@ describe("> System tests", () => {
 				socketEmitterWrapperSpy,
 				useSocketMiddlewareMethodWrapperSpy,
 				useSocketMiddlewareClassWrapperSpy,
+				throttleMethodWrapperSpy,
+				throttleClassWrapperSpy,
+				throttlePeriodicCleanupSpy,
 				controllerErrorMiddlewareWrapperSpy,
 				eventFuncAddFirstProxyLayerSpy,
 				listenersRegistrarSpy,

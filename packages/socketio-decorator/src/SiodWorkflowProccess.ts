@@ -9,6 +9,8 @@ import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWr
 import { ErrorMiddlewareWrapper } from "./Wrappers/ErrorMiddlewareWrapper"
 import { EventFuncProxyWrapper } from "./Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "./Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
+import { ThrottleManager } from "./Wrappers/throttle/ThrottleManager"
+import { ThrottleWrapper } from "./Wrappers/throttle/ThrottleWrapper"
 
 /**
  * Defines the workflow process responsible for binding all the metadata.
@@ -32,6 +34,7 @@ export class SiodWorkflowProcess {
 			SiodWorkflowProcess.bindDataValidation(m)
 			SiodWorkflowProcess.bindEmitters(m)
 			SiodWorkflowProcess.bindUseSocketMiddlewareDecorator(m)
+			SiodWorkflowProcess.bindThrottle(m)
 			SiodWorkflowProcess.bindErrorMiddleware(m)
 
 			SiodWorkflowProcess.bindFirstChainProxy(m)
@@ -99,6 +102,15 @@ export class SiodWorkflowProcess {
 
 		SocketMiddlewareDecoratorWrapper.addMethodSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
 		SocketMiddlewareDecoratorWrapper.addSocketMiddlewareToManyClassMethods(metadata)
+	}
+
+	/**
+	 * Binds the throttle to the controller methods.
+	 * @param {ControllerMetadata} metadata - The metadata of the controller.
+	 */
+	private static bindThrottle (metadata: ControllerMetadata) {
+		ThrottleWrapper.wrap(metadata)
+		ThrottleManager.startPeriodicCleanup(config.throttleConfig?.cleanupIntervalMs)
 	}
 
 	/**
