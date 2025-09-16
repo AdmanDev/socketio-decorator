@@ -76,9 +76,10 @@ describe("> Throttle scope tests", () => {
 			it("should apply the global throttle to the controller methods", async () => {
 				for (let i = 0; i < 7; i++) {
 					clientSocket.emit("no-custom-throttle-event")
+					await waitFor(50)
 				}
 
-				await waitFor(200)
+				await waitFor(20)
 
 				expect(uniqueEventFnSpy).toHaveBeenCalledTimes(5)
 				expect(errorMiddlewareSpy).toHaveBeenCalledTimes(2)
