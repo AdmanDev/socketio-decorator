@@ -3,10 +3,9 @@ import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { SocketOn } from "../../../../../src"
 import { IoCContainer } from "../../../../../src/IoCContainer"
+import { InMemoryThrottleStorage } from "../../../../../src/Wrappers/throttle/InMemoryThrottleStorage"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
-import { InMemoryThrottleStorage } from "../../../../../src/Wrappers/throttle/InMemoryThrottleStorage"
-import { config } from "../../../../../src/globalMetadata"
 
 describe("> Throttle User Identifier tests", () => {
 	class ControllerTest {
@@ -106,8 +105,6 @@ describe("> Throttle User Identifier tests", () => {
 			})
 
 			it("should use socket.id if custom user identifier is undefined", async () => {
-				config.throttleConfig!.getUserIdentifier = undefined
-
 				clientSocket.emit("no-custom-throttle-event")
 
 				await waitFor(100)
