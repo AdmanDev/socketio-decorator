@@ -16,6 +16,7 @@ export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"
 export * from "./Decorators/ArgsInjection/CurrentUserDecorator"
 export * from "./Decorators/ArgsInjection/DataDecorator"
 export * from "./Decorators/ArgsInjection/EventNameDecorator"
+export * from "./Decorators/ArgsInjection/SocketDataDecorator"
 
 export * from "./Decorators/Others/SocketNamespaceDecorator"
 export * from "./Decorators/Others/ThrottleDecorator"
@@ -39,3 +40,6 @@ export * from "./Models/DecoratorOptions/DecoratorOptions"
 export * from "./Models/Errors/SiodImcomigDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
 export * from "./Models/Errors/SiodThrottleError"
+
+// Utils
+export * from "./Wrappers/EventFuncProxy/ArgProviders/SocketDataStore"

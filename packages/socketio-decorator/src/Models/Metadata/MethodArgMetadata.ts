@@ -10,6 +10,9 @@ export type MethodArgMetadata = {
 		valueType: "eventName"
 	} | {
 		valueType: "currentUser"
+	} | {
+		valueType: "socketDataAttribute"
+		dataKey?: string
 	}
 )
 
