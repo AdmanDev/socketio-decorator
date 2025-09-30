@@ -405,6 +405,7 @@ The following decorators can be used to inject parameters into the event handler
 | `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
 | `@EventName()` | Injects the name of the event message that triggered the handler. |
 | `@CurrentUser()` | Injects the current user object. |
+| `@SocketData(dataKey?: string)` | Injects socket data value (socket.data[dataKey]). |
 
 #### Examples
 
@@ -506,6 +507,104 @@ Injects the current user object into an event handler parameter.
         console.log("Message received from user:", user.name)
     }
     ```
+
+---
+
+##### @SocketData(dataKey?: string)
+
+**Equivalent in basic Socket.io:** `socket.data[dataKey]`
+
+Injects a socket data attribute value into an event handler parameter. SocketData decorator allow you to store custom data on a per-socket basis, which persists for the lifetime of the socket connection.
+
+**Usage** :
+
+1. **Inject the entire SocketDataStore**
+
+   When used without a parameter, `@SocketData()` injects a `SocketDataStore` instance that provides methods to manage socket data attribute:
+
+    ```typescript
+    @SocketOn("save-user-preferences")
+    public savePreferences(@SocketData() dataStore: SocketDataStore) {
+        // Store user preferences on this socket
+        dataStore.setData("theme", "dark")
+        dataStore.setData("language", "fr")
+        
+        console.log("Preferences saved for this socket")
+    }
+
+    @SocketOn("get-user-preferences")
+    @SocketEmitter("preferences")
+    public getPreferences(@SocketData() dataStore: SocketDataStore) {
+        return {
+            theme: dataStore.getData("theme"),
+            language: dataStore.getData("language")
+        }
+    }
+    ```
+
+    **SocketDataStore API**
+
+    The `SocketDataStore` class provides the following methods:
+
+    | Method | Parameters | Returns | Description |
+    |--------|------------|---------|-------------|
+    | `getData(key)` | `key: string` | `any \| null` | Retrieves the value of a socket data attribute. Returns `null` if the key doesn't exist. |
+    | `setData(key, value)` | `key: string, value: any` | `void` | Sets a socket data with the specified key and value. |
+    | `removeData(key)` | `key: string` | `void` | Removes a socket data attribute by key. |
+    | `hasData(key)` | `key: string` | `boolean` | Checks if a socket data exists for the specified key. |
+
+    **Type Safety with Generics**
+
+    You can type the `SocketDataStore` methods using generics by defining an interface that describes your socket data structure:
+
+    ```typescript
+    // Define your socket data type
+    interface MyStoreType {
+        userId: number
+        theme: 'light' | 'dark'
+        language: string
+    }
+
+    @SocketOn("example")
+    public example(@SocketData() dataStore: SocketDataStore<MyStoreType>) {
+        // ❌ Type error - "unknownKey" is not a valid key of MyStoreType
+        dataStore.getData("unknownKey")
+        
+        // ✅ Correct - "userId" is a valid key
+        dataStore.getData("userId") // Returns: number | null
+        
+        // ❌ Type error - Argument of type 'string' is not assignable to parameter of type 'number'
+        dataStore.setData("userId", "not-a-number")
+        
+        // ✅ Correct - proper type
+        dataStore.setData("userId", 123) // ✅ Works correctly
+        dataStore.setData("theme", "dark") // ✅ Only 'light' | 'dark' allowed
+        dataStore.setData("language", "en") // ✅ String type as expected
+    }
+    ```
+
+    With typed `SocketDataStore<MyStoreType>`, you get:
+    - **Autocompletion**: IDE suggests only valid keys from your interface
+    - **Type checking**: Values must match the expected types
+    - **Compile-time errors**: Catch mistakes before runtime
+
+2. **Inject a specific data attribute value**
+
+   When used with a key parameter, `@SocketData("key")` directly injects the value of that specific data attribute:
+
+    ```typescript
+    @SocketOn("update-theme")
+    public updateTheme(@SocketData("theme") currentTheme: string) {
+        console.log("Current theme:", currentTheme) // Will be null if not set
+    }
+    ```
+
+    **Important notes**
+
+    - Socket data attributes are stored per socket connection and persist for the lifetime of that connection
+    - When a socket disconnects, all associated data attributes are automatically cleared
+    - This is built on top of Socket.IO's native `socket.data` property
+    - Data attributes are not shared between different socket connections, even for the same user
 
 ### Other decorators
 
