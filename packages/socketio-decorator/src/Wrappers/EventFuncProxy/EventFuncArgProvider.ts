@@ -3,6 +3,7 @@ import { config } from "../../globalMetadata"
 import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
+import { SocketDataStore } from "../.."
 
 /**
  * Defines the event function argument provider.
@@ -39,6 +40,7 @@ export class EventFuncArgProvider {
 
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
+			socketDataAttribute: this.getSocketDataAttribute(argMetadata, args.socket),
 			data: args.data,
 			eventName: args.eventName,
 			currentUser: await this.getCurrentUserArg(argMetadata, args.socket)
@@ -79,5 +81,27 @@ export class EventFuncArgProvider {
 		}
 
 		return currentUser
+	}
+
+	/**
+	 * Gets the socket data attribute value from the socket
+	 * @param {MethodArgMetadata} argMetadata The argument metadata
+	 * @param {Socket | null} socket The socket instance
+	 * @returns {SocketDataStore | unknown | null} The socket data attribute value
+	 */
+	private static getSocketDataAttribute (argMetadata: MethodArgMetadata, socket: Socket | null) {
+		if (argMetadata.valueType !== "socketDataAttribute") {
+			return null
+		}
+
+		if (!socket) {
+			throw new SiodDecoratorError("Unable to get socket data attribute, the socket instance is undefined.")
+		}
+
+		if (!argMetadata.dataKey) {
+			return new SocketDataStore(socket)
+		}
+
+		return socket.data[argMetadata.dataKey] || null
 	}
 }

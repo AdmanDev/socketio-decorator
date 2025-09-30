@@ -1,12 +1,13 @@
-import { CurrentSocket, Data, ServerOn, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
+import { CurrentSocket, Data, ServerOn, SocketData, SocketDataStore, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
 import { MessageRequest } from "../messageRequest";
+import { SocketDataStoreSchema } from "../socketDataStoreSchema";
 
 export class SocketController {
-    @ServerOn("connection")
-    public onConnection(@CurrentSocket() socket: Socket) {
-      console.log("Socket connected with socket id", socket.id)
-    }
+	@ServerOn("connection")
+	public onConnection(@CurrentSocket() socket: Socket) {
+		console.log("Socket connected with socket id", socket.id)
+	}
 
 	@SocketOn("message")
 	public onMessage(@Data() data: MessageRequest) {
@@ -19,6 +20,20 @@ export class SocketController {
 		await new Promise((resolve) => setTimeout(resolve, 500))
 		return {
 			message: "Hello you"
+		}
+	}
+
+	@SocketOn("set-language-preferences", { disableDataValidation: true })
+	public setLanguagePreferences(@SocketData() dataStore: SocketDataStore<SocketDataStoreSchema>, @Data() language: string) {
+		dataStore.setData("language", language)
+		console.log("Language preferences set to", language)
+	}
+
+	@SocketOn("get-language-preferences")
+	@SocketEmitter("user-pref")
+	public getLanguagePreferences(@SocketData("language") language: string) {
+		return {
+			language
 		}
 	}
 

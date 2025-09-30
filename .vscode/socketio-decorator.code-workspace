@@ -22,9 +22,9 @@
         ],
         "editor.formatOnPaste": false,
         "jest.jestCommandLine": "yarn test",
-		"jestrunner.jestCommand": "yarn test",
         "jest.disabledWorkspaceFolders": [
-            "examples"
+            "socketio-decorator",
+            "examples",
         ],
         "powershell.cwd": "library",
     }
