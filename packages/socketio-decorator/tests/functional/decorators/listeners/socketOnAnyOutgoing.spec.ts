@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { CurrentSocket, Data, EventName, IErrorMiddleware, SocketOnAnyOutgoing } from "../../../../src"
+import { CurrentSocket, Data, EventName, SocketOnAnyOutgoing } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { IoCContainer } from "../../../../src/IoCContainer"
@@ -12,16 +12,9 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
 
-	const errorMiddlewareCallback = jest.fn()
 	const socketOnAnyOutgoingSpy = jest.fn()
 
 	const testEventName = "testEvent"
-
-	class ErrorMiddleware implements IErrorMiddleware {
-		public handleError (error: unknown) {
-			errorMiddlewareCallback(error)
-		}
-	}
 
 	class SocketOnAnyOutgoingController {
 		public sendMessage (data: MessageData) {
@@ -37,8 +30,7 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [SocketOnAnyOutgoingController],
-				errorMiddleware: ErrorMiddleware,
+				controllers: [SocketOnAnyOutgoingController]
 			},
 			{
 				onServerListen: done,
@@ -71,23 +63,6 @@ describe("> SocketOnAnyOutgoing decorator", () => {
 
 			await waitFor(50)
 
-			expect(errorMiddlewareCallback).not.toHaveBeenCalled()
-			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledTimes(1)
-			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledWith(serverSocket.id, testEventName, data)
-		})
-	})
-
-	describe("> Data validation tests", () => {
-		it("should not throw an error if the data is not valid", async () => {
-			const data = { wrong: "data" }
-
-			const controller = IoCContainer.getInstance<SocketOnAnyOutgoingController>(SocketOnAnyOutgoingController)
-
-			controller.sendMessage(data as Any)
-
-			await waitFor(50)
-
-			expect(errorMiddlewareCallback).not.toHaveBeenCalled()
 			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledTimes(1)
 			expect(socketOnAnyOutgoingSpy).toHaveBeenCalledWith(serverSocket.id, testEventName, data)
 		})

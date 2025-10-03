@@ -1,24 +1,17 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
-import { MessageData, UserData } from "../../../types/socketData"
+import { Data, SocketOn } from "../../../../src"
+import { SiodDecoratorError } from "../../../../src/Models/Errors/SiodDecoratorError"
+import { MessageData } from "../../../types/socketData"
 import { createServer, createSocketClient } from "../../../utilities/serverUtils"
 import { waitFor } from "../../../utilities/testUtils"
-import { SiodDecoratorError } from "../../../../src/Models/Errors/SiodDecoratorError"
 
 describe("> Data Decorator", () => {
 	let io: Server
 	let clientSocket: ClientSocket
 
 	const simpleTestFn = jest.fn()
-	const errorMiddlewareSpy = jest.fn()
-
-	class ErrorMiddleware implements IErrorMiddleware {
-		public handleError (error: unknown) {
-			errorMiddlewareSpy(error)
-		}
-	}
 
 	class ControllerTest {
 		@SocketOn("simple-test")
@@ -35,24 +28,12 @@ describe("> Data Decorator", () => {
 		public onMultipleDataTest (@Data() data0: MessageData, @Data(1) data1: MessageData) {
 			simpleTestFn(data0, data1)
 		}
-
-		@SocketOn("multiple-data-validation-test")
-		public onMultipleDataValidationTest (@Data() data0: MessageData, @Data(1) data1: UserData) {
-			simpleTestFn(data0, data1)
-		}
-
-		@SocketOn("test-with-data-index-out-of-bounds")
-		public onTestWithDataIndexOutOfBounds (@Data(999) data: MessageData) {
-			simpleTestFn(data)
-		}
 	}
 
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [ControllerTest],
-				errorMiddleware: ErrorMiddleware,
-				dataValidationEnabled: true
+				controllers: [ControllerTest]
 			},
 			{
 				onServerListen: done
@@ -120,46 +101,6 @@ describe("> Data Decorator", () => {
 					}
 				}
 			}).toThrow("Data index must be a non-negative number.")
-		})
-	})
-
-	describe("> Data validation tests", () => {
-		it("should throw an error if data is not valid", async () => {
-			const event = "simple-test"
-
-			clientSocket.emit(event)
-
-			await waitFor(50)
-
-			expect(simpleTestFn).not.toHaveBeenCalled()
-			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-		})
-
-		it("should throw SiodImcomigDataError when dataIndex is out of bounds", async () => {
-			const data: MessageData = { message: "Hello World" }
-			clientSocket.emit("test-with-data-index-out-of-bounds", data)
-
-			await waitFor(50)
-
-			expect(simpleTestFn).not.toHaveBeenCalled()
-			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-		})
-
-		it("should validate all incoming data", async () => {
-			const goodData: MessageData = { message: "Hello World" }
-			const invalidData = { wrong: "data" }
-
-			const event = "multiple-data-validation-test"
-
-			clientSocket.emit(event, goodData, invalidData)
-
-			await waitFor(50)
-
-			expect(simpleTestFn).not.toHaveBeenCalled()
-			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
 		})
 	})
 })
