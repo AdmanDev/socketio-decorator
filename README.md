@@ -27,7 +27,6 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [UseIoServer hook](#useioserver-hook)
   - [UseUserSocket hook](#useusersocket-hook)
 - [Dependency Injection](#dependency-injection)
-- [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
 ## Installation
 
@@ -1184,21 +1183,3 @@ If you run into any issues or have suggestions, feel free to open an issue on Gi
 🔗 [Socket.io Decorator Issues](https://github.com/AdmanDev/socketio-decorator/issues)
 
 Thank you for using Socketio Decorator
-
-## Migration 1.3.0 to 1.3.1+
-
-Starting from version 1.3.1, you need to use the parameter injection decorators (`@CurrentSocket()`, `@Data()`, `@EventName()`) to access the socket, data, and event name in your handlers:
-
-```typescript
-// Before (1.3.0)
-@SocketOn("message")
-public onMessage(socket: Socket, data: any) {
-    console.log("Message from:", socket.id, "data:", data)
-}
-
-// After (1.3.1+)
-@SocketOn("message")
-public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
-    console.log("Message from:", socket.id, "data:", data)
-}
-```
