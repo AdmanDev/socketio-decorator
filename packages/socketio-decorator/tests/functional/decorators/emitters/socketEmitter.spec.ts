@@ -38,6 +38,17 @@ describe("> SocketEmitter decorator", () => {
 			})
 		}
 
+		@SocketOn("testWithTargetInEmitOptionObject")
+		@SocketEmitter()
+		public testWithTargetInEmitOptionObject (@Data() target: string) {
+			const data: MessageData = { message: "Hello" }
+			return new EmitterOption({
+				message: "testWithTargetInEmitOptionObjectMsg",
+				data,
+				to: target
+			})
+		}
+
 		@SocketOn("testWithDisableEmitOption")
 		@SocketEmitter()
 		public testWithDisableEmitOptionObject () {
@@ -123,6 +134,53 @@ describe("> SocketEmitter decorator", () => {
 			})
 
 			clientSocket.emit("testWithEmitOption", expectedData)
+		})
+
+		it("should emit event only to the specified room when 'to' is set in EmitterOption", async () => {
+			const clientEventMsg = "testWithTargetInEmitOptionObjectMsg"
+			const targetRoom = "special-room"
+			const expectedData: MessageData = { message: "Hello" }
+
+			const serverEmitterSocket = serverSocket
+			const clientEmitterSocket = clientSocket
+
+			const clientReceiver1 = createSocketClient()
+			const clientReceiver2 = createSocketClient()
+
+			await waitFor(100)
+
+			const allServerSockets = Array.from(io.sockets.sockets.values())
+			const receiverSocket1 = allServerSockets.find(s => s.id !== serverSocket.id && s.id === clientReceiver1.id)
+
+			receiverSocket1?.join(targetRoom)
+			serverEmitterSocket.join(targetRoom)
+
+			const senderReceiverSpy = jest.fn()
+			const receiver1Spy = jest.fn()
+			const receiver2Spy = jest.fn()
+
+			clientEmitterSocket.on(clientEventMsg, (data: MessageData) => {
+				senderReceiverSpy(data)
+			})
+
+			clientReceiver1.on(clientEventMsg, (data: MessageData) => {
+				receiver1Spy(data)
+			})
+
+			clientReceiver2.on(clientEventMsg, (data: MessageData) => {
+				receiver2Spy(data)
+			})
+
+			clientEmitterSocket.emit("testWithTargetInEmitOptionObject", targetRoom)
+
+			await waitFor(100)
+
+			expect(receiver1Spy).toHaveBeenCalledWith(expectedData)
+			expect(receiver2Spy).not.toHaveBeenCalled()
+			expect(senderReceiverSpy).not.toHaveBeenCalled()
+
+			clientReceiver1.disconnect()
+			clientReceiver2.disconnect()
 		})
 
 		it("should emit multiple events from the returned EmitOption array", async () => {

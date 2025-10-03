@@ -37,10 +37,14 @@ export class SocketEmitterWrapper {
 			const emitterOptions = EmitterWrapperUtils.getEmitterOptions(metadata, result)
 
 			emitterOptions.forEach((option) => {
-				const { data, message } = option
+				const { data, message, to } = option
 
 				if (EmitterWrapperUtils.canEmit(option)) {
-					socket.emit(message, data)
+					if (to) {
+						socket.to(to).emit(message, data)
+					} else {
+						socket.emit(message, data)
+					}
 				}
 			})
 
