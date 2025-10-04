@@ -3,19 +3,20 @@ import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
+import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 
 /**
- * Allow to wrap a method to add socket emitter layer
+ * A wrapper to add socket emitter layer to the controller methods
  */
-export class SocketEmitterWrapper {
-	/**
-	 * Wraps all emitters to add emitter logic
-	 * @param {EmitterMetadata[]} metadata - The metadata of the emitters to wrap
-	 * @param {any} controllerInstance - The controller instance
-	 */
-	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
-		MetadataUtils.mapIoMappingMetadata(metadata, "socket", controllerInstance, (m, method) => {
-			SocketEmitterWrapper.wrapMethod(m, controllerInstance, method)
+export class SocketEmitterWrapper extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata): void {
+		const controllerInstance = metadata.controllerInstance
+		const emitters = metadata.methodMetadata.flatMap(m => m.metadata.ioMetadata.emitterMetadata)
+
+		MetadataUtils.mapIoMappingMetadata(emitters, "socket", controllerInstance, (m, method) => {
+			this.wrapMethod(m, controllerInstance, method)
 		})
 	}
 
@@ -25,7 +26,7 @@ export class SocketEmitterWrapper {
 	 * @param {any} controllerInstance - The controller instance
 	 * @param {Function} method - The original method of the controller
 	 */
-	private static wrapMethod (metadata: EmitterMetadata, controllerInstance: Any, method: Function) {
+	private wrapMethod (metadata: EmitterMetadata, controllerInstance: Any, method: Function) {
 		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
 			const result = await method.apply(controllerInstance, [proxyArgs])
 

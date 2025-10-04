@@ -1,20 +1,45 @@
 import { Socket } from "socket.io"
 import { config } from "../../globalMetadata"
-import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
-import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
-import { SocketDataStore } from "../.."
+import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
+import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
+import { Wrapper } from "../WrapperCore/Wrapper"
+import { SocketDataStore } from "./ArgProviders/SocketDataStore"
 
 /**
- * Defines the event function argument provider.
+ * Defines the event function handler proxy wrapper to manage handler args
  */
-export class EventFuncArgProvider {
+export class ArgsInjector extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata): void {
+		metadata.methodMetadata.forEach(methodMetadata => {
+			this.wrapMethod(metadata.controllerInstance, methodMetadata.methodName)
+		})
+	}
+
+	/**
+	 * Wraps the method to inject normalized arguments
+	 * @param {any} controller The controller instance.
+	 * @param {string} methodName The name of the method to wrap.
+	 */
+	private wrapMethod (controller: Any, methodName: string) {
+		const originalHandler = controller[methodName] as (...args: unknown[]) => Promise<unknown>
+
+		const proxy: EventFuncProxyType = async (proxyArgs) => {
+			const finalArgs = await this.buildFinalHandlerArgs(proxyArgs)
+			return await originalHandler.apply(controller, finalArgs)
+		}
+
+		controller[methodName] = proxy
+	}
+
 	/**
 	 * Builds the final arguments for the handler
 	 * @param {EventFuncProxyArgs} args The proxy args
 	 * @returns {Promise<unknown[]>} The final arguments
 	 */
-	public static async buildFinalHandlerArgs (args: EventFuncProxyArgs) {
+	private async buildFinalHandlerArgs (args: EventFuncProxyArgs) {
 		const argsMetadata = args.methodMetadata.argsMetadata
 
 		if (args.methodMetadata.metadata.ioMetadata.listenerMetadata.length === 0) {
@@ -24,7 +49,7 @@ export class EventFuncArgProvider {
 		const finalArgs: unknown[] = []
 
 		for (const meta of argsMetadata) {
-			finalArgs[meta.parameterIndex] = await EventFuncArgProvider.getArgValue(args, meta)
+			finalArgs[meta.parameterIndex] = await this.getArgValue(args, meta)
 		}
 
 		return finalArgs
@@ -36,7 +61,7 @@ export class EventFuncArgProvider {
 	 * @param {MethodArgMetadata} argMetadata The argument metadata
 	 * @returns {Promise<unknown>} The value of the argument
 	 */
-	private static async getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
+	private async getArgValue (args: EventFuncProxyArgs, argMetadata: MethodArgMetadata) {
 
 		const argsReference: Record<MethodArgValueType, unknown> = {
 			socket: args.socket,
@@ -61,7 +86,7 @@ export class EventFuncArgProvider {
 	 * @param {Socket | null} socket The socket instance
 	 * @returns {Promise<unknown | null>} The current user value
 	 */
-	private static async getCurrentUserArg (argMetadata: MethodArgMetadata, socket: Socket | null) {
+	private async getCurrentUserArg (argMetadata: MethodArgMetadata, socket: Socket | null) {
 		if (argMetadata.valueType !== "currentUser") {
 			return Promise.resolve(null)
 		}
@@ -89,7 +114,7 @@ export class EventFuncArgProvider {
 	 * @param {Socket | null} socket The socket instance
 	 * @returns {SocketDataStore | unknown | null} The socket data attribute value
 	 */
-	private static getSocketDataAttribute (argMetadata: MethodArgMetadata, socket: Socket | null) {
+	private getSocketDataAttribute (argMetadata: MethodArgMetadata, socket: Socket | null) {
 		if (argMetadata.valueType !== "socketDataAttribute") {
 			return null
 		}

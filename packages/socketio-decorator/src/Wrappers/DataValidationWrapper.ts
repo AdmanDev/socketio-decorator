@@ -4,24 +4,24 @@ import { config } from "../globalMetadata"
 import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { Wrapper } from "./WrapperCore/Wrapper"
+import { ControllerMetadata } from "../Models/Metadata/Metadata"
 
 /**
  * Allows to wrap a method to add data validation layer
  */
-export class DataValidationWrapper {
-
-	/**
-	 * Wraps all listeners to add data validation layer
-	 * @param {ListenerMetadata[]} metadata The metadata of the listeners to wrap
-	 * @param {any} controllerInstance The controller instance
-	 */
-	public static wrapListeners (metadata: ListenerMetadata[], controllerInstance: Any) {
+export class DataValidationWrapper extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata) {
 		if (!config.dataValidationEnabled) {
 			return
 		}
 
-		metadata.forEach(m => {
-			DataValidationWrapper.prepareDataValidationLayerAndWrap(m, controllerInstance)
+		const { controllerInstance, methodMetadata } = metadata
+		const listeners = methodMetadata.flatMap(m => m.metadata.ioMetadata.listenerMetadata)
+
+		listeners.forEach(m => {
+			this.prepareDataValidationLayerAndWrap(m, controllerInstance)
 		})
 	}
 
@@ -30,17 +30,17 @@ export class DataValidationWrapper {
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata of method to wrap
 	 * @param {any} controllerInstance The controller instance
 	 */
-	private static prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: Any) {
+	private prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: Any) {
 		if (listenerMetadata.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", listenerMetadata.target, listenerMetadata.methodName)
 
-			if (!DataValidationWrapper.isParamTypesValid(paramTypes)) {
+			if (!this.isParamTypesValid(paramTypes)) {
 				return
 			}
 
 			const originalMethod = controllerInstance[listenerMetadata.methodName]
 
-			DataValidationWrapper.wrapMethod(listenerMetadata, controllerInstance, originalMethod, paramTypes)
+			this.wrapMethod(listenerMetadata, controllerInstance, originalMethod, paramTypes)
 		}
 	}
 
@@ -49,7 +49,7 @@ export class DataValidationWrapper {
 	 * @param {Function[]} paramTypes - The paramTypes of the method to wrap
 	 * @returns {boolean} - Returns true if the paramTypes are valid; false otherwise
 	 */
-	private static isParamTypesValid (paramTypes: Function[]) {
+	private isParamTypesValid (paramTypes: Function[]) {
 		const dataParamIndex = paramTypes?.findIndex((p: Function) => p.name !== "Socket")
 		return paramTypes && dataParamIndex >= 0
 	}
@@ -61,13 +61,13 @@ export class DataValidationWrapper {
 	 * @param {Function} originalMethod - The original method of the controller
 	 * @param {ClassConstructor<unknown>[]} paramTypes - The paramTypes of the method to wrap
 	 */
-	private static wrapMethod (
+	private wrapMethod (
 		listenerMetadata: ListenerMetadata,
 		controllerInstance: Any,
 		originalMethod: Function,
 		paramTypes: ClassConstructor<unknown>[]
 	) {
-		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
+		const wrappedMethod: EventFuncProxyType = async (proxyArgs) => {
 			const dataArgsMetadata = proxyArgs.methodMetadata.argsMetadata.filter(m => m.valueType === "data")
 
 			for (const paramMetadata of dataArgsMetadata) {
@@ -80,15 +80,15 @@ export class DataValidationWrapper {
 					)
 				}
 
-				if (DataValidationWrapper.isPrimitiveType(dataType)) {
-					DataValidationWrapper.validatePrimitiveType(
+				if (this.isPrimitiveType(dataType)) {
+					this.validatePrimitiveType(
 						dataValue,
 						dataType,
 						paramMetadata.parameterIndex,
 						paramMetadata.dataIndex
 					)
 				} else {
-					await DataValidationWrapper.validateObjectType(dataType, dataValue)
+					await this.validateObjectType(dataType, dataValue)
 				}
 			}
 
@@ -103,7 +103,7 @@ export class DataValidationWrapper {
 	 * @param {ClassConstructor<unknown>} dataType - The expected object type
 	 * @param {unknown} dataValue - The value to validate
 	 */
-	private static async validateObjectType (dataType: ClassConstructor<unknown>, dataValue: unknown) {
+	private async validateObjectType (dataType: ClassConstructor<unknown>, dataValue: unknown) {
 		const dataInstance = plainToInstance(dataType, dataValue)
 		const errors = await validate(dataInstance as Any)
 
@@ -123,7 +123,7 @@ export class DataValidationWrapper {
 	 * @param {Function} type - The type to check
 	 * @returns {boolean} - True if the type is a primitive type; false otherwise
 	 */
-	private static isPrimitiveType (type: Function): boolean {
+	private isPrimitiveType (type: Function): boolean {
 		return type === String || type === Number || type === Boolean
 	}
 
@@ -134,7 +134,7 @@ export class DataValidationWrapper {
 	 * @param {number} parameterIndex - The parameter index for error reporting
 	 * @param {number} dataIndex - The data index for error reporting
 	 */
-	private static validatePrimitiveType (value: unknown, expectedType: Function, parameterIndex: number, dataIndex: number) {
+	private validatePrimitiveType (value: unknown, expectedType: Function, parameterIndex: number, dataIndex: number) {
 		const actualType = typeof value
 		const expectedTypeName = expectedType.name.toLowerCase()
 		const isValid = actualType === expectedTypeName

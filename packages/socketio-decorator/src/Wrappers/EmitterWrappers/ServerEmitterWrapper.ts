@@ -1,21 +1,22 @@
 import { config } from "../../globalMetadata"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
+import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
+import { Wrapper } from "../WrapperCore/Wrapper"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
 
 /**
- * Allow to wrap a method to add server emitter layer
+ * A wrapper to add server emitter layer to the controller methods
  */
-export class ServerEmitterWrapper {
-	/**
-	 * Wraps all emitters controllers to add emitter logic
-	 * @param {EmitterMetadata[]} metadata - The metadata of the emitters to wrap
-	 * @param {any} controllerInstance - The controller instance
-	 */
-	public static wrapEmitters (metadata: EmitterMetadata[], controllerInstance: Any) {
-		MetadataUtils.mapIoMappingMetadata(metadata, "server", controllerInstance, (m, method) => {
-			ServerEmitterWrapper.wrapMethod(m, controllerInstance, method)
+export class ServerEmitterWrapper extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata): void {
+		const controllerInstance = metadata.controllerInstance
+		const emitters = metadata.methodMetadata.flatMap(m => m.metadata.ioMetadata.emitterMetadata)
+
+		MetadataUtils.mapIoMappingMetadata(emitters, "server", controllerInstance, (m, method) => {
+			this.wrapMethod(m, controllerInstance, method)
 		})
 	}
 
@@ -25,7 +26,7 @@ export class ServerEmitterWrapper {
 	 * @param {any} controllerInstance - The controller instance
 	 * @param {Function} method - The original method of the controller
 	 */
-	private static wrapMethod (metadata: EmitterMetadata, controllerInstance: Any, method: Function) {
+	private wrapMethod (metadata: EmitterMetadata, controllerInstance: Any, method: Function) {
 		const wrappedMethod: EventFuncProxyType = async function (proxyArgs) {
 			const result = await method.apply(controllerInstance, [proxyArgs])
 
