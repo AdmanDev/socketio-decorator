@@ -2,17 +2,15 @@ import { config } from "../../globalMetadata"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { ThrottleMetadata } from "../../Models/Metadata/ThrottleMetadata"
+import { Wrapper } from "../WrapperCore/Wrapper"
 import { ThrottleManager } from "./ThrottleManager"
 
 /**
  * Defines a wrapper to apply throttle on event handlers.
  */
-export class ThrottleWrapper {
-	/**
-	 * Wraps the controller methods with throttle
-	 * @param {ControllerMetadata} metadata - The controller metadata
-	 */
-	public static wrap (metadata: ControllerMetadata) {
+export class ThrottleWrapper extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata) {
 		if (config.throttleConfig?.rateLimitConfig && !metadata.throttleMetadata) {
 			metadata.throttleMetadata = {
 				target: metadata.controllerTarget,
@@ -22,8 +20,8 @@ export class ThrottleWrapper {
 		}
 
 		const throttleMetadata = metadata.methodMetadata.map(m => m.metadata.throttleMetadata).filter(m => m !== undefined)
-		ThrottleWrapper.addMethodThrottle(throttleMetadata, metadata.controllerInstance)
-		ThrottleWrapper.addClassThrottle(metadata)
+		this.addMethodThrottle(throttleMetadata, metadata.controllerInstance)
+		this.addClassThrottle(metadata)
 	}
 
 	/**
@@ -31,9 +29,9 @@ export class ThrottleWrapper {
 	 * @param {ThrottleMetadata[]} metadata - Array of metadata for the methods to be throttled.
 	 * @param {any} controllerInstance - The target controller instance containing the methods to wrap.
 	 */
-	public static addMethodThrottle (metadata: ThrottleMetadata[], controllerInstance: Any) {
+	private addMethodThrottle (metadata: ThrottleMetadata[], controllerInstance: Any) {
 		metadata.forEach((m) => {
-			ThrottleWrapper.wrapMethod(m, controllerInstance)
+			this.wrapMethod(m, controllerInstance)
 		})
 	}
 
@@ -41,7 +39,7 @@ export class ThrottleWrapper {
 	 * Adds class throttle to all applicable handlers of a controller class.
 	 * @param {ControllerMetadata} metadata - The controller metadata containing the class throttle info.
 	 */
-	public static addClassThrottle (metadata: ControllerMetadata) {
+	private addClassThrottle (metadata: ControllerMetadata) {
 		const { controllerInstance, methodMetadata, throttleMetadata } = metadata
 
 		if (!throttleMetadata) {
@@ -65,7 +63,7 @@ export class ThrottleWrapper {
 				timeWindowMs: throttleMetadata.timeWindowMs,
 				methodName
 			}
-			ThrottleWrapper.wrapMethod(metadata, controllerInstance)
+			this.wrapMethod(metadata, controllerInstance)
 		})
 	}
 
@@ -74,7 +72,7 @@ export class ThrottleWrapper {
 	 * @param {ThrottleMetadata} metadata - Metadata associated with the throttle to be applied.
 	 * @param {any} controllerInstance - The target controller instance containing the method to wrap.
 	 */
-	public static wrapMethod (metadata: ThrottleMetadata, controllerInstance: Any) {
+	private wrapMethod (metadata: ThrottleMetadata, controllerInstance: Any) {
 		const methodName = metadata.methodName
 		const method = controllerInstance[methodName]
 

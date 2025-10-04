@@ -3,19 +3,28 @@ import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
+import { Wrapper } from "../WrapperCore/Wrapper"
 
 /**
  * Defines a wrapper to apply socket middleware decorators.
  */
-export class SocketMiddlewareDecoratorWrapper {
+export class SocketMiddlewareDecoratorWrapper extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata): void {
+		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.flatMap(m => m.metadata.socketMiddlewareMetadata)
+
+		this.addMethodSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
+		this.addSocketMiddlewareToManyClassMethods(metadata)
+	}
+
 	/**
 	 * Applies methods socket middleware decorators to the methods of a controller instance.
 	 * @param {SocketMiddlewareMetadata[]} metadata - The metadata of the socket middleware to apply.
 	 * @param {any} controllerInstance - The instance of the controller containing the methods.
 	 */
-	public static addMethodSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
+	private addMethodSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
 		metadata.forEach((m) => {
-			SocketMiddlewareDecoratorWrapper.wrapMethod(m, controllerInstance)
+			this.wrapMethod(m, controllerInstance)
 		})
 	}
 
@@ -23,7 +32,7 @@ export class SocketMiddlewareDecoratorWrapper {
 	 * Applies class socket middleware decorators to all methods of a controller class.
 	 * @param {ControllerMetadata} metadata - The metadata of the controller class containing the methods.
 	 */
-	public static addSocketMiddlewareToManyClassMethods (metadata: ControllerMetadata) {
+	private addSocketMiddlewareToManyClassMethods (metadata: ControllerMetadata) {
 		const { controllerInstance, methodMetadata, middlewaresMetadata } = metadata
 
 		const methodNames: string[] = methodMetadata
@@ -45,7 +54,7 @@ export class SocketMiddlewareDecoratorWrapper {
 			}))
 		)
 
-		SocketMiddlewareDecoratorWrapper.addMethodSocketMiddleware(socketMiddlewareMetadata, controllerInstance)
+		this.addMethodSocketMiddleware(socketMiddlewareMetadata, controllerInstance)
 	}
 
 	/**
@@ -53,7 +62,7 @@ export class SocketMiddlewareDecoratorWrapper {
 	 * @param {SocketMiddlewareMetadata} metadata - Metadata associated with the middleware to be applied.
 	 * @param {any} controllerInstance - The target controller instance containing the method to wrap.
 	 */
-	private static wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any) {
+	private wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any) {
 		const methodName = metadata.methodName
 		const middlewareInstances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares).reverse()
 

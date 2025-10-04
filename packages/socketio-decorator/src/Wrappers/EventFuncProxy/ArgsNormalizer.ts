@@ -1,34 +1,26 @@
+import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { SiodInvalidMetadataError } from "../../Models/Errors/SiodInvalidMetadataError"
-import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { getReflectMethodMetadata } from "../../reflectLetadataFunc"
-import { EventFuncArgProvider } from "./EventFuncArgProvider"
 
 /**
- * Define the evant function handler proxy wrapper to manage handler args
+ * A wrapper to normalize the arguments of the controller methods
  */
-export class EventFuncProxyWrapper {
-	/**
-	 * Adds last proxy layer to the method
-	 * @param {any} controller The controller instance.
-	 * @param {string} methodName The name of the method to wrap.
-	 */
-	public static addLastProxyLayer (controller: Any, methodName: string) {
-		const originalHandler = controller[methodName] as (...args: unknown[]) => Promise<unknown>
-
-		const proxy: EventFuncProxyType = async (proxyArgs) => {
-			const finalArgs = await EventFuncArgProvider.buildFinalHandlerArgs(proxyArgs)
-			return await originalHandler.apply(controller, finalArgs)
-		}
-
-		controller[methodName] = proxy
+export class ArgsNormalizer extends Wrapper {
+	/** @inheritdoc */
+	public execute (metadata: ControllerMetadata): void {
+		metadata.methodMetadata.forEach(methodMetadata => {
+			this.normalize(metadata.controllerInstance, methodMetadata.methodName)
+		})
 	}
 
 	/**
-	 * Adds the first proxy layer to the method
+	 * Normalizes the arguments of the method
 	 * @param {any} controller The controller instance
 	 * @param {string} methodName The name of the method
 	 */
-	public static addFirstProxyLayer (controller: Any, methodName: string) {
+	private normalize (controller: Any, methodName: string) {
 		const originalHandler = controller[methodName] as Function
 
 		const proxy = async function (...args: unknown[]) {
@@ -39,7 +31,7 @@ export class EventFuncProxyWrapper {
 			if (firstArg && firstArg instanceof EventFuncProxyArgs) {
 				proxyArgs = firstArg
 			} else {
-				proxyArgs = EventFuncProxyWrapper.createProxyArgs(controller, methodName, args)
+				proxyArgs = ArgsNormalizer.createProxyArgs(controller, methodName, args)
 			}
 
 			return await originalHandler.apply(controller, [proxyArgs])

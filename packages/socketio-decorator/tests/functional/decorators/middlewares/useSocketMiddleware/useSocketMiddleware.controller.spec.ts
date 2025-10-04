@@ -173,7 +173,10 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 
 				expect(noListenerFnSpy).not.toHaveBeenCalled()
 
-				expectCallOrder(firstSocketMiddlewareSpy, listenerFnSpy)
+				expectCallOrder({
+					firstSocketMiddlewareSpy,
+					listenerFnSpy
+				})
 
 				done()
 			})
@@ -200,8 +203,15 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 			expect(secondListenerFnSpy).toHaveBeenCalledTimes(1)
 			expect(secondListenerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
 
-			expectCallOrder(firstSocketMiddlewareSpy, listenerFnSpy)
-			expectCallOrder(firstSocketMiddlewareSpy, secondListenerFnSpy)
+			expectCallOrder({
+				firstSocketMiddlewareSpy,
+				listenerFnSpy
+			})
+
+			expectCallOrder({
+				firstSocketMiddlewareSpy,
+				secondListenerFnSpy
+			})
 		})
 
 		it("should call multiple middlewares before the controller when an event is emitted", (done) => {
@@ -220,7 +230,11 @@ describe("> UseSocketMiddleware Decorator (on controller class)", () => {
 
 				expect(noListenerFnSpy).not.toHaveBeenCalled()
 
-				expectCallOrder(firstSocketMiddlewareSpy, secondSocketMiddlewareSpy, listenerFnSpy)
+				expectCallOrder({
+					firstSocketMiddlewareSpy,
+					secondSocketMiddlewareSpy,
+					listenerFnSpy
+				})
 
 				done()
 			})
