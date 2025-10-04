@@ -74,23 +74,21 @@ export class DataValidationWrapper {
 				const dataValue = proxyArgs.data[paramMetadata.dataIndex]
 				const dataType = paramTypes[paramMetadata.parameterIndex]
 
-				if (!dataValue) {
+				if (dataValue === undefined || dataValue === null) {
 					throw new SiodImcomigDataError(
 						`Data for parameter (${dataType.name}) at position ${paramMetadata.parameterIndex} is undefined (dataIndex: ${paramMetadata.dataIndex})`,
 					)
 				}
 
-				const dataInstance = plainToInstance(dataType, dataValue)
-				const errors = await validate(dataInstance as Any)
-
-				if (errors.length > 0) {
-					let errorMessage = "Incoming data is not valid"
-
-					if (!config.errorMiddleware) {
-						errorMessage += "\n You should implement an error middleware to handle this error"
-					}
-
-					throw new SiodImcomigDataError(errorMessage, dataValue, errors)
+				if (DataValidationWrapper.isPrimitiveType(dataType)) {
+					DataValidationWrapper.validatePrimitiveType(
+						dataValue,
+						dataType,
+						paramMetadata.parameterIndex,
+						paramMetadata.dataIndex
+					)
+				} else {
+					await DataValidationWrapper.validateObjectType(dataType, dataValue)
 				}
 			}
 
@@ -98,5 +96,53 @@ export class DataValidationWrapper {
 		}
 
 		controllerInstance[listenerMetadata.methodName] = wrappedMethod
+	}
+
+	/**
+	 * Validates an object type value
+	 * @param {ClassConstructor<unknown>} dataType - The expected object type
+	 * @param {unknown} dataValue - The value to validate
+	 */
+	private static async validateObjectType (dataType: ClassConstructor<unknown>, dataValue: unknown) {
+		const dataInstance = plainToInstance(dataType, dataValue)
+		const errors = await validate(dataInstance as Any)
+
+		if (errors.length > 0) {
+			let errorMessage = "Incoming data is not valid"
+
+			if (!config.errorMiddleware) {
+				errorMessage += "\n You should implement an error middleware to handle this error"
+			}
+
+			throw new SiodImcomigDataError(errorMessage, dataValue, errors)
+		}
+	}
+
+	/**
+	 * Checks if the given type is a primitive type
+	 * @param {Function} type - The type to check
+	 * @returns {boolean} - True if the type is a primitive type; false otherwise
+	 */
+	private static isPrimitiveType (type: Function): boolean {
+		return type === String || type === Number || type === Boolean
+	}
+
+	/**
+	 * Validates a primitive type value
+	 * @param {unknown} value - The value to validate
+	 * @param {Function} expectedType - The expected primitive type
+	 * @param {number} parameterIndex - The parameter index for error reporting
+	 * @param {number} dataIndex - The data index for error reporting
+	 */
+	private static validatePrimitiveType (value: unknown, expectedType: Function, parameterIndex: number, dataIndex: number) {
+		const actualType = typeof value
+		const expectedTypeName = expectedType.name.toLowerCase()
+		const isValid = actualType === expectedTypeName
+
+		if (!isValid) {
+			throw new SiodImcomigDataError(
+				`Incoming data is not valid. Invalid type for parameter at position ${parameterIndex}. Expected ${expectedTypeName}, but received ${actualType} (dataIndex: ${dataIndex})`,
+			)
+		}
 	}
 }
