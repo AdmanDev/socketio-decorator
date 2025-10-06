@@ -1,6 +1,6 @@
 import { config } from "../../globalMetadata"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { EmitterMetadata } from "../../Models/Metadata/EmiterMetadata"
+import { EmitterMetadata } from "../../Models/Metadata/EmitterMetadata"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { Wrapper } from "../WrapperCore/Wrapper"

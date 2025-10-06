@@ -37,7 +37,7 @@ export * from "./Models/DecoratorOptions/EmitterOption"
 export * from "./Models/DecoratorOptions/DecoratorOptions"
 
 // Errors
-export * from "./Models/Errors/SiodImcomigDataError"
+export * from "./Models/Errors/SiodIncomingDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
 export * from "./Models/Errors/SiodThrottleError"
 

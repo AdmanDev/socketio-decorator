@@ -1,5 +1,5 @@
 import { MiddlewareOptionType } from "../../Models/DecoratorOptions/MiddlewareOptionType"
-import { defineReflectMiddlewareOptionMetadata } from "../../reflectLetadataFunc"
+import { defineReflectMiddlewareOptionMetadata } from "../../reflectMetadataFunc"
 
 /**
  * This decorator allows to define options for a middleware class.

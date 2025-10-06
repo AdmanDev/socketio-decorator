@@ -2,7 +2,7 @@ import { Wrapper } from "../WrapperCore/Wrapper"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { SiodInvalidMetadataError } from "../../Models/Errors/SiodInvalidMetadataError"
-import { getReflectMethodMetadata } from "../../reflectLetadataFunc"
+import { getReflectMethodMetadata } from "../../reflectMetadataFunc"
 
 /**
  * A wrapper to normalize the arguments of the controller methods
