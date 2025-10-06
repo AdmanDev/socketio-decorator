@@ -3,7 +3,7 @@ import { ValidationError } from "class-validator"
 /**
  * Defines the error for incoming data exception
  */
-export class SiodImcomigDataError extends Error {
+export class SiodIncomingDataError extends Error {
 	/**
 	 * The incoming data that caused the error
 	 */
@@ -17,7 +17,7 @@ export class SiodImcomigDataError extends Error {
 	 */
 	constructor (message: string, data?: unknown, validationErrors?: ValidationError[]) {
 		super(message, { cause: validationErrors })
-		this.name = SiodImcomigDataError.name
+		this.name = SiodIncomingDataError.name
 		this.dataValue = data
 	}
 }

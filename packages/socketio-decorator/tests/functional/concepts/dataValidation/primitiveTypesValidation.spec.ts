@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
+import { Data, IErrorMiddleware, SiodIncomingDataError, SocketOn } from "../../../../src"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { waitFor } from "../../../utilities/testUtils"
 
@@ -86,7 +86,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 
 		it("should reject object instead of string", async () => {
@@ -97,7 +97,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 	})
 
@@ -150,7 +150,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 
 		it("should reject NaN", async () => {
@@ -161,7 +161,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 	})
 
@@ -194,7 +194,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 
 		it("should reject number instead of boolean", async () => {
@@ -205,7 +205,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 	})
 
@@ -234,7 +234,7 @@ describe("> Primitive Types Validation", () => {
 
 			expect(testFn).not.toHaveBeenCalled()
 			expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+			expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 		})
 	})
 })

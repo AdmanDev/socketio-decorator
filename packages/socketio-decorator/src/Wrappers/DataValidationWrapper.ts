@@ -1,7 +1,7 @@
 import { ClassConstructor, plainToInstance } from "class-transformer"
 import { validate } from "class-validator"
 import { config } from "../globalMetadata"
-import { SiodImcomigDataError } from "../Models/Errors/SiodImcomigDataError"
+import { SiodIncomingDataError } from "../Models/Errors/SiodIncomingDataError"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { Wrapper } from "./WrapperCore/Wrapper"
@@ -75,7 +75,7 @@ export class DataValidationWrapper extends Wrapper {
 				const dataType = paramTypes[paramMetadata.parameterIndex]
 
 				if (dataValue === undefined || dataValue === null) {
-					throw new SiodImcomigDataError(
+					throw new SiodIncomingDataError(
 						`Data for parameter (${dataType.name}) at position ${paramMetadata.parameterIndex} is undefined (dataIndex: ${paramMetadata.dataIndex})`,
 					)
 				}
@@ -114,7 +114,7 @@ export class DataValidationWrapper extends Wrapper {
 				errorMessage += "\n You should implement an error middleware to handle this error"
 			}
 
-			throw new SiodImcomigDataError(errorMessage, dataValue, errors)
+			throw new SiodIncomingDataError(errorMessage, dataValue, errors)
 		}
 	}
 
@@ -140,7 +140,7 @@ export class DataValidationWrapper extends Wrapper {
 		const isValid = actualType === expectedTypeName
 
 		if (!isValid) {
-			throw new SiodImcomigDataError(
+			throw new SiodIncomingDataError(
 				`Incoming data is not valid. Invalid type for parameter at position ${parameterIndex}. Expected ${expectedTypeName}, but received ${actualType} (dataIndex: ${dataIndex})`,
 			)
 		}

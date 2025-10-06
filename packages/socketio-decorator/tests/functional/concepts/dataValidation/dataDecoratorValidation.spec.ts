@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { Data, IErrorMiddleware, SiodImcomigDataError, SocketOn } from "../../../../src"
+import { Data, IErrorMiddleware, SiodIncomingDataError, SocketOn } from "../../../../src"
 import { MessageData, UserData } from "../../../types/socketData"
 import { createSocketClient, createServer } from "../../../utilities/serverUtils"
 import { waitFor } from "../../../utilities/testUtils"
@@ -90,7 +90,7 @@ describe("> @Data Decorator Validation", () => {
 
 		expect(simpleTestFn).not.toHaveBeenCalled()
 		expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 	})
 
 	it("should validate data regardless of parameter position", async () => {
@@ -127,10 +127,10 @@ describe("> @Data Decorator Validation", () => {
 
 		expect(simpleTestFn).not.toHaveBeenCalled()
 		expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 	})
 
-	it("should throw SiodImcomigDataError when dataIndex is out of bounds", async () => {
+	it("should throw SiodIncomingDataError when dataIndex is out of bounds", async () => {
 		const data: MessageData = { message: "Hello World" }
 		clientSocket.emit("data-index-out-of-bounds", data)
 
@@ -138,6 +138,6 @@ describe("> @Data Decorator Validation", () => {
 
 		expect(simpleTestFn).not.toHaveBeenCalled()
 		expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+		expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 	})
 })

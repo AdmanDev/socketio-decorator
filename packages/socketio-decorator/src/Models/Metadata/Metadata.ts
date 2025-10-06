@@ -1,4 +1,4 @@
-import { EmitterMetadata } from "./EmiterMetadata"
+import { EmitterMetadata } from "./EmitterMetadata"
 import { ListenerMetadata } from "./ListenerMetadata"
 import { MethodArgMetadata } from "./MethodArgMetadata"
 import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"

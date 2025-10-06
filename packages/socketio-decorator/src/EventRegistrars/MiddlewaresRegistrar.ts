@@ -2,7 +2,7 @@ import { IoCContainer } from "../IoCContainer"
 import { addEventBinder, config } from "../globalMetadata"
 import { IServerMiddleware } from "../Interfaces/IServerMiddleware"
 import { ISocketMiddleware } from "../Interfaces/ISocketMiddleware"
-import { getReflectMiddlewareOptionMetadata } from "../reflectLetadataFunc"
+import { getReflectMiddlewareOptionMetadata } from "../reflectMetadataFunc"
 import { Namespace, Server } from "socket.io"
 
 /**

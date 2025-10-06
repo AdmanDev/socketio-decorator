@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
-import { CurrentSocket, Data, EventName, IErrorMiddleware, SiodImcomigDataError, SocketOnAny } from "../../../../src"
+import { CurrentSocket, Data, EventName, IErrorMiddleware, SiodIncomingDataError, SocketOnAny } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
@@ -118,7 +118,7 @@ describe("> @SocketOnAny Data Validation", () => {
 				const onMessage = () => {
 					expect(socketOnAnySpy).not.toHaveBeenCalled()
 					expect(socketOnAnyErrorSpy).toHaveBeenCalledTimes(1)
-					expect(socketOnAnyErrorSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
+					expect(socketOnAnyErrorSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError))
 
 					clientSocket.disconnect()
 					done()
