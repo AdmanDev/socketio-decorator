@@ -6,6 +6,7 @@ import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { Wrapper } from "./WrapperCore/Wrapper"
 import { ControllerMetadata } from "../Models/Metadata/Metadata"
+import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**
  * Allows to wrap a method to add data validation layer
@@ -21,16 +22,16 @@ export class DataValidationWrapper extends Wrapper {
 		const listeners = methodMetadata.flatMap(m => m.metadata.ioMetadata.listenerMetadata)
 
 		listeners.forEach(m => {
-			this.prepareDataValidationLayerAndWrap(m, controllerInstance)
+			this.prepareDataValidationLayerAndWrap(m, controllerInstance!)
 		})
 	}
 
 	/**
 	 * Prepares data validation layer and wraps listener methods
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata of method to wrap
-	 * @param {any} controllerInstance The controller instance
+	 * @param {ControllerInstance} controllerInstance The controller instance
 	 */
-	private prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: Any) {
+	private prepareDataValidationLayerAndWrap (listenerMetadata: ListenerMetadata, controllerInstance: ControllerInstance) {
 		if (listenerMetadata.dataCheck) {
 			const paramTypes = Reflect.getMetadata("design:paramtypes", listenerMetadata.target, listenerMetadata.methodName)
 
@@ -40,7 +41,7 @@ export class DataValidationWrapper extends Wrapper {
 
 			const originalMethod = controllerInstance[listenerMetadata.methodName]
 
-			this.wrapMethod(listenerMetadata, controllerInstance, originalMethod, paramTypes)
+			this.wrapMethod(listenerMetadata, controllerInstance, originalMethod as Function, paramTypes)
 		}
 	}
 
@@ -57,13 +58,13 @@ export class DataValidationWrapper extends Wrapper {
 	/**
 	 * Wraps the method to add data validation layer
 	 * @param {ListenerMetadata} listenerMetadata - The listener metadata of method to wrap
-	 * @param {any} controllerInstance - The controller instance
+	 * @param {ControllerInstance} controllerInstance - The controller instance
 	 * @param {Function} originalMethod - The original method of the controller
 	 * @param {ClassConstructor<unknown>[]} paramTypes - The paramTypes of the method to wrap
 	 */
 	private wrapMethod (
 		listenerMetadata: ListenerMetadata,
-		controllerInstance: Any,
+		controllerInstance: ControllerInstance,
 		originalMethod: Function,
 		paramTypes: ClassConstructor<unknown>[]
 	) {
@@ -105,7 +106,7 @@ export class DataValidationWrapper extends Wrapper {
 	 */
 	private async validateObjectType (dataType: ClassConstructor<unknown>, dataValue: unknown) {
 		const dataInstance = plainToInstance(dataType, dataValue)
-		const errors = await validate(dataInstance as Any)
+		const errors = await validate(dataInstance as Object)
 
 		if (errors.length > 0) {
 			let errorMessage = "Incoming data is not valid"

@@ -8,6 +8,7 @@ import { MetadataUtils } from "./Utils/MetadataUtils"
 import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
 import { defineReflectMethodMetadata } from "./reflectMetadataFunc"
 import { MethodArgMetadata } from "./Models/Metadata/MethodArgMetadata"
+import { ControllerConstructor } from "./Models/Utilities/ControllerTypes"
 import { ClassThrottleMetadata, ThrottleMetadata } from "./Models/Metadata/ThrottleMetadata"
 
 const controllerMetadata: ControllerMetadata[] = []
@@ -37,7 +38,7 @@ function getOrCreateControllerMetadata (target: Object) {
 		const controllerName = MetadataUtils.getTargetName(target)
 
 		const newMetadata: ControllerMetadata = {
-			controllerTarget: targetClass,
+			controllerTarget: targetClass as ControllerConstructor,
 			controllerName,
 			namespace: "/",
 			methodMetadata: [],

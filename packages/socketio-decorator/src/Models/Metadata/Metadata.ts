@@ -3,10 +3,11 @@ import { ListenerMetadata } from "./ListenerMetadata"
 import { MethodArgMetadata } from "./MethodArgMetadata"
 import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
 import { ClassThrottleMetadata, ThrottleMetadata } from "./ThrottleMetadata"
+import { ControllerConstructor, ControllerInstance } from "../Utilities/ControllerTypes"
 
 export type ControllerMetadata = {
-	controllerTarget: new () => Any
-	controllerInstance?: Any
+	controllerTarget: ControllerConstructor
+	controllerInstance?: ControllerInstance
 	controllerName: string
 	namespace: string
 	methodMetadata: MethodMetadata[]

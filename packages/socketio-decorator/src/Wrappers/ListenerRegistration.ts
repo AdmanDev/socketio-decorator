@@ -1,11 +1,11 @@
 import { IoActionHandler } from "../EventRegistrars/IoActionHandler"
 import { config, getControllerMetadata, addEventBinder } from "../globalMetadata"
-import { ClassConstructorType } from "../Models/ClassConstructorType"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
 import { ControllerMetadata, MethodMetadata } from "../Models/Metadata/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
 import { Wrapper } from "./WrapperCore/Wrapper"
+import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a wrapper to register listeners
@@ -17,8 +17,8 @@ export class ListenerRegistration extends Wrapper {
 
 		methodMetadata.forEach(mm => {
 			const listenerMetadata = mm.metadata.ioMetadata.listenerMetadata
-			this.registerServerListeners(mm, listenerMetadata, controllerInstance)
-			this.setupSocketListeners(mm, listenerMetadata, controllerInstance)
+			this.registerServerListeners(mm, listenerMetadata, controllerInstance!)
+			this.setupSocketListeners(mm, listenerMetadata, controllerInstance!)
 		})
 	}
 
@@ -26,12 +26,12 @@ export class ListenerRegistration extends Wrapper {
 	 * Registers server listeners
 	 * @param {MethodMetadata} methodMetadata Metadata of the method
 	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
-	 * @param {ClassConstructorType<unknown>} controllerInstance Instance of the controller
+	 * @param {ControllerInstance} controllerInstance Instance of the controller
 	 */
 	private registerServerListeners (
 		methodMetadata: MethodMetadata,
 		listenerMetadata: ListenerMetadata[],
-		controllerInstance: ClassConstructorType<unknown>
+		controllerInstance: ControllerInstance
 	) {
 		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "server", controllerInstance, (metadata, method) => {
 			IoActionHandler.callServerAction(config.ioserver, methodMetadata, metadata, controllerInstance, method)
@@ -42,12 +42,12 @@ export class ListenerRegistration extends Wrapper {
 	 * Setups socket listeners
 	 * @param {MethodMetadata} methodMetadata Metadata of the method
 	 * @param {ListenerMetadata[]} listenerMetadata Metadata of the listeners
-	 * @param {ClassConstructorType<unknown>} controllerInstance Instance of the controller
+	 * @param {ControllerInstance} controllerInstance Instance of the controller
 	 */
 	private setupSocketListeners (
 		methodMetadata: MethodMetadata,
 		listenerMetadata: ListenerMetadata[],
-		controllerInstance: ClassConstructorType<unknown>
+		controllerInstance: ControllerInstance
 	) {
 		const filteredMetadata: {
 			method: EventFuncProxyType,

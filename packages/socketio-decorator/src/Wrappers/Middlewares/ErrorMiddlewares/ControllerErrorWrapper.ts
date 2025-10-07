@@ -32,7 +32,7 @@ export class ControllerErrorWrapper extends Wrapper {
 			.filter((value, index, self) => self.indexOf(value) === index)
 
 		unicMethods.forEach(methodName => {
-			BaseErrorMiddlewareWrapper.wrapMethod(errorMiddleware, methodName, metadata.controllerInstance)
+			BaseErrorMiddlewareWrapper.wrapMethod(errorMiddleware, methodName, metadata.controllerInstance!)
 		})
 	}
 }

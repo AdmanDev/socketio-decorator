@@ -4,6 +4,7 @@ import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a wrapper to apply socket middleware decorators.
@@ -13,16 +14,16 @@ export class SocketMiddlewareDecoratorWrapper extends Wrapper {
 	public execute (metadata: ControllerMetadata): void {
 		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.flatMap(m => m.metadata.socketMiddlewareMetadata)
 
-		this.addMethodSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance)
+		this.addMethodSocketMiddleware(socketMiddlewareDecoratorMetadata, metadata.controllerInstance!)
 		this.addSocketMiddlewareToManyClassMethods(metadata)
 	}
 
 	/**
 	 * Applies methods socket middleware decorators to the methods of a controller instance.
 	 * @param {SocketMiddlewareMetadata[]} metadata - The metadata of the socket middleware to apply.
-	 * @param {any} controllerInstance - The instance of the controller containing the methods.
+	 * @param {ControllerInstance} controllerInstance - The instance of the controller containing the methods.
 	 */
-	private addMethodSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: Any) {
+	private addMethodSocketMiddleware (metadata: SocketMiddlewareMetadata[], controllerInstance: ControllerInstance) {
 		metadata.forEach((m) => {
 			this.wrapMethod(m, controllerInstance)
 		})
@@ -54,20 +55,20 @@ export class SocketMiddlewareDecoratorWrapper extends Wrapper {
 			}))
 		)
 
-		this.addMethodSocketMiddleware(socketMiddlewareMetadata, controllerInstance)
+		this.addMethodSocketMiddleware(socketMiddlewareMetadata, controllerInstance!)
 	}
 
 	/**
 	 * Wraps a controller method with socket middleware logic.
 	 * @param {SocketMiddlewareMetadata} metadata - Metadata associated with the middleware to be applied.
-	 * @param {any} controllerInstance - The target controller instance containing the method to wrap.
+	 * @param {ControllerInstance} controllerInstance - The target controller instance containing the method to wrap.
 	 */
-	private wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: Any) {
+	private wrapMethod (metadata: SocketMiddlewareMetadata, controllerInstance: ControllerInstance) {
 		const methodName = metadata.methodName
 		const middlewareInstances = IoCContainer.getInstances<ISocketMiddleware>(metadata.middlewares).reverse()
 
 		middlewareInstances.forEach((middleware) => {
-			const method = controllerInstance[methodName]
+			const method = controllerInstance[methodName] as EventFuncProxyType
 
 			const socketMiddlewareProxy: EventFuncProxyType = async function (proxyArgs) {
 				const middlewareResult = new Promise((resolve) => {

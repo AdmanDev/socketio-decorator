@@ -4,6 +4,7 @@ import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { ThrottleMetadata } from "../../Models/Metadata/ThrottleMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { ThrottleManager } from "./ThrottleManager"
+import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a wrapper to apply throttle on event handlers.
@@ -20,16 +21,16 @@ export class ThrottleWrapper extends Wrapper {
 		}
 
 		const throttleMetadata = metadata.methodMetadata.map(m => m.metadata.throttleMetadata).filter(m => m !== undefined)
-		this.addMethodThrottle(throttleMetadata, metadata.controllerInstance)
+		this.addMethodThrottle(throttleMetadata, metadata.controllerInstance!)
 		this.addClassThrottle(metadata)
 	}
 
 	/**
 	 * Adds method throttle to the controller instance methods.
 	 * @param {ThrottleMetadata[]} metadata - Array of metadata for the methods to be throttled.
-	 * @param {any} controllerInstance - The target controller instance containing the methods to wrap.
+	 * @param {ControllerInstance} controllerInstance - The target controller instance containing the methods to wrap.
 	 */
-	private addMethodThrottle (metadata: ThrottleMetadata[], controllerInstance: Any) {
+	private addMethodThrottle (metadata: ThrottleMetadata[], controllerInstance: ControllerInstance) {
 		metadata.forEach((m) => {
 			this.wrapMethod(m, controllerInstance)
 		})
@@ -58,23 +59,23 @@ export class ThrottleWrapper extends Wrapper {
 
 		methodNames.forEach(methodName => {
 			const metadata: ThrottleMetadata = {
-				target: controllerInstance.constructor,
+				target: controllerInstance!.constructor,
 				limit: throttleMetadata.limit,
 				timeWindowMs: throttleMetadata.timeWindowMs,
 				methodName
 			}
-			this.wrapMethod(metadata, controllerInstance)
+			this.wrapMethod(metadata, controllerInstance!)
 		})
 	}
 
 	/**
 	 * Wraps a controller method with throttle logic.
 	 * @param {ThrottleMetadata} metadata - Metadata associated with the throttle to be applied.
-	 * @param {any} controllerInstance - The target controller instance containing the method to wrap.
+	 * @param {ControllerInstance} controllerInstance - The target controller instance containing the method to wrap.
 	 */
-	private wrapMethod (metadata: ThrottleMetadata, controllerInstance: Any) {
+	private wrapMethod (metadata: ThrottleMetadata, controllerInstance: ControllerInstance) {
 		const methodName = metadata.methodName
-		const method = controllerInstance[methodName]
+		const method = controllerInstance[methodName] as EventFuncProxyType
 
 		const throttleProxy: EventFuncProxyType = async function (proxyArgs) {
 			const { socket, eventName } = proxyArgs

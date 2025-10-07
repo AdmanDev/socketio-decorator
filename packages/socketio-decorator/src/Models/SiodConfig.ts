@@ -38,10 +38,9 @@ export type SiodConfig = {
 	throttleConfig?: ThrottleConfig
 	/**
 	 * The current user provider that will be used to get the current user from CurrentUser decorator.
-	 * @returns {Promise<TUser | null>} The current user if found, or null if not found
-	 * @template TUser The user type
+	 * @returns {Promise<unknown | null>} The current user if found, or null if not found
 	 */
-	currentUserProvider?: (socket: Socket) => Promise<Any>
+	currentUserProvider?: (socket: Socket) => Promise<unknown | null>
 	/**
 	 * Search for a user socket that matches the search argument
 	 * @param {any} arg The search argument

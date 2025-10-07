@@ -5,13 +5,14 @@ import { ControllerMetadata, MethodMetadata } from "../Models/Metadata/Metadata"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { EventMapAction } from "../Models/Metadata/EventMappingDescription"
 import { getControllerMetadata } from "../globalMetadata"
+import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 type ServerAction = {
 	[action in EventMapAction]: (ioserver: Server, eventName: string, metadata: MethodMetadata, controllerMetadata: ControllerMetadata, method: EventFuncProxyType) => void
 }
 
 type SocketAction = {
-	[action in EventMapAction]: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => void
+	[action in EventMapAction]: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: ControllerInstance, method: EventFuncProxyType) => void
 }
 
 type IoActionFnBinder = {
@@ -35,19 +36,19 @@ export class IoActionHandler {
 			},
 		},
 		socket: {
-			on: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
+			on: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: ControllerInstance, method: EventFuncProxyType) => {
 				socket.on(eventName, (...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(data, metadata, eventName, socket)
 					method.apply(controller, [proxyArgs])
 				})
 			},
-			once: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
+			once: (socket: Socket, eventName: string, metadata: MethodMetadata, controller: ControllerInstance, method: EventFuncProxyType) => {
 				socket.once(eventName, (...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(data, metadata, eventName, socket)
 					method.apply(controller, [proxyArgs])
 				})
 			},
-			onAny: (socket: Socket, _: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
+			onAny: (socket: Socket, _: string, metadata: MethodMetadata, controller: ControllerInstance, method: EventFuncProxyType) => {
 				socket.onAny((eventName: string, ...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(
 						data,
@@ -59,7 +60,7 @@ export class IoActionHandler {
 					method.apply(controller, [proxyArgs])
 				})
 			},
-			onAnyOutgoing: (socket: Socket, _: string, metadata: MethodMetadata, controller: Any, method: EventFuncProxyType) => {
+			onAnyOutgoing: (socket: Socket, _: string, metadata: MethodMetadata, controller: ControllerInstance, method: EventFuncProxyType) => {
 				socket.onAnyOutgoing((eventName: string, ...data: unknown[]) => {
 					const proxyArgs = new EventFuncProxyArgs(
 						data,
@@ -79,10 +80,10 @@ export class IoActionHandler {
 	 * @param {Server} ioserver The socket.io server instance
 	 * @param {MethodMetadata} methodMetadata The method metadata
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata
-	 * @param {any} controller The controller instance
+	 * @param {ControllerInstance} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callServerAction (ioserver: Server, methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata, controller: Any, method: EventFuncProxyType) {
+	public static callServerAction (ioserver: Server, methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata, controller: ControllerInstance, method: EventFuncProxyType) {
 		const fn = IoActionHandler.ioFns.server[listenerMetadata.action]
 		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
@@ -96,10 +97,10 @@ export class IoActionHandler {
 	 * @param {Socket} socket The socket.io socket instance
 	 * @param {MethodMetadata} methodMetadata The metadata for the method
 	 * @param {ListenerMetadata} listenerMetadata The listener metadata
-	 * @param {any} controller The controller instance
+	 * @param {ControllerInstance} controller The controller instance
 	 * @param {Function} method The method to call
 	 */
-	public static callSocketAction (socket: Socket, methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata, controller: Any, method: EventFuncProxyType) {
+	public static callSocketAction (socket: Socket, methodMetadata: MethodMetadata, listenerMetadata: ListenerMetadata, controller: ControllerInstance, method: EventFuncProxyType) {
 		const fn = IoActionHandler.ioFns.socket[listenerMetadata.action]
 		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
