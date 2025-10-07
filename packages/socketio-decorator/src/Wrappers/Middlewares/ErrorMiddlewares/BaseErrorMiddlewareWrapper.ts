@@ -3,6 +3,7 @@ import { config } from "../../../globalMetadata"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"
 import { IoCContainer } from "../../../IoCContainer"
 import { EventFuncProxyArgs } from "../../../Models/EventFuncProxyType"
+import { MiddlewareInstance } from "../../../Models/Utilities/ControllerTypes"
 
 /**
  * Error middleware wrapper
@@ -17,7 +18,10 @@ export class BaseErrorMiddlewareWrapper {
 			return
 		}
 
-		const otherMiddlewares = IoCContainer.getInstances([...config.serverMiddlewares || [], ...config.socketMiddlewares || []])
+		const otherMiddlewares = IoCContainer.getInstances<MiddlewareInstance>([
+			...config.serverMiddlewares || [],
+			...config.socketMiddlewares || []
+		])
 
 		otherMiddlewares.forEach(middleware => {
 			BaseErrorMiddlewareWrapper.wrapMethod(errorMiddleware, "use", middleware)
@@ -33,28 +37,28 @@ export class BaseErrorMiddlewareWrapper {
 			return undefined
 		}
 
-		return IoCContainer.getInstances([config.errorMiddleware])?.[0] as IErrorMiddleware | undefined
+		return IoCContainer.getInstance<IErrorMiddleware>(config.errorMiddleware)
 	}
 
 	/**
 	 * Wraps method to handle errors with error middleware
 	 * @param {IErrorMiddleware} errorMiddleware The error middleware
 	 * @param {string} methodName The method name
-	 * @param {any} controllerInstance The controller instance
+	 * @param {MiddlewareInstance} middlewareInstance The middleware instance
 	 */
-	public static wrapMethod (errorMiddleware: IErrorMiddleware, methodName: string, controllerInstance: Any) {
-		const originalMethod = controllerInstance[methodName]
+	public static wrapMethod (errorMiddleware: IErrorMiddleware, methodName: string, middlewareInstance: MiddlewareInstance) {
+		const originalMethod = middlewareInstance[methodName] as Function
 
 		const wrappedMethod = async function (...args: unknown[]) {
 			try {
-				return await originalMethod.apply(controllerInstance, args)
-			} catch (error: Any) {
+				return await originalMethod.apply(middlewareInstance, args)
+			} catch (error: unknown) {
 				const socket = BaseErrorMiddlewareWrapper.getSocketFromArgs(...args)
 				return errorMiddleware.handleError(error, socket)
 			}
 		}
 
-		controllerInstance[methodName] = wrappedMethod
+		middlewareInstance[methodName] = wrappedMethod
 	}
 
 	/**

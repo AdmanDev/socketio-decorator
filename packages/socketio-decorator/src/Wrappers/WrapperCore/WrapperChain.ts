@@ -1,7 +1,7 @@
 import { IoCContainer } from "../../IoCContainer"
-import { ClassConstructorType } from "../../Models/ClassConstructorType"
 import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { Wrapper } from "./Wrapper"
+import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a chain of wrappers allowing to execute all the wrappers in the chain.
@@ -25,7 +25,7 @@ export class WrapperChain {
 	 */
 	public execute (metadata: ControllerMetadata[]) {
 		metadata.forEach(m => {
-			m.controllerInstance = IoCContainer.getInstance<ClassConstructorType<unknown>>(m.controllerTarget)
+			m.controllerInstance = IoCContainer.getInstance<ControllerInstance>(m.controllerTarget)
 			this.wrappers.forEach(wrapper => wrapper.execute(m))
 		})
 	}

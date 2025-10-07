@@ -23,7 +23,7 @@ export class SiodWorkflowProcess {
 	 */
 	public static processAll () {
 		const metadata = getAllMetadata()
-			.filter(m => config.controllers.includes(m.controllerTarget as Any))
+			.filter(m => config.controllers.some(controller => typeof controller === "function" && controller === m.controllerTarget))
 
 		BaseErrorMiddlewareWrapper.wrapAllMiddlewares()
 

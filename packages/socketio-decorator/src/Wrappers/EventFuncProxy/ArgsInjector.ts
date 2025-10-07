@@ -6,6 +6,7 @@ import { ControllerMetadata } from "../../Models/Metadata/Metadata"
 import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { SocketDataStore } from "./ArgProviders/SocketDataStore"
+import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines the event function handler proxy wrapper to manage handler args
@@ -14,16 +15,16 @@ export class ArgsInjector extends Wrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		metadata.methodMetadata.forEach(methodMetadata => {
-			this.wrapMethod(metadata.controllerInstance, methodMetadata.methodName)
+			this.wrapMethod(metadata.controllerInstance!, methodMetadata.methodName)
 		})
 	}
 
 	/**
 	 * Wraps the method to inject normalized arguments
-	 * @param {any} controller The controller instance.
+	 * @param {ControllerInstance} controller The controller instance.
 	 * @param {string} methodName The name of the method to wrap.
 	 */
-	private wrapMethod (controller: Any, methodName: string) {
+	private wrapMethod (controller: ControllerInstance, methodName: string) {
 		const originalHandler = controller[methodName] as (...args: unknown[]) => Promise<unknown>
 
 		const proxy: EventFuncProxyType = async (proxyArgs) => {
@@ -99,13 +100,7 @@ export class ArgsInjector extends Wrapper {
 			throw new SiodDecoratorError("Unable to get current user, the socket instance is undefined.")
 		}
 
-		let currentUser: unknown = null
-
-		if (config.currentUserProvider) {
-			currentUser = await config.currentUserProvider(socket)
-		}
-
-		return currentUser
+		return await config.currentUserProvider(socket) || null
 	}
 
 	/**
