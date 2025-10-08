@@ -2,6 +2,8 @@ import { IoEventsBinder } from "./EventRegistrars/IoEventsBinder"
 import { MiddlewaresRegistrar } from "./EventRegistrars/MiddlewaresRegistrar"
 import { ConfigStore } from "./MetadataRepository/Stores/ConfigStore"
 import { ControllerMetadataStore } from "./MetadataRepository/Stores/ControllerMetadataStore"
+import { AppEmitStandaloneWrapper } from "./Wrappers/AppEmitStandaloneWrapper"
+import { AppEmitControllerWrapper } from "./Wrappers/AppEmitControllerWrapper"
 import { DataValidationWrapper } from "./Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "./Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWrapper"
@@ -27,6 +29,7 @@ export class SiodWorkflowProcess {
 			.getAll()
 			.filter(m => ConfigStore.get().controllers.some(controller => typeof controller === "function" && controller === m.controllerTarget))
 
+		new AppEmitStandaloneWrapper().execute()
 		BaseErrorMiddlewareWrapper.wrapAllMiddlewares()
 
 		const wrapperChain = new WrapperChain()
@@ -37,6 +40,7 @@ export class SiodWorkflowProcess {
 			.register(new SocketMiddlewareDecoratorWrapper())
 			.register(new ThrottleWrapper())
 			.register(new ControllerErrorWrapper())
+			.register(new AppEmitControllerWrapper())
 			.register(new ArgsNormalizer())
 			.register(new ListenerRegistration())
 

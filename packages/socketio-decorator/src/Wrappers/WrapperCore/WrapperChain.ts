@@ -1,20 +1,20 @@
 import { IoCContainer } from "../../IoCContainer"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
-import { Wrapper } from "./Wrapper"
+import { ControllerWrapper } from "./ControllerWrapper"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a chain of wrappers allowing to execute all the wrappers in the chain.
  */
 export class WrapperChain {
-	private wrappers: Wrapper[] = []
+	private wrappers: ControllerWrapper[] = []
 
 	/**
 	 * Registers a wrapper in the chain.
-	 * @param {Wrapper} wrapper - The wrapper to register.
+	 * @param {ControllerWrapper} wrapper - The wrapper to register.
 	 * @returns {WrapperChain} This wrapper chain.
 	 */
-	public register (wrapper: Wrapper) {
+	public register (wrapper: ControllerWrapper) {
 		this.wrappers.push(wrapper)
 		return this
 	}

@@ -119,7 +119,8 @@ describe("> System tests", () => {
 				get: (type) => {
 					externalContainerSpy(type)
 					return new type()
-				}
+				},
+				set: jest.fn()
 			}
 
 			beforeAll(() => {

@@ -3,14 +3,14 @@ import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../MetadataRepository/MetadataObjects/EmitterMetadata"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
-import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * A wrapper to add server emitter layer to the controller methods
  */
-export class ServerEmitterWrapper extends Wrapper {
+export class ServerEmitterWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		const controllerInstance = metadata.controllerInstance!

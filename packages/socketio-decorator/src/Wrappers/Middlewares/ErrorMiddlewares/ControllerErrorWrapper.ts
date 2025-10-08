@@ -1,12 +1,12 @@
 import { ControllerMetadata } from "../../../MetadataRepository/MetadataObjects/Metadata"
 import { BaseErrorMiddlewareWrapper } from "./BaseErrorMiddlewareWrapper"
-import { Wrapper } from "../../WrapperCore/Wrapper"
+import { ControllerWrapper } from "../../WrapperCore/ControllerWrapper"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"
 
 /**
  * Defines a wrapper to wrap controllers methods with the error middleware.
  */
-export class ControllerErrorWrapper extends Wrapper {
+export class ControllerErrorWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata) {
 		const errorMiddleware = BaseErrorMiddlewareWrapper.getErrorMiddlewareInstance()

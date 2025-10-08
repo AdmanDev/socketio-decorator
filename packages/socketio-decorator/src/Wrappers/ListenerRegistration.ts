@@ -6,13 +6,13 @@ import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
 import { ControllerMetadata, MethodMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
-import { Wrapper } from "./WrapperCore/Wrapper"
+import { ControllerWrapper } from "./WrapperCore/ControllerWrapper"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a wrapper to register listeners
  */
-export class ListenerRegistration extends Wrapper {
+export class ListenerRegistration extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (controllerMetadata: ControllerMetadata) {
 		const { controllerInstance, methodMetadata } = controllerMetadata
