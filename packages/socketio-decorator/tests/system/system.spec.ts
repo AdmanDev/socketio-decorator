@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { SocketOn, useSocketIoDecorator } from "../../src"
-import { ListenersRegistrar } from "../../src/EventRegistrars/ListenersRegistrar"
 import { MiddlewaresRegistrar } from "../../src/EventRegistrars/MiddlewaresRegistrar"
 import { setConfig } from "../../src/globalMetadata"
 import { IoCContainer } from "../../src/IoCContainer"
@@ -9,10 +8,16 @@ import { IoCProvider } from "../../src/Models/IocProvider"
 import { DataValidationWrapper } from "../../src/Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "../../src/Wrappers/EmitterWrappers/SocketEmitterWrapper"
-import { ErrorMiddlewareWrapper } from "../../src/Wrappers/ErrorMiddlewareWrapper"
-import { EventFuncProxyWrapper } from "../../src/Wrappers/EventFuncProxy/EventFuncProxyWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "../../src/Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
 import { expectCallOrder } from "../utilities/testUtils"
+import { ThrottleWrapper } from "../../src/Wrappers/throttle/ThrottleWrapper"
+import { ThrottleManager } from "../../src/Wrappers/throttle/ThrottleManager"
+import { ArgsInjector } from "../../src/Wrappers/EventFuncProxy/ArgsInjector"
+import { ControllerErrorWrapper } from "../../src/Wrappers/Middlewares/ErrorMiddlewares/ControllerErrorWrapper"
+import { BaseErrorMiddlewareWrapper } from "../../src/Wrappers/Middlewares/ErrorMiddlewares/BaseErrorMiddlewareWrapper"
+import { ArgsNormalizer } from "../../src/Wrappers/EventFuncProxy/ArgsNormalizer"
+import { ListenerRegistration } from "../../src/Wrappers/ListenerRegistration"
+import { IoEventsBinder } from "../../src/EventRegistrars/IoEventsBinder"
 
 describe("> System tests", () => {
 	class FirstController {
@@ -24,18 +29,21 @@ describe("> System tests", () => {
 	}
 
 	describe("> Wrapping and Bindings order tests", () => {
-		const eventFuncAddLastProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addLastProxyLayer")
-		const eventFuncAddFirstProxyLayerSpy = jest.spyOn(EventFuncProxyWrapper, "addFirstProxyLayer")
-		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper, "wrapListeners")
-		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper, "wrapEmitters")
-		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper, "wrapEmitters")
-		const useSocketMiddlewareMethodWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addMethodSocketMiddleware")
-		const useSocketMiddlewareClassWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper, "addSocketMiddlewareToManyClassMethods")
-		const controllerErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapController")
-		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(ErrorMiddlewareWrapper, "wrapAllMiddlewares")
+		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(BaseErrorMiddlewareWrapper, "wrapAllMiddlewares")
+		const argsInjectorSpy = jest.spyOn(ArgsInjector.prototype, "execute")
+		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper.prototype, "execute")
+		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper.prototype, "execute")
+		const socketEmitterWrapperSpy = jest.spyOn(SocketEmitterWrapper.prototype, "execute")
+		const socketMiddlewareMethodWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper.prototype, "addMethodSocketMiddleware" as Any)
+		const socketMiddlewareClassWrapperSpy = jest.spyOn(SocketMiddlewareDecoratorWrapper.prototype, "addSocketMiddlewareToManyClassMethods" as Any)
+		const throttleMethodWrapperSpy = jest.spyOn(ThrottleWrapper.prototype, "addMethodThrottle" as Any)
+		const throttleClassWrapperSpy = jest.spyOn(ThrottleWrapper.prototype, "addClassThrottle" as Any)
+		const controllerErrorWrapperSpy = jest.spyOn(ControllerErrorWrapper.prototype, "execute")
+		const argsNormalizerSpy = jest.spyOn(ArgsNormalizer.prototype, "execute")
+		const listenerRegistrationSpy = jest.spyOn(ListenerRegistration.prototype, "execute")
 		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
-		const listenersRegistrarSpy = jest.spyOn(ListenersRegistrar, "registerListeners")
-		const groupedEventsRegistrationSpy = jest.spyOn(ListenersRegistrar, "applyGroupedSocketEventsRegistration")
+		const ioEventsBinderSpy = jest.spyOn(IoEventsBinder, "bindAll")
+		const throttlePeriodicCleanupSpy = jest.spyOn(ThrottleManager, "startPeriodicCleanup")
 
 		it("should wrap controller methods and binds events in the correct order", async () => {
 			await useSocketIoDecorator({
@@ -46,20 +54,23 @@ describe("> System tests", () => {
 				} as unknown as Server,
 			})
 
-			expectCallOrder(
+			expectCallOrder({
 				middlewareErrorMiddlewareWrapperSpy,
-				eventFuncAddLastProxyLayerSpy,
+				argsInjectorSpy,
 				dataValidationWrapperSpy,
 				serverEmitterWrapperSpy,
 				socketEmitterWrapperSpy,
-				useSocketMiddlewareMethodWrapperSpy,
-				useSocketMiddlewareClassWrapperSpy,
-				controllerErrorMiddlewareWrapperSpy,
-				eventFuncAddFirstProxyLayerSpy,
-				listenersRegistrarSpy,
+				socketMiddlewareMethodWrapperSpy,
+				socketMiddlewareClassWrapperSpy,
+				throttleMethodWrapperSpy,
+				throttleClassWrapperSpy,
+				controllerErrorWrapperSpy,
+				argsNormalizerSpy,
+				listenerRegistrationSpy,
 				middlewaresRegistrarSpy,
-				groupedEventsRegistrationSpy
-			)
+				ioEventsBinderSpy,
+				throttlePeriodicCleanupSpy,
+			})
 		})
 	})
 

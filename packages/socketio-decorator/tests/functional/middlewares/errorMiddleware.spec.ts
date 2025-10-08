@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { CurrentSocket, Data, EmitterOption, IErrorMiddleware, ServerEmitter, SiodImcomigDataError, SiodInvalidArgumentError, SocketEmitter, SocketOn } from "../../../src"
+import { CurrentSocket, Data, EmitterOption, IErrorMiddleware, ServerEmitter, SiodIncomingDataError, SiodInvalidArgumentError, SocketEmitter, SocketOn } from "../../../src"
 import { MessageData } from "../../types/socketData"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
@@ -132,7 +132,7 @@ describe("> Error middleware tests", () => {
 			const onTestWithData = () => {
 				expect(controllerFnSpy).not.toHaveBeenCalled()
 				expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError), clientSocket.id)
+				expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodIncomingDataError), clientSocket.id)
 
 				done()
 			}

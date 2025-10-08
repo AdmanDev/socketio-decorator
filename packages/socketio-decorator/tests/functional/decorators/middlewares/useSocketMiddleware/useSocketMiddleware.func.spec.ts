@@ -124,7 +124,10 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
 
-				expectCallOrder(firstSocketMiddlewareSpy, controllerFnSpy)
+				expectCallOrder({
+					firstSocketMiddlewareSpy,
+					controllerFnSpy
+				})
 
 				done()
 			})
@@ -146,7 +149,11 @@ describe("> UseSocketMiddleware Decorator (on function)", () => {
 				expect(controllerFnSpy).toHaveBeenCalledTimes(1)
 				expect(controllerFnSpy).toHaveBeenCalledWith(clientSocket.id, data)
 
-				expectCallOrder(firstSocketMiddlewareSpy, secondSocketMiddlewareSpy, controllerFnSpy)
+				expectCallOrder({
+					firstSocketMiddlewareSpy,
+					secondSocketMiddlewareSpy,
+					controllerFnSpy
+				})
 
 				done()
 			})

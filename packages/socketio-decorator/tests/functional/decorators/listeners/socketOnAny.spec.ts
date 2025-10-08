@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { CurrentSocket, Data, EventName, IErrorMiddleware, SiodImcomigDataError, SocketOnAny } from "../../../../src"
+import { CurrentSocket, Data, EventName, SocketOnAny } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
 
@@ -11,33 +11,18 @@ describe("> SocketOnAny decorator", () => {
 	let clientSocket: ClientSocket
 
 	const onMessageSpy = jest.fn()
-	const onNoDataValidationSpy = jest.fn()
-	const errorMiddlewareSpy = jest.fn()
-
-	class ErrorMiddleware implements IErrorMiddleware {
-		public handleError (error: unknown) {
-			errorMiddlewareSpy(error)
-		}
-	}
 
 	class SocketOnAnyController {
-		@SocketOnAny({ disableDataValidation: false })
+		@SocketOnAny()
 		public onAny (@CurrentSocket() socket: ServerSocket, @EventName() event: string, @Data() data: MessageData) {
 			onMessageSpy(socket.id, event, data)
-		}
-
-		@SocketOnAny()
-		public onNoDataValidation (@CurrentSocket() socket: ServerSocket, @EventName() event: string, @Data() data: MessageData) {
-			onNoDataValidationSpy(data, socket.id)
 		}
 	}
 
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [SocketOnAnyController],
-				errorMiddleware: ErrorMiddleware,
-				dataValidationEnabled: true
+				controllers: [SocketOnAnyController]
 			},
 			{
 				onServerListen: done,
@@ -66,7 +51,6 @@ describe("> SocketOnAny decorator", () => {
 			const data: MessageData = { message: "Hello" }
 
 			const onMessage = (socket: ServerSocket, data: MessageData) => {
-				expect(errorMiddlewareSpy).not.toHaveBeenCalled()
 				expect(onMessageSpy).toHaveBeenCalledTimes(1)
 				expect(onMessageSpy).toHaveBeenCalledWith(socket.id, event, data)
 
@@ -75,70 +59,6 @@ describe("> SocketOnAny decorator", () => {
 
 			registerServerEventAndEmit({
 				eventCallback: onMessage,
-				event,
-				data,
-				serverSocket,
-				clientSocket
-			})
-		})
-	})
-
-	describe("> Data validation tests", () => {
-		it("should throw an error if the data is not valid", (done) => {
-			const event = "message"
-			const data = { wrong: "data" }
-
-			const onMessage = () => {
-				expect(onMessageSpy).not.toHaveBeenCalled()
-				expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onMessage,
-				event,
-				data,
-				serverSocket,
-				clientSocket
-			})
-		})
-
-		it("should throw an error if the data is null", (done) => {
-			const event = "message"
-
-			const onMessage = () => {
-				expect(onMessageSpy).not.toHaveBeenCalled()
-				expect(errorMiddlewareSpy).toHaveBeenCalledTimes(1)
-				expect(errorMiddlewareSpy).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onMessage,
-				data: null,
-				event,
-				serverSocket,
-				clientSocket
-			})
-		})
-
-		it("should not throw an error if the data validation is disabled", (done) => {
-			const event = "no-data-validation"
-			const data = { wrong: "data" }
-
-			const onNoDataValidation = () => {
-				//Expect(errorMiddlewareSpy).not.toHaveBeenCalled()
-				expect(onNoDataValidationSpy).toHaveBeenCalledTimes(1)
-				expect(onNoDataValidationSpy).toHaveBeenCalledWith(data, expect.any(String))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onNoDataValidation,
 				event,
 				data,
 				serverSocket,

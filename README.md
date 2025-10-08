@@ -19,6 +19,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [Socket Middleware](#socket-middleware)
   - [Namespace middleware](#namespace-middleware)
   - [Error handling middleware](#error-handling-middleware)
+- [Rate Limiting](#rate-limiting)
 - [Data validation](#data-validation)
   - [Setup](#setup)
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
@@ -26,7 +27,6 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [UseIoServer hook](#useioserver-hook)
   - [UseUserSocket hook](#useusersocket-hook)
 - [Dependency Injection](#dependency-injection)
-- [Migration 1.3.0 to 1.3.1](#migration-130-to-131)
 
 ## Installation
 
@@ -404,6 +404,7 @@ The following decorators can be used to inject parameters into the event handler
 | `@Data(dataIndex?: number)` | Injects the data sent by the client                 |
 | `@EventName()` | Injects the name of the event message that triggered the handler. |
 | `@CurrentUser()` | Injects the current user object. |
+| `@SocketData(dataKey?: string)` | Injects socket data value (socket.data[dataKey]). |
 
 #### Examples
 
@@ -506,6 +507,104 @@ Injects the current user object into an event handler parameter.
     }
     ```
 
+---
+
+##### @SocketData(dataKey?: string)
+
+**Equivalent in basic Socket.io:** `socket.data[dataKey]`
+
+Injects a socket data attribute value into an event handler parameter. SocketData decorator allow you to store custom data on a per-socket basis, which persists for the lifetime of the socket connection.
+
+**Usage** :
+
+1. **Inject the entire SocketDataStore**
+
+   When used without a parameter, `@SocketData()` injects a `SocketDataStore` instance that provides methods to manage socket data attribute:
+
+    ```typescript
+    @SocketOn("save-user-preferences")
+    public savePreferences(@SocketData() dataStore: SocketDataStore) {
+        // Store user preferences on this socket
+        dataStore.setData("theme", "dark")
+        dataStore.setData("language", "fr")
+        
+        console.log("Preferences saved for this socket")
+    }
+
+    @SocketOn("get-user-preferences")
+    @SocketEmitter("preferences")
+    public getPreferences(@SocketData() dataStore: SocketDataStore) {
+        return {
+            theme: dataStore.getData("theme"),
+            language: dataStore.getData("language")
+        }
+    }
+    ```
+
+    **SocketDataStore API**
+
+    The `SocketDataStore` class provides the following methods:
+
+    | Method | Parameters | Returns | Description |
+    |--------|------------|---------|-------------|
+    | `getData(key)` | `key: string` | `any \| null` | Retrieves the value of a socket data attribute. Returns `null` if the key doesn't exist. |
+    | `setData(key, value)` | `key: string, value: any` | `void` | Sets a socket data with the specified key and value. |
+    | `removeData(key)` | `key: string` | `void` | Removes a socket data attribute by key. |
+    | `hasData(key)` | `key: string` | `boolean` | Checks if a socket data exists for the specified key. |
+
+    **Type Safety with Generics**
+
+    You can type the `SocketDataStore` methods using generics by defining an interface that describes your socket data structure:
+
+    ```typescript
+    // Define your socket data type
+    interface MyStoreType {
+        userId: number
+        theme: 'light' | 'dark'
+        language: string
+    }
+
+    @SocketOn("example")
+    public example(@SocketData() dataStore: SocketDataStore<MyStoreType>) {
+        // ❌ Type error - "unknownKey" is not a valid key of MyStoreType
+        dataStore.getData("unknownKey")
+        
+        // ✅ Correct - "userId" is a valid key
+        dataStore.getData("userId") // Returns: number | null
+        
+        // ❌ Type error - Argument of type 'string' is not assignable to parameter of type 'number'
+        dataStore.setData("userId", "not-a-number")
+        
+        // ✅ Correct - proper type
+        dataStore.setData("userId", 123) // ✅ Works correctly
+        dataStore.setData("theme", "dark") // ✅ Only 'light' | 'dark' allowed
+        dataStore.setData("language", "en") // ✅ String type as expected
+    }
+    ```
+
+    With typed `SocketDataStore<MyStoreType>`, you get:
+    - **Autocompletion**: IDE suggests only valid keys from your interface
+    - **Type checking**: Values must match the expected types
+    - **Compile-time errors**: Catch mistakes before runtime
+
+2. **Inject a specific data attribute value**
+
+   When used with a key parameter, `@SocketData("key")` directly injects the value of that specific data attribute:
+
+    ```typescript
+    @SocketOn("update-theme")
+    public updateTheme(@SocketData("theme") currentTheme: string) {
+        console.log("Current theme:", currentTheme) // Will be null if not set
+    }
+    ```
+
+    **Important notes**
+
+    - Socket data attributes are stored per socket connection and persist for the lifetime of that connection
+    - When a socket disconnects, all associated data attributes are automatically cleared
+    - This is built on top of Socket.IO's native `socket.data` property
+    - Data attributes are not shared between different socket connections, even for the same user
+
 ### Other decorators
 
 | Decorator | Description                                              |
@@ -513,6 +612,7 @@ Injects the current user object into an event handler parameter.
 | `@UseSocketMiddleware(...ISocketMiddleware[])` | Applies one or more socket middleware to the event handler or controller class. |
 | `@SocketNamespace(namespace: string)` | Defines a namespace for a socket controller |
 | `@MiddlewareOption(options: MiddlewareOptionType)` | Applies options to a middleware. |
+| `@Throttle(limit: number, timeWindowMs: number)` | Applies rate limiting to a controller or event handler. ( [See Rate Limiting](#rate-limiting)) |
 
 #### Examples
 
@@ -712,6 +812,211 @@ You can create a middleware to handle errors that occur during event handling an
      })
      ```
 
+## Rate Limiting
+
+You can use rate limiting to control how many requests a client can make within a specific time window. This helps protect your application from abuse and ensures fair resource usage.
+
+### Global Rate Limiting
+
+To enable rate limiting globally for all controllers:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    throttleConfig: {
+        rateLimitConfig: {
+            limit: 100,        // Maximum number of requests
+            timeWindowMs: 60000 // Time window in milliseconds (1 minute)
+        },
+        // Optional: cleanup interval for expired throttle data (default: 1 hour)
+        cleanupIntervalMs: 3600000,
+        // Optional: custom storage implementation
+        store: InMemoryThrottleStorage // By default, uses in-memory storage
+        getUserIdentifier: (socket) => {
+            // Return any unique identifier for the user
+            return "By default, it uses the socket id"
+        }
+    }
+})
+```
+
+### Class-Level Rate Limiting
+
+Apply rate limiting to all socket events in a controller:
+
+```typescript
+@Throttle(10, 60000) // Max 10 requests per minute
+class UserController {
+    @SocketOn("update-profile")
+    public updateProfile() { }
+
+    @SocketOn("change-settings")
+    public changeSettings() { }
+
+    @SocketOn("upload-avatar")
+    public uploadAvatar() { }
+}
+```
+
+### Method-Level Rate Limiting
+
+Use the `@Throttle` decorator to apply rate limiting to specific methods:
+
+```typescript
+class ChatController {
+    @SocketOn("message")
+    @Throttle(5, 1000) // Max 5 requests per second
+    public sendMessage(@Data() message: string) {
+        console.log("Message received:", message)
+    }
+}
+```
+
+### Priority and Scope
+
+Rate limiting follows a hierarchy where more specific configurations override broader ones:
+
+1. **Method-level** (Highest Priority): `@Throttle` decorator on individual methods
+2. **Class-level** (Medium Priority): `@Throttle` decorator on controller classes  
+3. **Global** (Lowest Priority): `throttleConfig` in `useSocketIoDecorator`
+
+```typescript
+// Global configuration (lowest priority)
+useSocketIoDecorator({
+    throttleConfig: {
+        rateLimitConfig: { limit: 100, timeWindowMs: 60000 }
+    }
+})
+
+// Class-level configuration (medium priority)
+@Throttle(20, 60000) // Overrides global config for this controller
+class ChatController {
+    
+    @SocketOn("message")
+    public sendMessage() {
+        // Uses class-level: 20 requests per minute
+    }
+
+    @SocketOn("upload")
+    @Throttle(5, 300000) // Method-level (highest priority)
+    public uploadFile() {
+        // Uses method-level: 5 requests per 5 minutes
+        // Overrides both class and global configs
+    }
+}
+```
+
+### Custom User Identification
+
+By default, rate limiting uses the socket ID to identify clients. However, since socket IDs change when users reconnect, you might want to use a more persistent identifier (e.g., user ID, session ID). You can configure this through the `getUserIdentifier` option:
+
+```typescript
+useSocketIoDecorator({
+    throttleConfig: {
+       ...,
+        // Custom user identification function
+        getUserIdentifier: (socket) => {
+            return "Return any unique identifier for the user"
+        }
+    }
+})
+```
+
+The `getUserIdentifier` function:
+
+- Receives the socket instance as parameter
+- Should return a string or Promise
+
+### Error Handling
+
+Rate limit errors are thrown as `SiodThrottleError`. Handle them using an [error middleware](#error-handling-middleware):
+
+```typescript
+class ErrorMiddleware implements IErrorMiddleware {
+    handleError(error: unknown) {
+        if (error instanceof SiodThrottleError) {
+            console.error("Rate limit exceeded. Retry in:", error.remainingTime, "ms")
+        }
+    }
+}
+```
+
+### Important Notes
+
+- Rate limits are applied per client ID
+- Each event has its own independent rate limit counter
+- Class-level rate limits can be overridden by method-level decorators
+- Global configuration applies to all controllers without explicit `@Throttle` decorators
+- Rate limit data is automatically cleaned up based on `cleanupIntervalMs`
+
+### Custom Storage Implementation
+
+By default, rate limiting data is stored in memory using `InMemoryThrottleStorage`. However, you can implement your own storage solution (e.g., Redis, Database) by implementing the `IThrottleStorage` interface.
+
+Example implementation using Redis:
+
+```typescript
+class RedisThrottleStorage implements IThrottleStorage {
+    private static readonly redis = new Redis("You url")
+    private readonly prefix = "throttle"
+
+    // Get the throttle entry for a specific client and event
+    public async get(clientId: string, event: string): Promise<ThrottleEntry | undefined> {
+        try {
+            const key = this.getKey(clientId, event)
+            const data = await RedisThrottleStore.redis.get(key)
+
+            if (!data) {
+                return undefined
+            }
+
+            return JSON.parse(data) as ThrottleEntry
+        } catch (error) {
+            console.error("Redis get error:", error)
+            return undefined
+        }
+    }
+
+    // Set / update the throttle entry for a specific client and event
+    public async set(clientId: string, event: string, entry: ThrottleEntry): Promise<void> {
+        try {
+            const key = this.getKey(clientId, event)
+            const ttl = Math.max(0, entry.resetTime - Date.now()) // in ms
+
+            // Save the entry with automatic expiration
+            if (ttl > 0) {
+                await RedisThrottleStore.redis.set(key, JSON.stringify(entry), "PX", ttl)
+            }
+        } catch (error) {
+            console.error("Redis set error:", error)
+        }
+    }
+
+    // Cleanup method to remove expired entries
+    public async cleanup(): Promise<void> {
+        // Redis handles expiration automatically with TTL → nothing to do here.
+        // But we can flush if needed (optional)
+        // await this.redis.flushall()
+        return Promise.resolve()
+    }
+
+    private getKey(clientId: string, event: string): string {
+        return `${this.prefix}:${clientId}:${event}`
+    }
+}
+```
+
+Then configure it in your application:
+
+```typescript
+useSocketIoDecorator({
+    ...,
+    throttleConfig: {
+        store: RedisThrottleStorage // Your custom storage class
+    }
+})
+```
+
 ## Data validation
 
 You can use the `class-validator` library to validate the data received from the client and be sure that required fields are present and have the correct type.
@@ -878,21 +1183,3 @@ If you run into any issues or have suggestions, feel free to open an issue on Gi
 🔗 [Socket.io Decorator Issues](https://github.com/AdmanDev/socketio-decorator/issues)
 
 Thank you for using Socketio Decorator
-
-## Migration 1.3.0 to 1.3.1+
-
-Starting from version 1.3.1, you need to use the parameter injection decorators (`@CurrentSocket()`, `@Data()`, `@EventName()`) to access the socket, data, and event name in your handlers:
-
-```typescript
-// Before (1.3.0)
-@SocketOn("message")
-public onMessage(socket: Socket, data: any) {
-    console.log("Message from:", socket.id, "data:", data)
-}
-
-// After (1.3.1+)
-@SocketOn("message")
-public onMessage(@CurrentSocket() socket: Socket, @Data() data: any) {
-    console.log("Message from:", socket.id, "data:", data)
-}
-```

@@ -1,10 +1,9 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { CurrentSocket, Data, IErrorMiddleware, SiodImcomigDataError, SocketOnce } from "../../../../src"
+import { CurrentSocket, Data, SocketOnce } from "../../../../src"
 import { MessageData } from "../../../types/socketData"
 import { createSocketClient, createServer, registerServerEventAndEmit } from "../../../utilities/serverUtils"
-import { waitFor } from "../../../utilities/testUtils"
 
 describe("> SocketOnce decorator", () => {
 	let io: Server
@@ -12,43 +11,18 @@ describe("> SocketOnce decorator", () => {
 	let clientSocket: ClientSocket
 
 	const controllerCallback = jest.fn()
-	const disconnectCallback = jest.fn()
-	const errorMiddlewareCallback = jest.fn()
-
-	class ErrorMiddleware implements IErrorMiddleware {
-		public handleError (error: unknown) {
-			errorMiddlewareCallback(error)
-		}
-	}
 
 	class SocketOnceController {
 		@SocketOnce("message")
 		public onMessage (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
 			controllerCallback(data, socket.id)
 		}
-
-		@SocketOnce("no-data-validation", { disableDataValidation: true })
-		public onNoDataValidation (@CurrentSocket() socket: ServerSocket, @Data() data: MessageData) {
-			controllerCallback(data, socket.id)
-		}
-
-		@SocketOnce("disconnecting")
-		public onDisconnecting (@Data() wrongData: MessageData) {
-			disconnectCallback(wrongData)
-		}
-
-		@SocketOnce("disconnect")
-		public onDisconnect (@Data() wrongData: MessageData) {
-			disconnectCallback(wrongData)
-		}
 	}
 
 	beforeAll((done) => {
 		io = createServer(
 			{
-				controllers: [SocketOnceController],
-				errorMiddleware: ErrorMiddleware,
-				dataValidationEnabled: true
+				controllers: [SocketOnceController]
 			},
 			{
 				onServerListen: done,
@@ -106,84 +80,6 @@ describe("> SocketOnce decorator", () => {
 
 			clientSocket.emit(event, data)
 			clientSocket.emit(event, data)
-		})
-	})
-
-	describe("> Data validation tests", () => {
-		it("should throw an error if the data is not valid", (done) => {
-			const event = "message"
-			const data = { wrong: "data" }
-
-			const onMessage = () => {
-				expect(controllerCallback).not.toHaveBeenCalled()
-				expect(errorMiddlewareCallback).toHaveBeenCalledTimes(1)
-				expect(errorMiddlewareCallback).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onMessage,
-				event,
-				data,
-				serverSocket,
-				clientSocket
-			})
-		})
-
-		it("should throw an error if the data is null", (done) => {
-			const event = "message"
-
-			const onMessage = () => {
-				expect(controllerCallback).not.toHaveBeenCalled()
-				expect(errorMiddlewareCallback).toHaveBeenCalledTimes(1)
-				expect(errorMiddlewareCallback).toHaveBeenCalledWith(expect.any(SiodImcomigDataError))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onMessage,
-				data: null,
-				event,
-				serverSocket,
-				clientSocket
-			})
-		})
-
-		it("should not throw an error if the data validation is disabled", (done) => {
-			const event = "no-data-validation"
-			const data = { wrong: "data" }
-
-			const onNoDataValidation = () => {
-				expect(errorMiddlewareCallback).not.toHaveBeenCalled()
-				expect(controllerCallback).toHaveBeenCalledTimes(1)
-				expect(controllerCallback).toHaveBeenCalledWith(data, expect.any(String))
-
-				done()
-			}
-
-			registerServerEventAndEmit({
-				eventCallback: onNoDataValidation,
-				event,
-				data,
-				serverSocket,
-				clientSocket
-			})
-		})
-
-		it("should not validate the data on DISCONNECT and DISCONNECTING event", (done) => {
-			disconnectCallback.mockClear()
-
-			serverSocket.on("disconnect", async () => {
-				await waitFor(50)
-				expect(errorMiddlewareCallback).not.toHaveBeenCalled()
-				expect(disconnectCallback).toHaveBeenCalled()
-
-				done()
-			})
-
-			clientSocket.disconnect()
 		})
 	})
 })

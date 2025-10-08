@@ -1,13 +1,15 @@
 import { Socket } from "socket.io"
 import { EventBinder } from "./Models/EventBinder"
-import { EmitterMetadata } from "./Models/Metadata/EmiterMetadata"
+import { EmitterMetadata } from "./Models/Metadata/EmitterMetadata"
 import { ListenerMetadata } from "./Models/Metadata/ListenerMetadata"
 import { MethodMetadata, ControllerMetadata } from "./Models/Metadata/Metadata"
 import { SiodConfig } from "./Models/SiodConfig"
 import { MetadataUtils } from "./Utils/MetadataUtils"
 import { ClassSocketMiddlewareMetadata, SocketMiddlewareMetadata } from "./Models/Metadata/MiddlewareMetadata"
-import { defineReflectMethodMetadata } from "./reflectLetadataFunc"
+import { defineReflectMethodMetadata } from "./reflectMetadataFunc"
 import { MethodArgMetadata } from "./Models/Metadata/MethodArgMetadata"
+import { ControllerConstructor } from "./Models/Utilities/ControllerTypes"
+import { ClassThrottleMetadata, ThrottleMetadata } from "./Models/Metadata/ThrottleMetadata"
 
 const controllerMetadata: ControllerMetadata[] = []
 const binderEvents: EventBinder[] = []
@@ -36,7 +38,7 @@ function getOrCreateControllerMetadata (target: Object) {
 		const controllerName = MetadataUtils.getTargetName(target)
 
 		const newMetadata: ControllerMetadata = {
-			controllerTarget: targetClass,
+			controllerTarget: targetClass as ControllerConstructor,
 			controllerName,
 			namespace: "/",
 			methodMetadata: [],
@@ -159,6 +161,24 @@ export function addClassSocketMiddlewareMetadata (metadata: ClassSocketMiddlewar
 export function addMethodArgMetadata (target: Object, methodName: string, argMetadata: MethodArgMetadata) {
 	const methodMetadata = getOrCreateMethodMetadata(target, methodName)
 	methodMetadata.argsMetadata.push(argMetadata)
+}
+
+/**
+ * Adds class throttle metadata to a controller
+ * @param {ClassThrottleMetadata} metadata The metadata to add
+ */
+export function addClassThrottleMetadata (metadata: ClassThrottleMetadata) {
+	const controllerMetadata = getOrCreateControllerMetadata(metadata.target)
+	controllerMetadata.throttleMetadata = metadata
+}
+
+/**
+ * Adds method throttle metadata to a method
+ * @param {ThrottleMetadata} metadata The metadata to add
+ */
+export function addMethodThrottleMetadata (metadata: ThrottleMetadata) {
+	const methodMetadata = getOrCreateMethodMetadata(metadata.target, metadata.methodName)
+	methodMetadata.metadata.throttleMetadata = metadata
 }
 
 /**

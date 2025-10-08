@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io"
 import { IoCProvider } from "./IocProvider"
+import { ThrottleConfig } from "./ThrottleConfig"
 
 export type SiodConfig = {
 	/**
@@ -32,11 +33,14 @@ export type SiodConfig = {
 	 */
 	errorMiddleware?: Function
 	/**
-	 * The current user provider that will be used to get the current user from CurrentUser decorator.
-	 * @returns {Promise<TUser | null>} The current user if found, or null if not found
-	 * @template TUser The user type
+	 * The event throttling configuration.
 	 */
-	currentUserProvider?: (socket: Socket) => Promise<Any>
+	throttleConfig?: ThrottleConfig
+	/**
+	 * The current user provider that will be used to get the current user from CurrentUser decorator.
+	 * @returns {Promise<unknown | null>} The current user if found, or null if not found
+	 */
+	currentUserProvider?: (socket: Socket) => Promise<unknown | null>
 	/**
 	 * Search for a user socket that matches the search argument
 	 * @param {any} arg The search argument
