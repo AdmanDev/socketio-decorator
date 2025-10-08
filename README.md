@@ -23,6 +23,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Data validation](#data-validation)
   - [Setup](#setup)
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
+- [Application Events Bus](#application-events)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
   - [UseUserSocket hook](#useusersocket-hook)
@@ -1107,6 +1108,160 @@ Here is the default value for the `disableDataValidation` option:
 ### Learn more about data validation
 
 For more information on data validation, see the [class-validator documentation](https://github.com/typestack/class-validator).
+
+## Application Events
+
+Application events provide an internal event bus for cross-service / class communication within your server application. Unlike Socket.IO events that communicate over the network, Application events are server-side only and enable decoupled communication between different parts of your application.
+
+### Why use Application Events?
+
+Application events are particularly useful for:
+
+- **Cross-Service communication**: Enable different services to communicate without direct references (e.g., OrderController notifying InventoryService and NotificationService)
+
+- **Decoupled architecture**: Create loosely coupled components that can interact through events
+
+- **Event-driven actions**: Trigger application-wide actions when Socket.IO events occur (e.g., emit an app event after processing a socket message)
+
+### How It Works
+
+The Application Events system uses two main decorators:
+
+| Decorator  | Description |
+|-----------|-------------|
+| `@AppOn(eventName: string)` | Registers a method as an application event listener |
+| `@AppEmit(eventName: string)` | Emits an application event when a method executes |
+
+When an event is emitted, all registered listeners for that event are called asynchronously with an `AppEventContext` object containing the event details.
+
+**How to use them?**
+
+#### `@AppOn(eventName: string)`
+
+**Description**: Registers a method as an application event listener
+
+**Method signature**: `(context: AppEventContext) => unknown | Promise<unknown>`
+
+**Usage**:
+
+```typescript
+type OrderData = {
+    orderId: string
+    items: OrderItem[]
+    total: number
+    createdAt: Date
+}
+
+// App event listener that responds to order creation
+class InventoryService {
+    @AppOn("order-created")
+    public updateInventory(context: AppEventContext) {
+        const order = context.data as OrderData
+
+        // Available when the event is triggered from a socket handler
+        const socket = context.ioContext?.currentSocket
+        
+        // Inventory update logic
+    }
+}
+
+// Another listener for the same event
+class NotificationService {
+    @AppOn("order-created")
+    public notifyWarehouse(context: AppEventContext) {
+        const order = context.data as OrderData
+        
+        // Warehouse notification logic
+    }
+}
+```
+
+**Key features**:
+
+- Multiple listeners can subscribe to the same event
+- Listeners execute independently and asynchronously
+- Method receives an `AppEventContext` object with event details
+
+---
+
+#### `@AppEmit(eventName: string)`
+
+**Description**: Emits an application event when the decorated method executes
+
+**Usage**:
+
+```typescript
+// Emits from a Socket.IO listener
+class OrderController {
+    @SocketOn("create-order")
+    @AppEmit("order-created")
+    public createOrder(@Data() orderData: any) {
+        console.log("Creating order from socket event")
+        
+        // Order creation logic
+        const order: OrderData = {
+            orderId: "ORD-123",
+            items: orderData.items,
+            total: orderData.total,
+            createdAt: new Date()
+        }
+        
+        // This return value becomes the data available in listeners context
+        return order
+    }
+}
+
+// Emits from a simple class method
+class OrderService {
+    @AppEmit("order-created")
+    public createOrder(orderData: any) {
+        console.log("Creating order from service")
+        
+        // Order creation logic
+        const order = ...
+        
+        // This return value becomes the data available in listeners context
+        return order
+    }
+}
+```
+
+**Key features**:
+
+- Method's return value becomes the event data in listeners context
+- Can be combined with Socket.IO decorators
+- Can be used with any class method
+- Event is emitted to all registered listeners
+
+### AppEventContext Interface
+
+The `AppEventContext` object passed to event listeners contains:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `eventName` | `string` | The name of the application event that triggered the listener |
+| `data` | `unknown` | The data associated with the event (return value from `@AppEmit` method) |
+| `ioContext` | `object` (optional) | Socket.IO context when event is triggered from a socket handler |
+
+**`ioContext` properties** (when available):
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentSocket` | `Socket \| null` | The current Socket.IO socket instance |
+| `eventName` | `string` | The original Socket.IO event name |
+| `eventData` | `unknown[]` | The original Socket.IO event arguments |
+
+### Important Notes
+
+- **Server-side only**: Application Events are internal to your server and don't communicate over the network
+
+- **Asynchronous execution**: Listeners execute independently and asynchronously
+
+- **No execution order guarantee**: The order in which multiple listeners execute is not guaranteed
+
+- **Error isolation**: Errors in one listener don't affect the emitter or other listeners
+
+- **Error handling**: ErrorMiddleware is not applied to app event listeners - you must handle errors within your listener methods
 
 ## Hooks
 

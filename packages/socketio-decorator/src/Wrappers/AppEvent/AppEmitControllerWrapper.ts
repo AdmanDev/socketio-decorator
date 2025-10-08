@@ -1,10 +1,10 @@
-import { AppEventDescription } from "../MetadataRepository/MetadataObjects/AppEventMetadata"
-import { AppEventMetadataStore } from "../MetadataRepository/Stores/AppEventMetadataStore"
-import { AppEventContext } from "../Models/AppEventBus/AppEventBusModels"
-import { EventFuncProxyArgs } from "../Models/EventFuncProxyType"
-import { ApplicationEventBus } from "../Others/ApplicationEvent/ApplicationEventBus"
-import { ControllerWrapper } from "./WrapperCore/ControllerWrapper"
-import { ControllerMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
+import { AppEventDescription } from "../../MetadataRepository/MetadataObjects/AppEventMetadata"
+import { AppEventMetadataStore } from "../../MetadataRepository/Stores/AppEventMetadataStore"
+import { AppEventContext } from "../../Models/AppEventBus/AppEventBusModels"
+import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
+import { ApplicationEventBus } from "./ApplicationEventBus"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 
 type WrapMethodContext = {
 	events: AppEventDescription[]

@@ -47,3 +47,4 @@ export * from "./Models/Errors/SiodThrottleError"
 
 // Utils
 export * from "./Wrappers/EventFuncProxy/ArgProviders/SocketDataStore"
+export * from "./Wrappers/AppEvent/ApplicationEventBus"

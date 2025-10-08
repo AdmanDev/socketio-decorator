@@ -1,6 +1,6 @@
 import { AppEventListener } from "../../Models/AppEventBus/AppEventBusModels"
 import { ClassConstructorType } from "../../Models/ClassConstructorType"
-import { ApplicationEventBus } from "../../Others/ApplicationEvent/ApplicationEventBus"
+import { ApplicationEventBus } from "../../Wrappers/AppEvent/ApplicationEventBus"
 
 /**
  * Register a method as an app event listener

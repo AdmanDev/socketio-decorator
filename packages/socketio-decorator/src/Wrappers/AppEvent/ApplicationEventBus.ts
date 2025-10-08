@@ -90,9 +90,9 @@ export class ApplicationEventBus {
 	}
 
 	/**
-	 * Destroy the event bus and remove all listeners
+	 * Remove all listeners
 	 */
-	public destroy (): void {
+	public removeAllListeners (): void {
 		this.listeners.clear()
 	}
 }
