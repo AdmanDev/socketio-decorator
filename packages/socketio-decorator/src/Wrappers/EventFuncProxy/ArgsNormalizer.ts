@@ -1,5 +1,5 @@
 import { Wrapper } from "../WrapperCore/Wrapper"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { SiodInvalidMetadataError } from "../../Models/Errors/SiodInvalidMetadataError"
 import { getReflectMethodMetadata } from "../../reflectMetadataFunc"

@@ -1,8 +1,10 @@
 import { IoActionHandler } from "../EventRegistrars/IoActionHandler"
-import { config, getControllerMetadata, addEventBinder } from "../globalMetadata"
+import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
+import { ControllerMetadataStore } from "../MetadataRepository/Stores/ControllerMetadataStore"
+import { EventBinderStore } from "../MetadataRepository/Stores/EventBinderStore"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
-import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { ControllerMetadata, MethodMetadata } from "../Models/Metadata/Metadata"
+import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
+import { ControllerMetadata, MethodMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
 import { Wrapper } from "./WrapperCore/Wrapper"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
@@ -33,6 +35,8 @@ export class ListenerRegistration extends Wrapper {
 		listenerMetadata: ListenerMetadata[],
 		controllerInstance: ControllerInstance
 	) {
+		const config = ConfigStore.get()
+
 		MetadataUtils.mapIoMappingMetadata(listenerMetadata, "server", controllerInstance, (metadata, method) => {
 			IoActionHandler.callServerAction(config.ioserver, methodMetadata, metadata, controllerInstance, method)
 		})
@@ -61,10 +65,10 @@ export class ListenerRegistration extends Wrapper {
 			})
 		})
 
-		const controllerMetadata = getControllerMetadata(controllerInstance)
+		const controllerMetadata = ControllerMetadataStore.get(controllerInstance)
 		const namespace = controllerMetadata?.namespace || "/"
 
-		addEventBinder(namespace, "connection", (socket) => {
+		EventBinderStore.add(namespace, "connection", (socket) => {
 			filteredMetadata.forEach(({method, metadata}) => {
 				IoActionHandler.callSocketAction(socket, methodMetadata, metadata, controllerInstance, method)
 			})

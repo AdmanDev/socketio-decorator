@@ -1,4 +1,4 @@
-import { updateControllerMetadata } from "../../globalMetadata"
+import { ControllerMetadataStore } from "../../MetadataRepository/Stores/ControllerMetadataStore"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 
 /**
@@ -12,6 +12,6 @@ export function SocketNamespace (namespace: string) {
 			throw new SiodDecoratorError("Namespace must be a string starting with '/'")
 		}
 
-		updateControllerMetadata(target, { namespace })
+		ControllerMetadataStore.update(target, { namespace })
 	}
 }

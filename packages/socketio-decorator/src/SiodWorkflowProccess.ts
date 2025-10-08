@@ -1,6 +1,7 @@
 import { IoEventsBinder } from "./EventRegistrars/IoEventsBinder"
 import { MiddlewaresRegistrar } from "./EventRegistrars/MiddlewaresRegistrar"
-import { config, getAllMetadata } from "./globalMetadata"
+import { ConfigStore } from "./MetadataRepository/Stores/ConfigStore"
+import { ControllerMetadataStore } from "./MetadataRepository/Stores/ControllerMetadataStore"
 import { DataValidationWrapper } from "./Wrappers/DataValidationWrapper"
 import { ServerEmitterWrapper } from "./Wrappers/EmitterWrappers/ServerEmitterWrapper"
 import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWrapper"
@@ -22,8 +23,9 @@ export class SiodWorkflowProcess {
 	 * Processes and binds all the metadata to the controller instances.
 	 */
 	public static processAll () {
-		const metadata = getAllMetadata()
-			.filter(m => config.controllers.some(controller => typeof controller === "function" && controller === m.controllerTarget))
+		const metadata = ControllerMetadataStore
+			.getAll()
+			.filter(m => ConfigStore.get().controllers.some(controller => typeof controller === "function" && controller === m.controllerTarget))
 
 		BaseErrorMiddlewareWrapper.wrapAllMiddlewares()
 
@@ -43,6 +45,6 @@ export class SiodWorkflowProcess {
 		MiddlewaresRegistrar.registerAll()
 		IoEventsBinder.bindAll()
 
-		ThrottleManager.startPeriodicCleanup(config.throttleConfig?.cleanupIntervalMs)
+		ThrottleManager.startPeriodicCleanup(ConfigStore.get().throttleConfig?.cleanupIntervalMs)
 	}
 }

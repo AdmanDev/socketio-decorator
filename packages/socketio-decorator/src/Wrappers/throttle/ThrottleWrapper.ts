@@ -1,7 +1,7 @@
-import { config } from "../../globalMetadata"
+import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
-import { ThrottleMetadata } from "../../Models/Metadata/ThrottleMetadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
+import { ThrottleMetadata } from "../../MetadataRepository/MetadataObjects/ThrottleMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { ThrottleManager } from "./ThrottleManager"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
@@ -12,11 +12,13 @@ import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 export class ThrottleWrapper extends Wrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata) {
-		if (config.throttleConfig?.rateLimitConfig && !metadata.throttleMetadata) {
+		const throttleConfig = ConfigStore.get().throttleConfig
+
+		if (throttleConfig?.rateLimitConfig && !metadata.throttleMetadata) {
 			metadata.throttleMetadata = {
 				target: metadata.controllerTarget,
-				limit: config.throttleConfig.rateLimitConfig.limit,
-				timeWindowMs: config.throttleConfig.rateLimitConfig.timeWindowMs
+				limit: throttleConfig.rateLimitConfig.limit,
+				timeWindowMs: throttleConfig.rateLimitConfig.timeWindowMs
 			}
 		}
 

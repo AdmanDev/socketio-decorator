@@ -1,4 +1,4 @@
-import { ControllerMetadata } from "../../../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../../../MetadataRepository/MetadataObjects/Metadata"
 import { BaseErrorMiddlewareWrapper } from "./BaseErrorMiddlewareWrapper"
 import { Wrapper } from "../../WrapperCore/Wrapper"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"

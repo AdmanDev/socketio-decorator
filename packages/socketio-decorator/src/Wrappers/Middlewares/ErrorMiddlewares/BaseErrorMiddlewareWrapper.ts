@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { config } from "../../../globalMetadata"
+import { ConfigStore } from "../../../MetadataRepository/Stores/ConfigStore"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"
 import { IoCContainer } from "../../../IoCContainer"
 import { EventFuncProxyArgs } from "../../../Models/EventFuncProxyType"
@@ -18,6 +18,8 @@ export class BaseErrorMiddlewareWrapper {
 			return
 		}
 
+		const config = ConfigStore.get()
+
 		const otherMiddlewares = IoCContainer.getInstances<MiddlewareInstance>([
 			...config.serverMiddlewares || [],
 			...config.socketMiddlewares || []
@@ -33,6 +35,8 @@ export class BaseErrorMiddlewareWrapper {
 	 * @returns {IErrorMiddleware | undefined} The error middleware instance or undefined if not set
 	 */
 	public static getErrorMiddlewareInstance () {
+		const config = ConfigStore.get()
+
 		if (!config.errorMiddleware) {
 			return undefined
 		}

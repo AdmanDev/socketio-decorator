@@ -1,4 +1,4 @@
-import { config } from "./globalMetadata"
+import { ConfigStore } from "./MetadataRepository/Stores/ConfigStore"
 import { ClassConstructorType } from "./Models/ClassConstructorType"
 
 /**
@@ -26,7 +26,7 @@ export class IoCContainer {
 	 * @returns {T} The instance of the service
 	 */
 	public static getInstance<T> (service: Function) {
-		const userContainer = config.iocContainer
+		const userContainer = ConfigStore.get().iocContainer
 		if (userContainer) {
 			return userContainer.get(service as ClassConstructorType<typeof service>) as T
 		}

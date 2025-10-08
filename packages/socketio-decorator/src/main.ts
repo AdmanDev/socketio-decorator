@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { setConfig } from "./globalMetadata"
+import { ConfigStore } from "./MetadataRepository/Stores/ConfigStore"
 import { SiodConfig } from "./Models/SiodConfig"
 import { SiodWorkflowProcess } from "./SiodWorkflowProccess"
 import { ModuleUtils } from "./Utils/ModuleUtils"
@@ -10,6 +10,6 @@ import { ModuleUtils } from "./Utils/ModuleUtils"
  */
 export async function useSocketIoDecorator (config: SiodConfig) {
 	const updatedConfig = await ModuleUtils.resolveAutoImportFromConfig(config)
-	setConfig(updatedConfig)
+	ConfigStore.set(updatedConfig)
 	SiodWorkflowProcess.processAll()
 }

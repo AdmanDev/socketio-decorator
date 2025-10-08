@@ -1,12 +1,12 @@
 import { Server, Socket } from "socket.io"
-import { config } from "../globalMetadata"
+import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 
 /**
  * Get the socket.io server instance
  * @returns {Server} The socket.io server instance
  */
 export function useIoServer (): Server {
-	return config.ioserver
+	return ConfigStore.get().ioserver
 }
 
 /**
@@ -16,6 +16,8 @@ export function useIoServer (): Server {
  * @returns {Promise<Socket | null>} The socket instance
  */
 export async function useUserSocket<T> (arg: T) {
+	const config = ConfigStore.get()
+
 	if (!config.searchUserSocket) {
 		return null
 	}

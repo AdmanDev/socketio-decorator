@@ -1,4 +1,5 @@
-import { config, getAllEventBinders } from "../globalMetadata"
+import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
+import { EventBinderStore } from "../MetadataRepository/Stores/EventBinderStore"
 import { EventBinder } from "../Models/EventBinder"
 
 /**
@@ -9,7 +10,7 @@ export class IoEventsBinder {
 	 * Binds all collected event binders to the Socket.IO server
 	 */
 	public static bindAll () {
-		const eventBindersGroupedByEvent = getAllEventBinders()
+		const eventBindersGroupedByEvent = EventBinderStore.getAllGrouped()
 
 		Object.entries(eventBindersGroupedByEvent).forEach(([eventName, binders]) => {
 			IoEventsBinder.bindEventToNamespaces(eventName, binders)
@@ -51,7 +52,7 @@ export class IoEventsBinder {
 	 * @param {Function[]} handlers The handlers to execute
 	 */
 	private static attachEventHandler (eventName: string, namespace: string, handlers: Function[]) {
-		const namespaceInstance = config.ioserver.of(namespace)
+		const namespaceInstance = ConfigStore.get().ioserver.of(namespace)
 
 		namespaceInstance.on(eventName, (socket) => {
 			handlers.forEach(handler => handler(socket))

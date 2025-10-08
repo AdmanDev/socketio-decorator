@@ -1,4 +1,4 @@
-import { addListenerMetadata } from "../../globalMetadata"
+import { ListenerOperations } from "../../MetadataRepository/Operations/ListenerOperations"
 import { ListenerDecoratorOptions } from "../../Models/DecoratorOptions/DecoratorOptions"
 
 /**
@@ -9,7 +9,7 @@ import { ListenerDecoratorOptions } from "../../Models/DecoratorOptions/Decorato
  */
 export function SocketOn (event: string, options?: ListenerDecoratorOptions) {
 	return function (target: Object, propertyKey: string) {
-		addListenerMetadata({
+		ListenerOperations.add({
 			type: "socket",
 			action: "on",
 			target: target,
