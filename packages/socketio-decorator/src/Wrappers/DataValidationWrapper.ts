@@ -1,11 +1,11 @@
 import { ClassConstructor, plainToInstance } from "class-transformer"
 import { validate } from "class-validator"
-import { config } from "../globalMetadata"
+import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { SiodIncomingDataError } from "../Models/Errors/SiodIncomingDataError"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
-import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
+import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
 import { Wrapper } from "./WrapperCore/Wrapper"
-import { ControllerMetadata } from "../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**
@@ -14,7 +14,7 @@ import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 export class DataValidationWrapper extends Wrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata) {
-		if (!config.dataValidationEnabled) {
+		if (!ConfigStore.get().dataValidationEnabled) {
 			return
 		}
 
@@ -111,7 +111,7 @@ export class DataValidationWrapper extends Wrapper {
 		if (errors.length > 0) {
 			let errorMessage = "Incoming data is not valid"
 
-			if (!config.errorMiddleware) {
+			if (!ConfigStore.get().errorMiddleware) {
 				errorMessage += "\n You should implement an error middleware to handle this error"
 			}
 

@@ -1,10 +1,10 @@
 /* eslint-disable stylistic/max-len */
 import { Server, Socket } from "socket.io"
-import { ListenerMetadata } from "../Models/Metadata/ListenerMetadata"
-import { ControllerMetadata, MethodMetadata } from "../Models/Metadata/Metadata"
+import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
+import { ControllerMetadata, MethodMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../Models/EventFuncProxyType"
-import { EventMapAction } from "../Models/Metadata/EventMappingDescription"
-import { getControllerMetadata } from "../globalMetadata"
+import { EventMapAction } from "../MetadataRepository/MetadataObjects/EventMappingDescription"
+import { ControllerMetadataStore } from "../MetadataRepository/Stores/ControllerMetadataStore"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 type ServerAction = {
@@ -87,7 +87,7 @@ export class IoActionHandler {
 		const fn = IoActionHandler.ioFns.server[listenerMetadata.action]
 		IoActionHandler.validateAction(listenerMetadata.action, fn)
 
-		const controllerMetadata = getControllerMetadata(listenerMetadata.target)
+		const controllerMetadata = ControllerMetadataStore.get(listenerMetadata.target)
 
 		fn?.(ioserver, listenerMetadata.eventName, methodMetadata, controllerMetadata!, method)
 	}

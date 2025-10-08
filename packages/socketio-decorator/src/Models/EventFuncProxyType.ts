@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { MethodMetadata } from "./Metadata/Metadata"
+import { MethodMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 
 /**
  * Defines the arguments for the event func proxy

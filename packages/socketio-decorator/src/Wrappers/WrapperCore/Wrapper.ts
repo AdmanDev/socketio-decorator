@@ -1,4 +1,4 @@
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 
 /**
  * Defines an abstract wrapper class that all wrappers must extend

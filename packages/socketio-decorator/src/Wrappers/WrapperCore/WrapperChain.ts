@@ -1,5 +1,5 @@
 import { IoCContainer } from "../../IoCContainer"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { Wrapper } from "./Wrapper"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 

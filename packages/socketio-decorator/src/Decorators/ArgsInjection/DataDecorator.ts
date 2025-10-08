@@ -1,6 +1,6 @@
-import { addMethodArgMetadata } from "../../globalMetadata"
+import { MethodArgOperations } from "../../MetadataRepository/Operations/MethodArgOperations"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
-import { MethodArgMetadata } from "../../Models/Metadata/MethodArgMetadata"
+import { MethodArgMetadata } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
 
 /**
  * Decorator to inject data from the sent message into the method argument.
@@ -19,6 +19,6 @@ export function Data (dataIndex = 0) {
 			dataIndex: dataIndex
 		}
 
-		addMethodArgMetadata(target, propertyKey, argMetadata)
+		MethodArgOperations.add(target, propertyKey, argMetadata)
 	}
 }

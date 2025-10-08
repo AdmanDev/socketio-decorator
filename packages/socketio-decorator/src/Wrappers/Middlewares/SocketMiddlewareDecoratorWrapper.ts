@@ -1,8 +1,8 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
-import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
+import { SocketMiddlewareMetadata } from "../../MetadataRepository/MetadataObjects/MiddlewareMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 

@@ -1,7 +1,7 @@
 import { ClassConstructorType } from "../Models/ClassConstructorType"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
-import { EventMappingDescription, EventMappingType } from "../Models/Metadata/EventMappingDescription"
-import { MetadataDescription } from "../Models/Metadata/Metadata"
+import { EventMappingDescription, EventMappingType } from "../MetadataRepository/MetadataObjects/EventMappingDescription"
+import { MetadataDescription } from "../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**

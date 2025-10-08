@@ -1,6 +1,6 @@
 import { EmitterOption } from "../../Models/DecoratorOptions/EmitterOption"
 import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
-import { EmitterMetadata } from "../../Models/Metadata/EmitterMetadata"
+import { EmitterMetadata } from "../../MetadataRepository/MetadataObjects/EmitterMetadata"
 
 /**
  * Defines utils for emitter wrappers

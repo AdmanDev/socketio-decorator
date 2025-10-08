@@ -1,9 +1,9 @@
 import { Socket } from "socket.io"
-import { config } from "../../globalMetadata"
+import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
-import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
+import { MethodArgMetadata, MethodArgValueType } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { SocketDataStore } from "./ArgProviders/SocketDataStore"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
@@ -91,6 +91,8 @@ export class ArgsInjector extends Wrapper {
 		if (argMetadata.valueType !== "currentUser") {
 			return Promise.resolve(null)
 		}
+
+		const config = ConfigStore.get()
 
 		if (!config.currentUserProvider) {
 			throw new SiodDecoratorError("To use @CurrentUser decorator, you must provide a currentUserProvider in the config.")

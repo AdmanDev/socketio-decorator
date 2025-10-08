@@ -1,4 +1,4 @@
-import { addClassThrottleMetadata, addMethodThrottleMetadata } from "../../globalMetadata"
+import { ThrottleOperations } from "../../MetadataRepository/Operations/ThrottleOperations"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { DecoratorUtils } from "../../Utils/DecoratorUtils"
 
@@ -12,7 +12,7 @@ export function Throttle (limit: number, timeWindowMs: number) {
 	return function (...args: unknown[]) {
 		if (DecoratorUtils.isMethodDecorator(args)) {
 			const [target, propertyKey] = args
-			addMethodThrottleMetadata({
+			ThrottleOperations.addToMethod({
 				target: target,
 				methodName: propertyKey as string,
 				limit,
@@ -23,7 +23,7 @@ export function Throttle (limit: number, timeWindowMs: number) {
 
 		if (DecoratorUtils.isClassDecorator(args)) {
 			const [target] = args
-			addClassThrottleMetadata({
+			ThrottleOperations.addToClass({
 				target: target.prototype,
 				limit,
 				timeWindowMs

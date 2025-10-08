@@ -1,7 +1,7 @@
-import { config } from "../../globalMetadata"
+import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { EmitterMetadata } from "../../Models/Metadata/EmitterMetadata"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { EmitterMetadata } from "../../MetadataRepository/MetadataObjects/EmitterMetadata"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { Wrapper } from "../WrapperCore/Wrapper"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
@@ -39,6 +39,8 @@ export class ServerEmitterWrapper extends Wrapper {
 				if (!EmitterWrapperUtils.canEmit(option)) {
 					return result
 				}
+
+				const config = ConfigStore.get()
 
 				if (to) {
 					config.ioserver.to(to).emit(message, data)

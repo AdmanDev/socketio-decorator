@@ -1,5 +1,6 @@
 import { IoCContainer } from "../IoCContainer"
-import { addEventBinder, config } from "../globalMetadata"
+import { EventBinderStore } from "../MetadataRepository/Stores/EventBinderStore"
+import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { IServerMiddleware } from "../Interfaces/IServerMiddleware"
 import { ISocketMiddleware } from "../Interfaces/ISocketMiddleware"
 import { getReflectMiddlewareOptionMetadata } from "../reflectMetadataFunc"
@@ -22,11 +23,14 @@ export class MiddlewaresRegistrar {
 	 * Registers the server middlewares
 	 */
 	private static registerServerMiddlewares () {
-		if (!config.serverMiddlewares || config.serverMiddlewares.length === 0) {
+		const config = ConfigStore.get()
+
+		const serverMiddlewares = config.serverMiddlewares
+		if (!serverMiddlewares || serverMiddlewares.length === 0) {
 			return
 		}
 
-		const middlewares = IoCContainer.getInstances<IServerMiddleware>(config.serverMiddlewares)
+		const middlewares = IoCContainer.getInstances<IServerMiddleware>(serverMiddlewares)
 
 		middlewares.forEach(middleware => {
 			const options = getReflectMiddlewareOptionMetadata(middleware.constructor)
@@ -44,16 +48,17 @@ export class MiddlewaresRegistrar {
 	 * Registers the socket middlewares
 	 */
 	private static registerSocketMiddlewares () {
-		if (!config.socketMiddlewares || config.socketMiddlewares.length === 0) {
+		const socketMiddlewares = ConfigStore.get().socketMiddlewares
+		if (!socketMiddlewares || socketMiddlewares.length === 0) {
 			return
 		}
 
-		const middlewares = IoCContainer.getInstances<ISocketMiddleware>(config.socketMiddlewares)
+		const middlewares = IoCContainer.getInstances<ISocketMiddleware>(socketMiddlewares)
 		middlewares.forEach(middleware => {
 			const options = getReflectMiddlewareOptionMetadata(middleware.constructor)
 			const namespace = options?.namespace || "/"
 
-			addEventBinder(namespace, "connection", (socket) => {
+			EventBinderStore.add(namespace, "connection", (socket) => {
 				socket.use((events, next) => {
 					middleware.use(socket, events, next)
 				})

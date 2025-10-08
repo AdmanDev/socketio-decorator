@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals"
 import { Server } from "socket.io"
 import { SocketOn, useSocketIoDecorator } from "../../src"
 import { MiddlewaresRegistrar } from "../../src/EventRegistrars/MiddlewaresRegistrar"
-import { setConfig } from "../../src/globalMetadata"
+import { ConfigStore } from "../../src/MetadataRepository/Stores/ConfigStore"
 import { IoCContainer } from "../../src/IoCContainer"
 import { IoCProvider } from "../../src/Models/IocProvider"
 import { DataValidationWrapper } from "../../src/Wrappers/DataValidationWrapper"
@@ -123,13 +123,13 @@ describe("> System tests", () => {
 			}
 
 			beforeAll(() => {
-				setConfig({
+				ConfigStore.set({
 					iocContainer: externalContainer
 				} as Any)
 			})
 
 			afterAll(() => {
-				setConfig(undefined as Any)
+				ConfigStore.set(undefined as Any)
 			})
 
 			it("should return an instance of a service from the external container", () => {
