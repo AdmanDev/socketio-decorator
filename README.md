@@ -1111,7 +1111,7 @@ For more information on data validation, see the [class-validator documentation]
 
 ## Application Events
 
-Application events provide an internal event bus for cross-service / class communication within your server application. Unlike Socket.IO events that communicate over the network, Application events are server-side only and enable decoupled communication between different parts of your application.
+Application events provide an internal event bus for cross-service / class communication within your server. Unlike Socket.IO events that communicate over the network, application events are server-side only and enable decoupled communication between different parts of your application.
 
 ### Why use Application Events?
 
@@ -1157,10 +1157,7 @@ class InventoryService {
     @AppOn("order-created")
     public updateInventory(context: AppEventContext) {
         const order = context.data as OrderData
-
-        // Available when the event is triggered from a socket handler
-        const socket = context.ioContext?.currentSocket
-        
+                
         // Inventory update logic
     }
 }
@@ -1170,6 +1167,9 @@ class NotificationService {
     @AppOn("order-created")
     public notifyWarehouse(context: AppEventContext) {
         const order = context.data as OrderData
+
+        // Available when the event is triggered from a socket handler
+        const socket = context.ioContext?.currentSocket
         
         // Warehouse notification logic
     }

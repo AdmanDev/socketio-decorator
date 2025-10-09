@@ -1,7 +1,7 @@
 import { AppEventContext, AppEventListener } from "../../Models/AppEventBus/AppEventBusModels"
 import { ClassConstructorType } from "../../Models/ClassConstructorType"
 
-type AppEventBListenerMetadata = {
+type AppEventListenerInfo = {
 	name: string
 	targetClass: ClassConstructorType<unknown>
 	callback: AppEventListener
@@ -13,7 +13,7 @@ type AppEventBListenerMetadata = {
  */
 export class ApplicationEventBus {
 	private static instance: ApplicationEventBus
-	private listeners: Map<string, AppEventBListenerMetadata[]> = new Map()
+	private listeners: Map<string, AppEventListenerInfo[]> = new Map()
 
 	/**
 	 * Get the instance of the application event bus
@@ -43,9 +43,9 @@ export class ApplicationEventBus {
 
 	/**
 	 * Register a listener for a specific event
-	 * @param {AppEventBListenerMetadata} listenerInfo The listener information
+	 * @param {AppEventListenerInfo} listenerInfo The listener information
 	 */
-	public on (listenerInfo: AppEventBListenerMetadata): void {
+	public on (listenerInfo: AppEventListenerInfo): void {
 		const { name } = listenerInfo
 		if (!name) {
 			return
