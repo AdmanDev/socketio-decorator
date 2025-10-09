@@ -17,8 +17,8 @@ export function AppOn (eventName: string) {
 
 		appEventBus.on({
 			eventName: eventName,
-			targetClass: target as ClassConstructorType<unknown>,
-			callback: descriptor.value!
+			targetClass: target.constructor as ClassConstructorType<unknown>,
+			methodName: descriptor.value!.name as keyof InstanceType<ClassConstructorType<unknown>>
 		})
 	}
 }
