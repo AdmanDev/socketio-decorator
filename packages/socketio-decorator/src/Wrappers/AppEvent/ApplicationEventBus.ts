@@ -38,9 +38,6 @@ export class ApplicationEventBus {
 	 */
 	public on<TTarget extends ClassConstructorType<unknown>>(listenerInfo: ListenerRegistration<TTarget>): void {
 		const { eventName } = listenerInfo
-		if (!eventName) {
-			return
-		}
 
 		const eventListeners = this.listeners.get(eventName) || []
 		eventListeners.push(listenerInfo)
