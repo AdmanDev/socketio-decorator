@@ -1144,37 +1144,48 @@ When an event is emitted, all registered listeners for that event are called asy
 
 **Usage**:
 
-```typescript
-type OrderData = {
-    orderId: string
-    items: OrderItem[]
-    total: number
-    createdAt: Date
-}
+1. **Create a class with the event listener**
 
-// App event listener that responds to order creation
-class InventoryService {
-    @AppOn("order-created")
-    public updateInventory(context: AppEventContext) {
-        const order = context.data as OrderData
-                
-        // Inventory update logic
+    ```typescript
+    type OrderData = {
+        orderId: string
+        items: OrderItem[]
+        total: number
+        createdAt: Date
     }
-}
 
-// Another listener for the same event
-class NotificationService {
-    @AppOn("order-created")
-    public notifyWarehouse(context: AppEventContext) {
-        const order = context.data as OrderData
-
-        // Available when the event is triggered from a socket handler
-        const socket = context.ioContext?.currentSocket
-        
-        // Warehouse notification logic
+    // App event listener that responds to order creation
+    class InventoryService {
+        @AppOn("order-created")
+        public updateInventory(context: AppEventContext) {
+            const order = context.data as OrderData
+                    
+            // Inventory update logic
+        }
     }
-}
-```
+
+    // Another listener for the same event
+    class NotificationService {
+        @AppOn("order-created")
+        public notifyWarehouse(context: AppEventContext) {
+            const order = context.data as OrderData
+
+            // Available when the event is triggered from a socket handler
+            const socket = context.ioContext?.currentSocket
+            
+            // Warehouse notification logic
+        }
+    }
+    ```
+
+2. **Register them in the `useSocketIoDecorator` config**
+
+    ```typescript
+    useSocketIoDecorator({
+        ...,
+        appEventListeners: [InventoryService, NotificationService]
+    })
+    ```
 
 **Key features**:
 
@@ -1225,6 +1236,8 @@ class OrderService {
     }
 }
 ```
+
+Note: No need to register the event emitters in the `useSocketIoDecorator` config.
 
 **Key features**:
 

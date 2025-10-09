@@ -1,7 +1,5 @@
 import { AppEmit, SocketOn } from "@admandev/socketio-decorator"
 import type { Order } from "../models/order"
-import { InventoryEventService } from "../appEvent/inventoryEventService"
-import { OrderNotificationEventService } from "../appEvent/orderNotificationEventService"
 
 export class OrderController {
     @SocketOn("create-order")

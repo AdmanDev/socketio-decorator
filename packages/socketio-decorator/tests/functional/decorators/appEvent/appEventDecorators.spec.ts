@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { AppEmit, AppEventContext, AppOn, IErrorMiddleware, SocketOn } from "../../../../src"
+import { AppEmit, AppEventContext, AppOn, SocketOn } from "../../../../src"
 import { createServer, createSocketClient } from "../../../utilities/serverUtils"
 import { waitFor } from "../../../utilities/testUtils"
 import { IoCContainer } from "../../../../src/IoCContainer"
@@ -11,18 +11,11 @@ describe("> AppEvent (On & Emit) decorators", () => {
 	let io: Server
 	let clientSocket: ClientSocket
 
-	const errorMiddlewareSpy = jest.fn()
 	const onAppEmitTestSpy = jest.fn()
 	const onAppEmitTestSecondSpy = jest.fn()
 	const onOtherEventSpy = jest.fn()
 
 	let appEmitTest: AppEmitTest
-
-	class ErrorMiddleware implements IErrorMiddleware {
-		public handleError (error: unknown) {
-			errorMiddlewareSpy(error)
-		}
-	}
 
 	class ControllerTest {
 		@SocketOn("test")
@@ -44,7 +37,6 @@ describe("> AppEvent (On & Emit) decorators", () => {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	class SecondAppEventListener {
 		@AppOn("app-emit-test")
 		public onAppEmitTest (context: AppEventContext) {
@@ -61,7 +53,7 @@ describe("> AppEvent (On & Emit) decorators", () => {
 		io = createServer(
 			{
 				controllers: [ControllerTest],
-				errorMiddleware: ErrorMiddleware
+				appEventListeners: [AppEmitTest, SecondAppEventListener],
 			},
 			{
 				onServerListen: () => {

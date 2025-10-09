@@ -37,6 +37,10 @@ export type SiodConfig = {
 	 */
 	throttleConfig?: ThrottleConfig
 	/**
+	 * The application event listeners to register.
+	 */
+	appEventListeners?: Function[] | string[]
+	/**
 	 * The current user provider that will be used to get the current user from CurrentUser decorator.
 	 * @returns {Promise<unknown | null>} The current user if found, or null if not found
 	 */

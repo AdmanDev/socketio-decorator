@@ -16,7 +16,7 @@ export function AppOn (eventName: string) {
 		const appEventBus = ApplicationEventBus.getInstance()
 
 		appEventBus.on({
-			name: eventName,
+			eventName: eventName,
 			targetClass: target as ClassConstructorType<unknown>,
 			callback: descriptor.value!
 		})

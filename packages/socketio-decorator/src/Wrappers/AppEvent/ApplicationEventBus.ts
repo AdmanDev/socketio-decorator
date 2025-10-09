@@ -1,8 +1,9 @@
+import { IoCContainer } from "../../IoCContainer"
 import { AppEventContext, AppEventListener } from "../../Models/AppEventBus/AppEventBusModels"
 import { ClassConstructorType } from "../../Models/ClassConstructorType"
 
 type AppEventListenerInfo = {
-	name: string
+	eventName: string
 	targetClass: ClassConstructorType<unknown>
 	callback: AppEventListener
 }
@@ -37,7 +38,8 @@ export class ApplicationEventBus {
 		}
 
 		for (const { targetClass, callback } of eventListeners) {
-			setTimeout(() => callback.apply(targetClass, [context]), 0)
+			const targetInstance = IoCContainer.getInstance<Record<string, unknown>>(targetClass.constructor)
+			setTimeout(() => callback.apply(targetInstance, [context]), 0)
 		}
 	}
 
@@ -46,15 +48,15 @@ export class ApplicationEventBus {
 	 * @param {AppEventListenerInfo} listenerInfo The listener information
 	 */
 	public on (listenerInfo: AppEventListenerInfo): void {
-		const { name } = listenerInfo
-		if (!name) {
+		const { eventName } = listenerInfo
+		if (!eventName) {
 			return
 		}
 
-		const eventListeners = this.listeners.get(name) || []
+		const eventListeners = this.listeners.get(eventName) || []
 		eventListeners.push(listenerInfo)
 
-		this.listeners.set(name, eventListeners)
+		this.listeners.set(eventName, eventListeners)
 	}
 
 	/**
@@ -69,7 +71,7 @@ export class ApplicationEventBus {
 		}
 
 		const newEventListeners = eventListeners.filter(
-			listener => !(listener.name === eventName && listener.callback === callback)
+			listener => !(listener.eventName === eventName && listener.callback === callback)
 		)
 
 		this.listeners.set(eventName, newEventListeners)
