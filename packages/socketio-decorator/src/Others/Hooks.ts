@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io"
 import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
+import { ApplicationEventBus } from "../Wrappers/AppEvent/ApplicationEventBus"
 
 /**
  * Get the socket.io server instance
@@ -23,4 +24,12 @@ export async function useUserSocket<T> (arg: T) {
 	}
 
 	return await config.searchUserSocket(arg)
+}
+
+/**
+ * Get the application event bus instance to use it dynamically in your code
+ * @returns {ApplicationEventBus} The application event bus instance
+ */
+export function useAppEventBus (): ApplicationEventBus {
+	return ApplicationEventBus.getInstance()
 }

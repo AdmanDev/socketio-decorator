@@ -1140,7 +1140,7 @@ When an event is emitted, all registered listeners for that event are called asy
 
 **Description**: Registers a method as an application event listener
 
-**Method signature**: `(context: AppEventContext) => unknown | Promise<unknown>`
+**Method signature required**: `(context: AppEventContext) => unknown | Promise<unknown>`
 
 **Usage**:
 
@@ -1183,7 +1183,7 @@ When an event is emitted, all registered listeners for that event are called asy
     ```typescript
     useSocketIoDecorator({
         ...,
-        appEventListeners: [InventoryService, NotificationService]
+        appEventListeners: [InventoryService, NotificationService] // Or [path/to/directory/*.js]
     })
     ```
 
@@ -1264,6 +1264,11 @@ The `AppEventContext` object passed to event listeners contains:
 | `eventName` | `string` | The original Socket.IO event name |
 | `eventData` | `unknown[]` | The original Socket.IO event arguments |
 
+### Use application event bus dynamically
+
+You can also use the application event bus dynamically by using the `useAppEventBus` hook.
+See [UseAppEventBus hook](#useappeventbus-hook)
+
 ### Important Notes
 
 - **Server-side only**: Application Events are internal to your server and don't communicate over the network
@@ -1278,7 +1283,52 @@ The `AppEventContext` object passed to event listeners contains:
 
 ## Hooks
 
-Hooks in Socketio Decorator are functions that provides some data.
+Hooks in Socketio Decorator are functions that provides some services.
+
+### UseAppEventBus hook
+
+The `useAppEventBus` hook allows you to use the application event bus dynamically in your code.
+
+This hook provides the `ApplicationEventBus` instance that you can use to listen and emit events without using the `@AppOn` and `@AppEmit` decorators.
+
+```typescript
+import { useAppEventBus, ApplicationEventBus } from "@admandev/socketio-decorator"
+
+const appEventBus: ApplicationEventBus = useAppEventBus()
+
+appEventBus.on({
+    eventName: "new-message",
+    targetClass: NotificationService,
+    methodName: "sendMessage"
+})
+
+appEventBus.emit({
+    eventName: "new-message",
+    data: "Hello, world!"
+})
+```
+
+#### `ApplicationEventBus` API
+
+The `ApplicationEventBus` instance provides the following methods:
+
+| Method | Description |
+|--------|---------|
+| `on(listenerInfo: ListenerRegistration<TTarget>)` | Registers a listener for a specific event |
+| `emit(context: AppEventContext)` | Emits an event to all registered listeners |
+| `off(listenerInfo: ListenerRegistration<TTarget>)` | Removes a specific listener for an event |
+| `offAll(eventName: string)` | Removes all listeners for a specific event |
+| `removeAllListeners()` | Removes all listeners |
+
+**The `ListenerRegistration<TTarget>` type is defined as follows:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `eventName` | `string` | The name of the event to listen for |
+| `targetClass` | `ClassConstructorType<unknown>` | The target class constructor of the listener |
+| `methodName` | `string` | The name of the method to listen for in the target class |
+
+---
 
 ### UseIoServer hook
 
