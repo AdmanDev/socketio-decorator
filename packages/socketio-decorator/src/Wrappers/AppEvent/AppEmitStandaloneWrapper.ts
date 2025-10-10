@@ -1,7 +1,7 @@
 import { IoCContainer } from "../../IoCContainer"
 import { AppEventDescription } from "../../MetadataRepository/MetadataObjects/AppEventMetadata"
 import { AppEventMetadataStore } from "../../MetadataRepository/Stores/AppEventMetadataStore"
-import { OperationWrapper } from "../WrapperCore/OperationWrapper"
+import { Operation } from "../WrapperCore/Operation/Operation"
 import { ApplicationEventBus } from "./ApplicationEventBus"
 
 type WrapMethodContext = {
@@ -14,7 +14,7 @@ type WrapMethodContext = {
 /**
  * Defines a wrapper to apply app emit decorators for standalone classes (non-controllers).
  */
-export class AppEmitStandaloneWrapper extends OperationWrapper {
+export class AppEmitStandaloneWrapper extends Operation {
 	/** @inheritdoc */
 	public execute (): void {
 		const metadata = AppEventMetadataStore.getAllStandalone()

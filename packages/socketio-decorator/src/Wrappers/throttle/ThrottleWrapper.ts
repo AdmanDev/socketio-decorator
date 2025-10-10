@@ -2,7 +2,7 @@ import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { ThrottleMetadata } from "../../MetadataRepository/MetadataObjects/ThrottleMetadata"
-import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ThrottleManager } from "./ThrottleManager"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 

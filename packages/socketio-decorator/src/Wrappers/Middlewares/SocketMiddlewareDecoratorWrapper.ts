@@ -3,7 +3,7 @@ import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { SocketMiddlewareMetadata } from "../../MetadataRepository/MetadataObjects/MiddlewareMetadata"
-import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**

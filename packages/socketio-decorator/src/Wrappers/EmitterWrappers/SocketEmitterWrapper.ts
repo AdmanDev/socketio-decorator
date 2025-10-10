@@ -3,7 +3,7 @@ import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { EmitterMetadata } from "../../MetadataRepository/MetadataObjects/EmitterMetadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
-import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 

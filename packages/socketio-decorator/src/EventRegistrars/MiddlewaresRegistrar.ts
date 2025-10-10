@@ -5,24 +5,23 @@ import { IServerMiddleware } from "../Interfaces/IServerMiddleware"
 import { ISocketMiddleware } from "../Interfaces/ISocketMiddleware"
 import { getReflectMiddlewareOptionMetadata } from "../reflectMetadataFunc"
 import { Namespace, Server } from "socket.io"
+import { Operation } from "../Wrappers/WrapperCore/Operation/Operation"
 
 /**
  * A class that is used to register middlewares event
  */
-export class MiddlewaresRegistrar {
+export class MiddlewaresRegistrar extends Operation {
 
-	/**
-	 * Registers all middlewares
-	 */
-	public static registerAll () {
-		MiddlewaresRegistrar.registerServerMiddlewares()
-		MiddlewaresRegistrar.registerSocketMiddlewares()
+	/** @inheritdoc */
+	public execute () {
+		this.registerServerMiddlewares()
+		this.registerSocketMiddlewares()
 	}
 
 	/**
 	 * Registers the server middlewares
 	 */
-	private static registerServerMiddlewares () {
+	private registerServerMiddlewares () {
 		const config = ConfigStore.get()
 
 		const serverMiddlewares = config.serverMiddlewares
@@ -47,7 +46,7 @@ export class MiddlewaresRegistrar {
 	/**
 	 * Registers the socket middlewares
 	 */
-	private static registerSocketMiddlewares () {
+	private registerSocketMiddlewares () {
 		const socketMiddlewares = ConfigStore.get().socketMiddlewares
 		if (!socketMiddlewares || socketMiddlewares.length === 0) {
 			return

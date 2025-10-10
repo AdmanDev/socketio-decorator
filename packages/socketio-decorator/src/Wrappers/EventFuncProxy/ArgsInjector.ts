@@ -4,7 +4,7 @@ import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { MethodArgMetadata, MethodArgValueType } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
-import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { SocketDataStore } from "./ArgProviders/SocketDataStore"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 

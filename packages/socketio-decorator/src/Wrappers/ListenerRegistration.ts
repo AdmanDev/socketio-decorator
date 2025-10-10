@@ -6,7 +6,7 @@ import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
 import { ControllerMetadata, MethodMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { MetadataUtils } from "../Utils/MetadataUtils"
-import { ControllerWrapper } from "./WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "./WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**

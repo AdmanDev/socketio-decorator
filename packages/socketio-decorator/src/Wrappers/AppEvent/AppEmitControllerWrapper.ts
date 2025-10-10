@@ -3,7 +3,7 @@ import { AppEventMetadataStore } from "../../MetadataRepository/Stores/AppEventM
 import { AppEventContext } from "../../Models/AppEventBus/AppEventBusModels"
 import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { ApplicationEventBus } from "./ApplicationEventBus"
-import { ControllerWrapper } from "../WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 
 type WrapMethodContext = {

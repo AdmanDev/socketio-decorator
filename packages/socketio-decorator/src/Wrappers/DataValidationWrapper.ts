@@ -4,7 +4,7 @@ import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { SiodIncomingDataError } from "../Models/Errors/SiodIncomingDataError"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
-import { ControllerWrapper } from "./WrapperCore/ControllerWrapper"
+import { ControllerWrapper } from "./WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
