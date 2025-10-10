@@ -4,14 +4,14 @@ import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
 import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { MethodArgMetadata, MethodArgValueType } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
-import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { SocketDataStore } from "./ArgProviders/SocketDataStore"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines the event function handler proxy wrapper to manage handler args
  */
-export class ArgsInjector extends Wrapper {
+export class ArgsInjector extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		metadata.methodMetadata.forEach(methodMetadata => {

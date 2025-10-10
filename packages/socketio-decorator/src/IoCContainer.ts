@@ -35,6 +35,17 @@ export class IoCContainer {
 	}
 
 	/**
+	 * Set an instance of a service
+	 * @param {ClassConstructorType<T>} service The service to set an instance of
+	 * @param {T} instance The instance of the service
+	 * @template T The type of the service
+	 */
+	public static setInstance<T> (service: ClassConstructorType<T>, instance: T) {
+		const container = ConfigStore.get().iocContainer || IoCContainer.container
+		container.set(service, instance)
+	}
+
+	/**
 	 * Get an instance of a service
 	 * @param {ClassConstructorType<T>} constructor The service constructor
 	 * @returns {T} The instance of the service
@@ -46,7 +57,7 @@ export class IoCContainer {
 		}
 
 		const instance = new constructor()
-		IoCContainer.container.set(constructor, instance)
+		IoCContainer.setInstance(constructor, instance)
 
 		return instance
 	}

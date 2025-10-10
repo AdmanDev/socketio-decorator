@@ -1,35 +1,14 @@
 import { Socket } from "socket.io"
-import { ConfigStore } from "../../../MetadataRepository/Stores/ConfigStore"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"
 import { IoCContainer } from "../../../IoCContainer"
+import { ConfigStore } from "../../../MetadataRepository/Stores/ConfigStore"
 import { EventFuncProxyArgs } from "../../../Models/EventFuncProxyType"
 import { MiddlewareInstance } from "../../../Models/Utilities/ControllerTypes"
 
 /**
- * Error middleware wrapper
+ * Defines the core logic for wrapping methods with error middleware
  */
-export class BaseErrorMiddlewareWrapper {
-	/**
-	 * Wraps all middlewares to add error middleware
-	 */
-	public static wrapAllMiddlewares () {
-		const errorMiddleware = BaseErrorMiddlewareWrapper.getErrorMiddlewareInstance()
-		if (!errorMiddleware) {
-			return
-		}
-
-		const config = ConfigStore.get()
-
-		const otherMiddlewares = IoCContainer.getInstances<MiddlewareInstance>([
-			...config.serverMiddlewares || [],
-			...config.socketMiddlewares || []
-		])
-
-		otherMiddlewares.forEach(middleware => {
-			BaseErrorMiddlewareWrapper.wrapMethod(errorMiddleware, "use", middleware)
-		})
-	}
-
+export class ErrorMiddlewareWrapperCore {
 	/**
 	 * Gets the error middleware instance
 	 * @returns {IErrorMiddleware | undefined} The error middleware instance or undefined if not set
@@ -53,11 +32,11 @@ export class BaseErrorMiddlewareWrapper {
 	public static wrapMethod (errorMiddleware: IErrorMiddleware, methodName: string, middlewareInstance: MiddlewareInstance) {
 		const originalMethod = middlewareInstance[methodName] as Function
 
-		const wrappedMethod = async function (...args: unknown[]) {
+		const wrappedMethod = async (...args: unknown[]) => {
 			try {
 				return await originalMethod.apply(middlewareInstance, args)
 			} catch (error: unknown) {
-				const socket = BaseErrorMiddlewareWrapper.getSocketFromArgs(...args)
+				const socket = ErrorMiddlewareWrapperCore.getSocketFromArgs(...args)
 				return errorMiddleware.handleError(error, socket)
 			}
 		}

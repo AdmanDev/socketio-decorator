@@ -4,14 +4,14 @@ import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { SiodIncomingDataError } from "../Models/Errors/SiodIncomingDataError"
 import { EventFuncProxyType } from "../Models/EventFuncProxyType"
 import { ListenerMetadata } from "../MetadataRepository/MetadataObjects/ListenerMetadata"
-import { Wrapper } from "./WrapperCore/Wrapper"
+import { ControllerWrapper } from "./WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerMetadata } from "../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../Models/Utilities/ControllerTypes"
 
 /**
  * Allows to wrap a method to add data validation layer
  */
-export class DataValidationWrapper extends Wrapper {
+export class DataValidationWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata) {
 		if (!ConfigStore.get().dataValidationEnabled) {

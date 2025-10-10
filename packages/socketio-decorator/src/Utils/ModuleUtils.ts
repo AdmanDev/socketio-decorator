@@ -13,11 +13,25 @@ export class ModuleUtils {
 	 * @returns {Promise<SiodConfig>} - A promise that resolves to the updated configuration with imported modules.
 	 */
 	public static async resolveAutoImportFromConfig (config: SiodConfig): Promise<SiodConfig> {
-		const configCopy = { ...config }
+		const configCopy: SiodConfig = { ...config }
 
-		const controllerPaths = configCopy.controllers.filter(c => typeof c === "string")
-		if (controllerPaths.length > 0) {
-			configCopy.controllers = await ModuleUtils.loadModulesFromPatterns(controllerPaths)
+		const propertiesToImport: (keyof SiodConfig)[] = [
+			"controllers",
+			"appEventListeners"
+		]
+
+		for (const property of propertiesToImport) {
+			const propertyValue = configCopy[property]
+			const isNotEmptyArray = Array.isArray(propertyValue) && propertyValue.length > 0
+
+			if (!isNotEmptyArray) {
+				continue
+			}
+
+			const paths = propertyValue.filter(path => typeof path === "string")
+			if (paths.length > 0) {
+				configCopy[property] = await ModuleUtils.loadModulesFromPatterns(paths) as Any
+			}
 		}
 
 		return configCopy

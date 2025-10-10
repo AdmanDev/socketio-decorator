@@ -1,19 +1,18 @@
 import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { EventBinderStore } from "../MetadataRepository/Stores/EventBinderStore"
 import { EventBinder } from "../Models/EventBinder"
+import { Operation } from "../Wrappers/WrapperCore/Operation/Operation"
 
 /**
  * Attaches consolidated event handlers to the Socket.IO server
  */
-export class IoEventsBinder {
-	/**
-	 * Binds all collected event binders to the Socket.IO server
-	 */
-	public static bindAll () {
+export class IoEventsBinder extends Operation {
+	/** @inheritdoc */
+	public execute () {
 		const eventBindersGroupedByEvent = EventBinderStore.getAllGrouped()
 
 		Object.entries(eventBindersGroupedByEvent).forEach(([eventName, binders]) => {
-			IoEventsBinder.bindEventToNamespaces(eventName, binders)
+			this.bindEventToNamespaces(eventName, binders)
 		})
 	}
 
@@ -22,11 +21,11 @@ export class IoEventsBinder {
 	 * @param {string} eventName The event name
 	 * @param {EventBinder[]} binders The event binders for this event
 	 */
-	private static bindEventToNamespaces (eventName: string, binders: EventBinder[]) {
-		const bindersByNamespace = IoEventsBinder.groupBindersByNamespace(binders)
+	private bindEventToNamespaces (eventName: string, binders: EventBinder[]) {
+		const bindersByNamespace = this.groupBindersByNamespace(binders)
 
 		Object.entries(bindersByNamespace).forEach(([namespace, handlers]) => {
-			IoEventsBinder.attachEventHandler(eventName, namespace, handlers)
+			this.attachEventHandler(eventName, namespace, handlers)
 		})
 	}
 
@@ -35,7 +34,7 @@ export class IoEventsBinder {
 	 * @param {EventBinder[]} binders The event binders to group
 	 * @returns {Record<string, Function[]>} The binders grouped by namespace
 	 */
-	private static groupBindersByNamespace (binders: EventBinder[]) {
+	private groupBindersByNamespace (binders: EventBinder[]) {
 		return binders.reduce((grouped, binder) => {
 			if (!grouped[binder.namespace]) {
 				grouped[binder.namespace] = []
@@ -51,7 +50,7 @@ export class IoEventsBinder {
 	 * @param {string} namespace The namespace
 	 * @param {Function[]} handlers The handlers to execute
 	 */
-	private static attachEventHandler (eventName: string, namespace: string, handlers: Function[]) {
+	private attachEventHandler (eventName: string, namespace: string, handlers: Function[]) {
 		const namespaceInstance = ConfigStore.get().ioserver.of(namespace)
 
 		namespaceInstance.on(eventName, (socket) => {

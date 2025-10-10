@@ -1,15 +1,15 @@
 import { ControllerMetadata } from "../../../MetadataRepository/MetadataObjects/Metadata"
-import { BaseErrorMiddlewareWrapper } from "./BaseErrorMiddlewareWrapper"
-import { Wrapper } from "../../WrapperCore/Wrapper"
+import { ControllerWrapper } from "../../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { IErrorMiddleware } from "../../../Interfaces/IErrorMiddleware"
+import { ErrorMiddlewareWrapperCore } from "./ErrorMiddlewareWrapperCore"
 
 /**
  * Defines a wrapper to wrap controllers methods with the error middleware.
  */
-export class ControllerErrorWrapper extends Wrapper {
+export class ControllerErrorWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata) {
-		const errorMiddleware = BaseErrorMiddlewareWrapper.getErrorMiddlewareInstance()
+		const errorMiddleware = ErrorMiddlewareWrapperCore.getErrorMiddlewareInstance()
 		if (!errorMiddleware) {
 			return
 		}
@@ -32,7 +32,7 @@ export class ControllerErrorWrapper extends Wrapper {
 			.filter((value, index, self) => self.indexOf(value) === index)
 
 		unicMethods.forEach(methodName => {
-			BaseErrorMiddlewareWrapper.wrapMethod(errorMiddleware, methodName, metadata.controllerInstance!)
+			ErrorMiddlewareWrapperCore.wrapMethod(errorMiddleware, methodName, metadata.controllerInstance!)
 		})
 	}
 }

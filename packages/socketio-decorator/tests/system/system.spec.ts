@@ -14,10 +14,12 @@ import { ThrottleWrapper } from "../../src/Wrappers/throttle/ThrottleWrapper"
 import { ThrottleManager } from "../../src/Wrappers/throttle/ThrottleManager"
 import { ArgsInjector } from "../../src/Wrappers/EventFuncProxy/ArgsInjector"
 import { ControllerErrorWrapper } from "../../src/Wrappers/Middlewares/ErrorMiddlewares/ControllerErrorWrapper"
-import { BaseErrorMiddlewareWrapper } from "../../src/Wrappers/Middlewares/ErrorMiddlewares/BaseErrorMiddlewareWrapper"
+import { IoMiddlewareErrorWrapper } from "../../src/Wrappers/Middlewares/ErrorMiddlewares/IoMiddlewareErrorWrapper"
 import { ArgsNormalizer } from "../../src/Wrappers/EventFuncProxy/ArgsNormalizer"
 import { ListenerRegistration } from "../../src/Wrappers/ListenerRegistration"
 import { IoEventsBinder } from "../../src/EventRegistrars/IoEventsBinder"
+import { AppEmitStandaloneWrapper } from "../../src/Wrappers/AppEvent/AppEmitStandaloneWrapper"
+import { AppEmitControllerWrapper } from "../../src/Wrappers/AppEvent/AppEmitControllerWrapper"
 
 describe("> System tests", () => {
 	class FirstController {
@@ -29,7 +31,8 @@ describe("> System tests", () => {
 	}
 
 	describe("> Wrapping and Bindings order tests", () => {
-		const middlewareErrorMiddlewareWrapperSpy = jest.spyOn(BaseErrorMiddlewareWrapper, "wrapAllMiddlewares")
+		const appEmitStandaloneWrapperSpy = jest.spyOn(AppEmitStandaloneWrapper.prototype, "execute")
+		const ioMiddlewareErrorWrapperSpy = jest.spyOn(IoMiddlewareErrorWrapper.prototype, "execute")
 		const argsInjectorSpy = jest.spyOn(ArgsInjector.prototype, "execute")
 		const dataValidationWrapperSpy = jest.spyOn(DataValidationWrapper.prototype, "execute")
 		const serverEmitterWrapperSpy = jest.spyOn(ServerEmitterWrapper.prototype, "execute")
@@ -39,10 +42,11 @@ describe("> System tests", () => {
 		const throttleMethodWrapperSpy = jest.spyOn(ThrottleWrapper.prototype, "addMethodThrottle" as Any)
 		const throttleClassWrapperSpy = jest.spyOn(ThrottleWrapper.prototype, "addClassThrottle" as Any)
 		const controllerErrorWrapperSpy = jest.spyOn(ControllerErrorWrapper.prototype, "execute")
+		const appEmitControllerWrapperSpy = jest.spyOn(AppEmitControllerWrapper.prototype, "execute")
 		const argsNormalizerSpy = jest.spyOn(ArgsNormalizer.prototype, "execute")
 		const listenerRegistrationSpy = jest.spyOn(ListenerRegistration.prototype, "execute")
-		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar, "registerAll")
-		const ioEventsBinderSpy = jest.spyOn(IoEventsBinder, "bindAll")
+		const middlewaresRegistrarSpy = jest.spyOn(MiddlewaresRegistrar.prototype, "execute")
+		const ioEventsBinderSpy = jest.spyOn(IoEventsBinder.prototype, "execute")
 		const throttlePeriodicCleanupSpy = jest.spyOn(ThrottleManager, "startPeriodicCleanup")
 
 		it("should wrap controller methods and binds events in the correct order", async () => {
@@ -55,7 +59,8 @@ describe("> System tests", () => {
 			})
 
 			expectCallOrder({
-				middlewareErrorMiddlewareWrapperSpy,
+				appEmitStandaloneWrapperSpy,
+				ioMiddlewareErrorWrapperSpy,
 				argsInjectorSpy,
 				dataValidationWrapperSpy,
 				serverEmitterWrapperSpy,
@@ -65,6 +70,7 @@ describe("> System tests", () => {
 				throttleMethodWrapperSpy,
 				throttleClassWrapperSpy,
 				controllerErrorWrapperSpy,
+				appEmitControllerWrapperSpy,
 				argsNormalizerSpy,
 				listenerRegistrationSpy,
 				middlewaresRegistrarSpy,
@@ -119,7 +125,8 @@ describe("> System tests", () => {
 				get: (type) => {
 					externalContainerSpy(type)
 					return new type()
-				}
+				},
+				set: jest.fn()
 			}
 
 			beforeAll(() => {
