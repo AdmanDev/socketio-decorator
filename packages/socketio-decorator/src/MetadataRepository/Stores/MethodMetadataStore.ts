@@ -24,7 +24,8 @@ export class MethodMetadataStore {
 						listenerMetadata: [],
 						emitterMetadata: []
 					},
-					socketMiddlewareMetadata: []
+					socketMiddlewareMetadata: [],
+					roomMetadata: []
 				},
 				argsMetadata: []
 			}

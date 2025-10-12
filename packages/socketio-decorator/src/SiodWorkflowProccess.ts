@@ -18,6 +18,7 @@ import { ThrottleWrapper } from "./Wrappers/throttle/ThrottleWrapper"
 import { ControllerWrapperChain } from "./Wrappers/WrapperCore/ControllerWrapper/ControllerWrapperChain"
 import { OperationChain } from "./Wrappers/WrapperCore/Operation/OperationChain"
 import { ControllerMetadata } from "./MetadataRepository/MetadataObjects/Metadata"
+import { MethodRoomWrapper } from "./Wrappers/Room/MethodRoomWrapper"
 
 /**
  * Defines the workflow process responsible for binding all the metadata.
@@ -36,6 +37,7 @@ export class SiodWorkflowProcess {
 
 		ControllerWrapperChain.create()
 			.register(new ArgsInjector())
+			.register(new MethodRoomWrapper())
 			.register(new DataValidationWrapper())
 			.register(new ServerEmitterWrapper())
 			.register(new SocketEmitterWrapper())

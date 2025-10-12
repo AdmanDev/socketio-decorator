@@ -12,6 +12,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Room management decorators](#room-decorators)
   - [Parameter injection](#parameter-injection-decorators)
   - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
@@ -394,6 +395,77 @@ public joinRoom(@CurrentSocket() socket: Socket) {
     })
 }
 ```
+
+### Room decorators
+
+The following decorators can be used to manage socket.io rooms:
+
+| Decorator | Description | Equivalent in Basic Socket.io |
+|-----------|-------------|-------------------------------|
+| `@AutoJoinRoom(roomName: string or RoomNameGetter)` | Auto joins a room when a listener is called. | `socket.join(roomName)` |
+
+#### Examples
+
+---
+
+##### @AutoJoinRoom(roomName: string | RoomNameGetter)
+
+**Equivalent in basic Socket.io:** `socket.join(roomName)`^
+
+Joins a room when a listener is called (executed after your code).
+It MUST be used with a [listener decorator](#listening-for-events) to work.
+
+**Usage** :
+
+1. **Using a static room name**
+
+```typescript
+@SocketOn("join-main-chat")
+@AutoJoinRoom("main-chat")
+public onJoinMainChat() {
+    console.log("Joined main chat")
+}
+```
+
+2. **Using a dynamic room name from client data** [See example here](#using-a-dynamic-room-name-from-client-data-in-room-decorators)
+
+---
+
+#### Using a dynamic room name from client data in room decorators
+
+Room decorators support dynamic room names through the `RoomNameGetter` function. This function computes the room name at runtime based on the socket instance and client data, allowing flexible room assignment.
+
+The `RoomNameGetter` signature is:
+
+```typescript
+type RoomNameGetter = ({ socket: Socket, data: any }) => string
+```
+
+The function executes after your event handler and returns the room name to be used by the decorator.
+
+```typescript
+type JoinChatData = {
+    roomId: string
+}
+
+// Server side - Room name computed from client data
+@SocketOn("join-chat")
+@AutoJoinRoom(({ data }: { data: JoinChatData }) => data.roomId)
+public onJoinChat(@Data(0) data: JoinChatData) {
+    console.log("Joined chat room:", data.roomId)
+}
+
+// Client side
+socket.emit("join-chat", { roomId: "chat-123" })
+```
+
+> [!WARNING]
+> The `data` parameter is the **first argument** sent by the client.
+>
+> If client sends multiple arguments: `socket.emit("join-chat", "chat-123", "chat-456")`,
+> the `data` parameter will be `"chat-123"`.
+
+**Alternative:** You can also use the `socket` parameter for room names based on socket properties: `@AutoJoinRoom(({ socket }) => socket.id)`
 
 ### Parameter injection decorators
 

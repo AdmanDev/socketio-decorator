@@ -10,6 +10,8 @@ export * from "./Decorators/Listeners/SocketOnAnyOutgoingDecorator"
 export * from "./Decorators/Emitters/ServerEmitterDecorator"
 export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
+export * from "./Decorators/Room/AutoJoinRoomDecorator"
+
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
 export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"

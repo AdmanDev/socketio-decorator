@@ -4,6 +4,7 @@ import { MethodArgMetadata } from "./MethodArgMetadata"
 import { SocketMiddlewareMetadata, ClassSocketMiddlewareMetadata } from "./MiddlewareMetadata"
 import { ClassThrottleMetadata, ThrottleMetadata } from "./ThrottleMetadata"
 import { ControllerConstructor, ControllerInstance } from "../../Models/Utilities/ControllerTypes"
+import { MethodRoomMetadata } from "./RoomMetadata"
 
 export type ControllerMetadata = {
 	controllerTarget: ControllerConstructor
@@ -28,6 +29,7 @@ type MethodMetadataItem = {
 	}
 	socketMiddlewareMetadata: SocketMiddlewareMetadata[]
 	throttleMetadata?: ThrottleMetadata
+	roomMetadata: MethodRoomMetadata[]
 }
 
 export type MetadataDescription = {
