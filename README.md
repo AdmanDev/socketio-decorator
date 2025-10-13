@@ -12,6 +12,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Room management decorators](#room-decorators)
   - [Parameter injection](#parameter-injection-decorators)
   - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
@@ -393,6 +394,58 @@ public joinRoom(@CurrentSocket() socket: Socket) {
         },
     })
 }
+```
+
+### Room decorators
+
+The following decorators can be used to manage socket.io rooms:
+
+| Decorator | Description | Equivalent in Basic Socket.io |
+|-----------|-------------|-------------------------------|
+| `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
+
+#### Examples
+
+---
+
+##### @OnRoomJoined(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("join-room", callback)`
+
+Listens for specific room joined events.
+
+If no room name is provided, the listener will be triggered for any room joined event.
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room joined event
+@OnRoomJoined("lobby")
+public onLobbyRoomJoined(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} joined room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for any room joined event
+@OnRoomJoined()
+public onAnyRoomJoined(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} joined room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for room joined event in a specific namespace
+@OnRoomJoined("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomJoined(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} joined room ${roomName}`)
+}
+```
+
+These listeners will be triggered when a socket joins the room.
+
+```typescript
+socket.join("lobby")
 ```
 
 ### Parameter injection decorators

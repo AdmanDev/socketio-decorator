@@ -41,6 +41,10 @@ export type SiodConfig = {
 	 */
 	appEventListeners?: Function[] | string[]
 	/**
+	 * The room event listeners (like room joined | left events) to register.
+	 */
+	roomEventListeners?: Function[] | string[]
+	/**
 	 * The current user provider that will be used to get the current user from CurrentUser decorator.
 	 * @returns {Promise<unknown | null>} The current user if found, or null if not found
 	 */

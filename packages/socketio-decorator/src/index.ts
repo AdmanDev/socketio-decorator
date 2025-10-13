@@ -10,6 +10,8 @@ export * from "./Decorators/Listeners/SocketOnAnyOutgoingDecorator"
 export * from "./Decorators/Emitters/ServerEmitterDecorator"
 export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
+export * from "./Decorators/Room/OnRoomJoinedDecorator"
+
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
 export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"
@@ -38,6 +40,7 @@ export * from "./Models/SiodConfig"
 export * from "./Models/ThrottleConfig"
 export * from "./Models/DecoratorOptions/EmitterOption"
 export * from "./Models/DecoratorOptions/DecoratorOptions"
+export * from "./Models/DecoratorOptions/RoomDecoratorOption"
 export * from "./Models/AppEventBus/AppEventBusModels"
 
 // Errors
