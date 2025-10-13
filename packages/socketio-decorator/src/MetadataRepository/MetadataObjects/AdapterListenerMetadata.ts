@@ -6,4 +6,4 @@ export type AdapterListenerMetadata = MetadataDescription & {
 	namespace: string
 }
 
-export type AdapterEventAction = "onRoomCreated" | "onRoomJoined" | "onRoomLeft"
+export type AdapterEventAction = "onRoomCreated" | "onRoomDeleted" | "onRoomJoined" | "onRoomLeft"

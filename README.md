@@ -403,6 +403,7 @@ The following decorators can be used to manage socket.io rooms:
 | Decorator | Description | Equivalent in Basic Socket.io |
 |-----------|-------------|-------------------------------|
 | `@OnRoomCreated(roomName?: string)` | Listens for room creation events. | `namespace.adapter.on("create-room", callback)` |
+| `@OnRoomDeleted(roomName?: string)` | Listens for room deletion events. | `namespace.adapter.on("delete-room", callback)` |
 | `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
 | `@OnRoomLeft(roomName?: string)` | Listens for room left events. | `namespace.adapter.on("leave-room", callback)` |
 
@@ -448,6 +449,46 @@ public onAnyRoomCreated(roomName: string) {
 @OnRoomCreated("lobby", { namespace: "/my-namespace" })
 public onLobbyRoomCreated(roomName: string) {
     console.log(`Room ${roomName} has been created`)
+}
+```
+
+---
+
+##### @OnRoomDeleted(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("delete-room", callback)`
+
+Listens for room deletion events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room deletion event
+@OnRoomDeleted("lobby")
+public onLobbyRoomDeleted(roomName: string) {
+    console.log(`Room ${roomName} has been deleted`)
+}
+```
+
+```typescript
+// Trigger for any room deletion event
+@OnRoomDeleted()
+public onAnyRoomDeleted(roomName: string) {
+    console.log(`Room ${roomName} has been deleted`)
+}
+```
+
+```typescript
+// Trigger for room deletion event in a specific namespace
+@OnRoomDeleted("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomDeleted(roomName: string) {
+    console.log(`Room ${roomName} has been deleted`)
 }
 ```
 
