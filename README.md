@@ -410,6 +410,24 @@ The following decorators can be used to manage socket.io rooms:
 > [!NOTE]
 > Socket ID room events are automatically filtered out and will not trigger the listener.
 
+#### Setup
+
+Classes using these decorators **must be registered in the `useSocketIoDecorator` config:**
+
+```typescript
+class ChatRoomEvents {
+    @OnRoomCreated()
+    public onRoomCreated(roomName: string) {
+        console.log(`Room ${roomName} has been created`)
+    }
+}
+
+useSocketIoDecorator({
+    roomEventListeners: [ChatRoomEvents], // Or [path/to/directory/*.js]
+    ...
+})
+```
+
 #### Examples
 
 ---
