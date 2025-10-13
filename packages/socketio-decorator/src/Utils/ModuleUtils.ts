@@ -17,7 +17,8 @@ export class ModuleUtils {
 
 		const propertiesToImport: (keyof SiodConfig)[] = [
 			"controllers",
-			"appEventListeners"
+			"appEventListeners",
+			"roomEventListeners"
 		]
 
 		for (const property of propertiesToImport) {
