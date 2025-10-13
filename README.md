@@ -402,10 +402,54 @@ The following decorators can be used to manage socket.io rooms:
 
 | Decorator | Description | Equivalent in Basic Socket.io |
 |-----------|-------------|-------------------------------|
+| `@OnRoomCreated(roomName?: string)` | Listens for room creation events. | `namespace.adapter.on("create-room", callback)` |
 | `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
 | `@OnRoomLeft(roomName?: string)` | Listens for room left events. | `namespace.adapter.on("leave-room", callback)` |
 
+> [!NOTE]
+> Socket ID room events are automatically filtered out and will not trigger the listener.
+
 #### Examples
+
+---
+
+##### @OnRoomCreated(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("create-room", callback)`
+
+Listens for room creation events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room creation event
+@OnRoomCreated("lobby")
+public onLobbyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
+```typescript
+// Trigger for any room creation event
+@OnRoomCreated()
+public onAnyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
+```typescript
+// Trigger for room creation event in a specific namespace
+@OnRoomCreated("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
 
 ---
 

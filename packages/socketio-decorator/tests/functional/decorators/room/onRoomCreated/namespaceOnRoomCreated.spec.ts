@@ -1,11 +1,11 @@
 import { describe, jest, beforeAll, beforeEach, afterEach, it, expect } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { OnRoomJoined } from "../../../../../src"
+import { OnRoomCreated } from "../../../../../src"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
 
-describe("> @OnRoomJoined with namespace awareness test", () => {
+describe("> @OnRoomCreated with namespace awareness test", () => {
 	let io: Server
 	let nsSocketServer: ServerSocket
 	let nsSocketClient: ClientSocket
@@ -14,14 +14,14 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 	const noNamespaceSpy = jest.fn()
 
 	class RoomEvents {
-		@OnRoomJoined("room-1")
-		public onRoomJoined (roomName: string, socket: ServerSocket) {
-			noNamespaceSpy(roomName, socket.id)
+		@OnRoomCreated()
+		public onRoomCreated (roomName: string) {
+			noNamespaceSpy(roomName)
 		}
 
-		@OnRoomJoined("room-1", { namespace: "/custom" })
-		public onRoomJoinedInNamespace (roomName: string, socket: ServerSocket) {
-			namespaceSpy(roomName, socket.id)
+		@OnRoomCreated(undefined, { namespace: "/custom" })
+		public onRoomCreatedInNamespace (roomName: string) {
+			namespaceSpy(roomName)
 		}
 	}
 
@@ -29,7 +29,7 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 		io = createServer(
 			{
 				roomEventListeners: [RoomEvents],
-				controllers: []
+				controllers: [],
 			},
 			{
 				onServerListen: () => {
@@ -46,7 +46,7 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 		nsSocketClient = createSocketClient(done, true, "custom")
 	})
 
-	afterEach(() => {
+	afterEach(async () => {
 		io.sockets.adapter.rooms.clear()
 		nsSocketClient?.disconnect()
 	})
@@ -55,10 +55,9 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 		const roomName = "room-1"
 
 		nsSocketServer.join(roomName)
-
 		await waitFor(50)
 
-		expect(namespaceSpy).toHaveBeenCalledWith(roomName, nsSocketServer.id)
+		expect(namespaceSpy).toHaveBeenCalledWith(roomName)
 		expect(noNamespaceSpy).not.toHaveBeenCalled()
 	})
 })

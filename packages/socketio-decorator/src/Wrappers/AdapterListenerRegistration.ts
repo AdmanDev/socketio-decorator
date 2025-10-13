@@ -31,6 +31,10 @@ export class AdapterListenerRegistration extends Operation {
 		const classInstance = IoCContainer.getInstance<InstanceType<Any>>(listenerMetadata.target.constructor)
 
 		switch (listenerMetadata.action) {
+			case "onRoomCreated":
+				this.RegisterAsOnRoomCreatedListener(namespace, listenerMetadata, classInstance)
+				break
+
 			case "onRoomJoined":
 				this.RegisterAsOnRoomJoinedListener(namespace, listenerMetadata, classInstance)
 				break
@@ -87,6 +91,29 @@ export class AdapterListenerRegistration extends Operation {
 	}
 
 	/**
+	 * Registers the listener as an on room created listener
+	 * @param {Namespace} namespace The namespace to register the listener to
+	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
+	 */
+	private RegisterAsOnRoomCreatedListener (
+		namespace: Namespace,
+		listenerMetadata: AdapterListenerMetadata,
+		classInstance: InstanceType<Any>
+	) {
+		namespace.adapter.on("create-room", (room: string) => {
+			const isSocketIdRoom = !!namespace.sockets.get(room)
+			const isMatchingRoomFilter = this.isMatchingRoomFilter(room, listenerMetadata.roomName)
+
+			if (!isMatchingRoomFilter || isSocketIdRoom) {
+				return
+			}
+
+			classInstance[listenerMetadata.methodName](room)
+		})
+	}
+
+	/**
 	 * Determines if the listener can be triggered
 	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata
 	 * @param {string} room The joined room name
@@ -94,13 +121,20 @@ export class AdapterListenerRegistration extends Operation {
 	 * @returns {boolean} True if the listener can be triggered, false otherwise
 	 */
 	private canTriggerListener (listenerMetadata: AdapterListenerMetadata, room: string, socket?: Socket) {
-		return (
-			!listenerMetadata.roomName
-			|| listenerMetadata.roomName === room
-		)
+		return this.isMatchingRoomFilter(room, listenerMetadata.roomName)
 		&& (
 			socket
 			&& socket.id !== room
 		)
+	}
+
+	/**
+	 * Determines if the current event room matches the listener's room filter
+	 * @param {string} eventRoom The current event room name
+	 * @param {string | undefined} roomFilter The listener's room filter
+	 * @returns {boolean} True if the event room matches the room filter, false otherwise
+	 */
+	private isMatchingRoomFilter (eventRoom: string, roomFilter?: string) {
+		return !roomFilter || roomFilter === eventRoom
 	}
 }

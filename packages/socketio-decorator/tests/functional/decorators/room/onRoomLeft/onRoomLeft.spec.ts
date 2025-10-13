@@ -45,6 +45,7 @@ describe("> OnRoomLeft decorator", () => {
 	})
 
 	afterEach(() => {
+		io.sockets.adapter.rooms.clear()
 		clientSocket.disconnect()
 	})
 
