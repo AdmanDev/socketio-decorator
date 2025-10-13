@@ -35,6 +35,10 @@ export class AdapterListenerRegistration extends Operation {
 				this.RegisterAsOnRoomJoinedListener(namespace, listenerMetadata, classInstance)
 				break
 
+			case "onRoomLeft":
+				this.RegisterAsOnRoomLeftListener(namespace, listenerMetadata, classInstance)
+				break
+
 			default:
 				throw new SiodInvalidMetadataError(`Unknown adapter action: ${listenerMetadata.action}`)
 		}
@@ -52,6 +56,27 @@ export class AdapterListenerRegistration extends Operation {
 		classInstance: InstanceType<Any>
 	) {
 		namespace.adapter.on("join-room", (room: string, id: string) => {
+			const socket = namespace.sockets.get(id)
+			if (!this.canTriggerListener(listenerMetadata, room, socket)) {
+				return
+			}
+
+			classInstance[listenerMetadata.methodName](room, socket!)
+		})
+	}
+
+	/**
+	 * Registers the listener as an on room left listener
+	 * @param {Namespace} namespace The namespace to register the listener to
+	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
+	 */
+	private RegisterAsOnRoomLeftListener (
+		namespace: Namespace,
+		listenerMetadata: AdapterListenerMetadata,
+		classInstance: InstanceType<Any>
+	) {
+		namespace.adapter.on("leave-room", (room: string, id: string) => {
 			const socket = namespace.sockets.get(id)
 			if (!this.canTriggerListener(listenerMetadata, room, socket)) {
 				return
