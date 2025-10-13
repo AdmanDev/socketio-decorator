@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { OnRoomJoined } from "../../../../../src"
+import { OnRoomLeft } from "../../../../../src"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
 
-describe("> OnRoomJoined decorator", () => {
+describe("> OnRoomLeft decorator", () => {
 	let io: Server
 	let serverSocket: ServerSocket
 	let clientSocket: ClientSocket
@@ -13,14 +13,14 @@ describe("> OnRoomJoined decorator", () => {
 	const allRoomsSpy = jest.fn()
 	const specificRoomSpy = jest.fn()
 
-	class OnRoomJoinedEvents {
-		@OnRoomJoined()
-		public onAnyRoomJoined (roomName: string, socket: ServerSocket) {
+	class OnRoomLeftEvents {
+		@OnRoomLeft()
+		public onAnyRoomLeft (roomName: string, socket: ServerSocket) {
 			allRoomsSpy(roomName, socket.id)
 		}
 
-		@OnRoomJoined("vip-room")
-		public onVipRoomJoined (roomName: string, socket: ServerSocket) {
+		@OnRoomLeft("vip-room")
+		public onVipRoomLeft (roomName: string, socket: ServerSocket) {
 			specificRoomSpy(roomName, socket.id)
 		}
 	}
@@ -28,7 +28,7 @@ describe("> OnRoomJoined decorator", () => {
 	beforeAll((done) => {
 		io = createServer(
 			{
-				roomEventListeners: [OnRoomJoinedEvents],
+				roomEventListeners: [OnRoomLeftEvents],
 				controllers: []
 			},
 			{
@@ -53,10 +53,12 @@ describe("> OnRoomJoined decorator", () => {
 	})
 
 	describe("> Functional tests", () => {
-		it("should trigger handler when a socket joins any room (no room filter)", async () => {
+		it("should trigger handler when a socket leaves any room (no room filter)", async () => {
 			const roomName = "test-room"
 
 			serverSocket.join(roomName)
+			serverSocket.leave(roomName)
+
 			await waitFor(50)
 
 			expect(allRoomsSpy).toHaveBeenCalledWith(roomName, serverSocket.id)
@@ -69,16 +71,20 @@ describe("> OnRoomJoined decorator", () => {
 			serverSocket.join(vipRoom)
 			serverSocket.join(regularRoom)
 
+			serverSocket.leave(vipRoom)
+			serverSocket.leave(regularRoom)
+
 			await waitFor(50)
 
 			expect(specificRoomSpy).toHaveBeenNthCalledWith(1, vipRoom, serverSocket.id)
 			expect(specificRoomSpy).not.toHaveBeenCalledWith(regularRoom, serverSocket.id)
 		})
 
-		it("should trigger both handlers when joining a room (all rooms + specific)", async () => {
+		it("should trigger both handlers when leaving a room (all rooms + specific)", async () => {
 			const vipRoom = "vip-room"
 
 			serverSocket.join(vipRoom)
+			serverSocket.leave(vipRoom)
 
 			await waitFor(50)
 
@@ -86,7 +92,7 @@ describe("> OnRoomJoined decorator", () => {
 			expect(specificRoomSpy).toHaveBeenNthCalledWith(1, vipRoom, serverSocket.id)
 		})
 
-		it("should trigger for multiple room joins", async () => {
+		it("should trigger for multiple room leaves", async () => {
 			const room1 = "room-1"
 			const room2 = "room-2"
 			const room3 = "room-3"
@@ -94,6 +100,10 @@ describe("> OnRoomJoined decorator", () => {
 			serverSocket.join(room1)
 			serverSocket.join(room2)
 			serverSocket.join(room3)
+
+			serverSocket.leave(room1)
+			serverSocket.leave(room2)
+			serverSocket.leave(room3)
 
 			await waitFor(50)
 
@@ -104,9 +114,8 @@ describe("> OnRoomJoined decorator", () => {
 		})
 
 		it("should not trigger if the socket id is the same as the room", async () => {
-			const roomName = "test-room"
+			clientSocket.disconnect()
 
-			serverSocket.join(roomName)
 			await waitFor(50)
 
 			expect(allRoomsSpy).not.toHaveBeenCalledWith(serverSocket.id, serverSocket.id)

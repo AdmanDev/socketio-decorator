@@ -403,6 +403,7 @@ The following decorators can be used to manage socket.io rooms:
 | Decorator | Description | Equivalent in Basic Socket.io |
 |-----------|-------------|-------------------------------|
 | `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
+| `@OnRoomLeft(roomName?: string)` | Listens for room left events. | `namespace.adapter.on("leave-room", callback)` |
 
 #### Examples
 
@@ -412,9 +413,13 @@ The following decorators can be used to manage socket.io rooms:
 
 **Equivalent in basic Socket.io:** `namespace.adapter.on("join-room", callback)`
 
-Listens for specific room joined events.
+Listens for specific room joined events. If no room name is provided, the listener will be triggered for any room.
 
-If no room name is provided, the listener will be triggered for any room joined event.
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string, socket: Socket) => any
+```
 
 **Usage** :
 
@@ -442,10 +447,44 @@ public onLobbyRoomJoined(roomName: string, socket: Socket) {
 }
 ```
 
-These listeners will be triggered when a socket joins the room.
+---
+
+##### @OnRoomLeft(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("leave-room", callback)`
+
+Listens for specific room left events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
 
 ```typescript
-socket.join("lobby")
+(roomName: string, socket: Socket) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room left event
+@OnRoomLeft("lobby")
+public onLobbyRoomLeft(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} left room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for any room left event
+@OnRoomLeft()
+public onAnyRoomLeft(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} left room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for room left event in a specific namespace
+@OnRoomLeft("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomLeft(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} left room ${roomName}`)
+}
 ```
 
 ### Parameter injection decorators

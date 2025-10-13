@@ -1,11 +1,11 @@
 import { describe, jest, beforeAll, beforeEach, afterEach, it, expect } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { OnRoomJoined } from "../../../../../src"
+import { OnRoomLeft } from "../../../../../src"
 import { createServer, createSocketClient } from "../../../../utilities/serverUtils"
 import { waitFor } from "../../../../utilities/testUtils"
 
-describe("> @OnRoomJoined with namespace awareness test", () => {
+describe("> @OnRoomLeft with namespace awareness test", () => {
 	let io: Server
 	let nsSocketServer: ServerSocket
 	let nsSocketClient: ClientSocket
@@ -14,13 +14,13 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 	const noNamespaceSpy = jest.fn()
 
 	class RoomEvents {
-		@OnRoomJoined("room-1")
-		public onRoomJoined (roomName: string, socket: ServerSocket) {
+		@OnRoomLeft("room-1")
+		public onRoomLeft (roomName: string, socket: ServerSocket) {
 			noNamespaceSpy(roomName, socket.id)
 		}
 
-		@OnRoomJoined("room-1", { namespace: "/custom" })
-		public onRoomJoinedInNamespace (roomName: string, socket: ServerSocket) {
+		@OnRoomLeft("room-1", { namespace: "/custom" })
+		public onRoomLeftInNamespace (roomName: string, socket: ServerSocket) {
 			namespaceSpy(roomName, socket.id)
 		}
 	}
@@ -29,7 +29,7 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 		io = createServer(
 			{
 				roomEventListeners: [RoomEvents],
-				controllers: []
+				controllers: [],
 			},
 			{
 				onServerListen: () => {
@@ -54,7 +54,9 @@ describe("> @OnRoomJoined with namespace awareness test", () => {
 		const roomName = "room-1"
 
 		nsSocketServer.join(roomName)
+		await waitFor(50)
 
+		nsSocketServer.leave(roomName)
 		await waitFor(50)
 
 		expect(namespaceSpy).toHaveBeenCalledWith(roomName, nsSocketServer.id)
