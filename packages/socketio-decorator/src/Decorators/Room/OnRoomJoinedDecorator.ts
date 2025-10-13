@@ -20,7 +20,6 @@ export function OnRoomJoined (roomName?: string, options?: RoomDecoratorOption) 
 			methodName: descriptor.value!.name,
 			roomName: roomName,
 			namespace: options?.namespace || "/",
-			targetClass: target.constructor
 		})
 	}
 }

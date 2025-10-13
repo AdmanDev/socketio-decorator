@@ -1,29 +1,24 @@
 import { AdapterListenerMetadata } from "../MetadataObjects/AdapterListenerMetadata"
 
-export type AdapterListenerEntry = AdapterListenerMetadata & {
-	targetClass: Function
-	methodName: string
-}
-
 /**
  * Store for managing adapter listener metadata independently from controllers
  */
 export class AdapterListenerMetadataStore {
-	private static listeners: AdapterListenerEntry[] = []
+	private static listeners: AdapterListenerMetadata[] = []
 
 	/**
-	 * Adds an adapter listener entry
-	 * @param {AdapterListenerEntry} entry The adapter listener entry to add
+	 * Adds an adapter listener metadata
+	 * @param {AdapterListenerMetadata} metadata The adapter listener metadata to add
 	 */
-	public static add (entry: AdapterListenerEntry): void {
-		AdapterListenerMetadataStore.listeners.push(entry)
+	public static add (metadata: AdapterListenerMetadata): void {
+		AdapterListenerMetadataStore.listeners.push(metadata)
 	}
 
 	/**
-	 * Gets all adapter listener entries
-	 * @returns {AdapterListenerEntry[]} All adapter listener entries
+	 * Gets all adapter listener metadata
+	 * @returns {AdapterListenerMetadata[]} All adapter listener metadata
 	 */
-	public static getAll (): AdapterListenerEntry[] {
+	public static getAll (): AdapterListenerMetadata[] {
 		return AdapterListenerMetadataStore.listeners
 	}
 }
