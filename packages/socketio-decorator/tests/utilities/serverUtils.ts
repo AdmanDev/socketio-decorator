@@ -43,20 +43,26 @@ export function createServer (siodConfig: Omit<SiodConfig, "ioserver">, serverEv
  * Creates a client socket.io socket connected to the server
  * @param {Function | undefined} done The callback to call when the client socket is connected
  * @param {boolean | undefined} autoConnect Whether to auto connect the client socket
+ * @param {string | undefined} namespace The namespace to connect to
  * @returns {ClientSocket} The client socket
  */
-export function createSocketClient (done?: Function, autoConnect = true) {
-	return createConfiguredSocketClient({ autoConnect }, done)
+export function createSocketClient (done?: Function, autoConnect = true, namespace?: string) {
+	return createConfiguredSocketClient({ autoConnect }, done, namespace)
 }
 
 /**
  * Creates a client socket.io socket with the given configuration
  * @param {Partial<ManagerOptions & SocketOptions>} config The configuration for the client socket
  * @param {Function | undefined} done The callback to call when the client socket is connected
+ * @param {string | undefined} namespace The namespace to connect to
  * @returns {ClientSocket} The client socket
  */
-export function createConfiguredSocketClient (config: Partial<ManagerOptions & SocketOptions>, done?: Function) {
-	const clientSocket = Client(`http://localhost:${port}`, config)
+export function createConfiguredSocketClient (
+	config: Partial<ManagerOptions & SocketOptions>,
+	done?: Function,
+	namespace?: string
+) {
+	const clientSocket = Client(`http://localhost:${port}/${namespace || ""}`, config)
 
 	if (config.autoConnect && done) {
 		clientSocket.on("connect", () => {

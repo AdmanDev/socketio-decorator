@@ -10,6 +10,7 @@ import { SocketEmitterWrapper } from "./Wrappers/EmitterWrappers/SocketEmitterWr
 import { ArgsInjector } from "./Wrappers/EventFuncProxy/ArgsInjector"
 import { ArgsNormalizer } from "./Wrappers/EventFuncProxy/ArgsNormalizer"
 import { ListenerRegistration } from "./Wrappers/ListenerRegistration"
+import { AdapterListenerRegistration } from "./Wrappers/AdapterListenerRegistration"
 import { IoMiddlewareErrorWrapper } from "./Wrappers/Middlewares/ErrorMiddlewares/IoMiddlewareErrorWrapper"
 import { ControllerErrorWrapper } from "./Wrappers/Middlewares/ErrorMiddlewares/ControllerErrorWrapper"
 import { SocketMiddlewareDecoratorWrapper } from "./Wrappers/Middlewares/SocketMiddlewareDecoratorWrapper"
@@ -50,6 +51,7 @@ export class SiodWorkflowProcess {
 		OperationChain.create()
 			.register(new MiddlewaresRegistrar())
 			.register(new IoEventsBinder())
+			.register(new AdapterListenerRegistration())
 			.execute()
 
 		ThrottleManager.startPeriodicCleanup(ConfigStore.get().throttleConfig?.cleanupIntervalMs)
