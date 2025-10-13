@@ -15,7 +15,6 @@ export function OnRoomJoined (roomName?: string, options?: RoomDecoratorOption) 
 		descriptor: TypedPropertyDescriptor<T>
 	) {
 		AdapterListenerMetadataStore.add({
-			type: "adapter",
 			action: "onRoomJoined",
 			target: target,
 			methodName: descriptor.value!.name,
