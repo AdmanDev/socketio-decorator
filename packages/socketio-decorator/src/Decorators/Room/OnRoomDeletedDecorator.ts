@@ -1,4 +1,4 @@
-import { AdapterListenerMetadataStore } from "../../MetadataRepository/Stores/AdapterListenerMetadataStore"
+import { RoomEventListenerMetadataStore } from "../../MetadataRepository/Stores/RoomEventListenerMetadataStore"
 import { RoomDecoratorOption, RoomLifecycleEventListener } from "../../Models/DecoratorOptions/RoomDecoratorOption"
 
 /**
@@ -13,8 +13,8 @@ export function OnRoomDeleted (roomName?: string, options?: RoomDecoratorOption)
 		propertyKey: string,
 		descriptor: TypedPropertyDescriptor<T>
 	) {
-		AdapterListenerMetadataStore.add({
-			action: "onRoomDeleted",
+		RoomEventListenerMetadataStore.add({
+			action: "delete-room",
 			target: target,
 			methodName: descriptor.value!.name,
 			roomName: roomName,

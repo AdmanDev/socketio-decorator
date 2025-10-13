@@ -11,7 +11,7 @@ export type RoomDecoratorOption = {
 }
 
 /**
- * Defines room event listeners signature
+ * Defines room presence event listeners signature
  */
-export type RoomEventListener = (roomName: string, socket: Socket) => Any
+export type RoomPresenceEventListener = (roomName: string, socket: Socket) => Any
 export type RoomLifecycleEventListener = (roomName: string) => Any
