@@ -47,6 +47,7 @@ describe("> @OnRoomLeft with namespace awareness test", () => {
 	})
 
 	afterEach(() => {
+		io.sockets.adapter.rooms.clear()
 		nsSocketClient?.disconnect()
 	})
 

@@ -12,6 +12,7 @@ export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
 export * from "./Decorators/Room/OnRoomJoinedDecorator"
 export * from "./Decorators/Room/OnRoomLeftDecorator"
+export * from "./Decorators/Room/OnRoomCreatedDecorator"
 
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
