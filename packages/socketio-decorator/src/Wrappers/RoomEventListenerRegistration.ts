@@ -118,6 +118,19 @@ export class RoomEventListenerRegistration extends Operation {
 	 * @returns {boolean} True if the event room matches the room filter, false otherwise
 	 */
 	private isMatchingRoomFilter (eventRoom: string, roomFilter?: string) {
-		return !roomFilter || roomFilter === eventRoom
+		if (!roomFilter) {
+			return true
+		}
+
+		if (!roomFilter.includes("*")) {
+			return roomFilter === eventRoom
+		}
+
+		const regexPattern = roomFilter
+			.replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+			.replace(/\*/g, ".*")
+
+		const regex = new RegExp(`^${regexPattern}$`)
+		return regex.test(eventRoom)
 	}
 }
