@@ -1,4 +1,4 @@
-import { AdapterListenerMetadataStore } from "../../MetadataRepository/Stores/AdapterListenerMetadataStore"
+import { RoomEventListenerMetadataStore } from "../../MetadataRepository/Stores/RoomEventListenerMetadataStore"
 import { RoomDecoratorOption, RoomPresenceEventListener } from "../../Models/DecoratorOptions/RoomDecoratorOption"
 
 /**
@@ -13,7 +13,7 @@ export function OnRoomJoined (roomName?: string, options?: RoomDecoratorOption) 
 		propertyKey: string,
 		descriptor: TypedPropertyDescriptor<T>
 	) {
-		AdapterListenerMetadataStore.add({
+		RoomEventListenerMetadataStore.add({
 			action: "join-room",
 			target: target,
 			methodName: descriptor.value!.name,

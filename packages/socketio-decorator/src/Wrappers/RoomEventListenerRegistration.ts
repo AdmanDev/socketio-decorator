@@ -1,31 +1,31 @@
 import { Namespace, Server, Socket } from "socket.io"
-import {  AdapterListenerMetadataStore } from "../MetadataRepository/Stores/AdapterListenerMetadataStore"
+import {  RoomEventListenerMetadataStore } from "../MetadataRepository/Stores/RoomEventListenerMetadataStore"
 import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { Operation } from "./WrapperCore/Operation/Operation"
 import { SiodInvalidMetadataError } from "../Models/Errors/SiodInvalidMetadataError"
 import { IoCContainer } from "../IoCContainer"
-import { AdapterListenerMetadata } from "../MetadataRepository/MetadataObjects/AdapterListenerMetadata"
+import { RoomEventListenerMetadata } from "../MetadataRepository/MetadataObjects/RoomEventListenerMetadata"
 
 /**
- * Registers adapter listeners independently from controllers
+ * Registers room event listeners
  */
-export class AdapterListenerRegistration extends Operation {
+export class RoomEventListenerRegistration extends Operation {
 	/** @inheritdoc */
 	public execute () {
 		const ioserver = ConfigStore.get().ioserver
-		const listeners = AdapterListenerMetadataStore.getAll()
+		const listeners = RoomEventListenerMetadataStore.getAll()
 
 		listeners.forEach(listenerMetadata => {
-			this.registerAdapterListener(ioserver, listenerMetadata)
+			this.registerRoomEventListener(ioserver, listenerMetadata)
 		})
 	}
 
 	/**
-	 * Registers a single adapter listener
+	 * Registers a single room event listener
 	 * @param {Server} ioserver The Socket.IO server instance
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {RoomEventListenerMetadata} listenerMetadata The listener metadata to register
 	 */
-	private registerAdapterListener (ioserver: Server, listenerMetadata: AdapterListenerMetadata) {
+	private registerRoomEventListener (ioserver: Server, listenerMetadata: RoomEventListenerMetadata) {
 		const namespace = ioserver.of(listenerMetadata.namespace)
 
 		const classInstance = IoCContainer.getInstance<InstanceType<Any>>(listenerMetadata.target.constructor)
@@ -44,7 +44,7 @@ export class AdapterListenerRegistration extends Operation {
 				break
 
 			default:
-				throw new SiodInvalidMetadataError(`Unknown adapter action: ${action}`)
+				throw new SiodInvalidMetadataError(`Unknown room event action: ${action}`)
 		}
 	}
 
@@ -52,13 +52,13 @@ export class AdapterListenerRegistration extends Operation {
 	 * Registers the listener as a room lifecycle event listener
 	 * @param {string} lifecycleEvent The lifecycle event to register the listener to
 	 * @param {Namespace} namespace The namespace to register the listener to
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {RoomEventListenerMetadata} listenerMetadata The listener metadata to register
 	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
 	 */
 	private RegisterAsRoomLifecycleEventListener (
 		lifecycleEvent: "create-room" | "delete-room",
 		namespace: Namespace,
-		listenerMetadata: AdapterListenerMetadata,
+		listenerMetadata: RoomEventListenerMetadata,
 		classInstance: InstanceType<Any>
 	) {
 		namespace.adapter.on(lifecycleEvent, (room: string) => {
@@ -77,13 +77,13 @@ export class AdapterListenerRegistration extends Operation {
 	 * Registers the listener as a room presence event listener
 	 * @param {string} presenceEvent The presence event to register the listener to
 	 * @param {Namespace} namespace The namespace to register the listener to
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {RoomEventListenerMetadata} listenerMetadata The listener metadata to register
 	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
 	 */
 	private RegisterRoomPresenceEventListener (
 		presenceEvent: "join-room" | "leave-room",
 		namespace: Namespace,
-		listenerMetadata: AdapterListenerMetadata,
+		listenerMetadata: RoomEventListenerMetadata,
 		classInstance: InstanceType<Any>
 	) {
 		namespace.adapter.on(presenceEvent, (room: string, id: string) => {
@@ -98,12 +98,12 @@ export class AdapterListenerRegistration extends Operation {
 
 	/**
 	 * Determines if the listener can be triggered
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata
+	 * @param {RoomEventListenerMetadata} listenerMetadata The listener metadata
 	 * @param {string} room The joined room name
 	 * @param {Socket | undefined} socket The current client socket that joined the room
 	 * @returns {boolean} True if the listener can be triggered, false otherwise
 	 */
-	private canTriggerListener (listenerMetadata: AdapterListenerMetadata, room: string, socket?: Socket) {
+	private canTriggerListener (listenerMetadata: RoomEventListenerMetadata, room: string, socket?: Socket) {
 		return this.isMatchingRoomFilter(room, listenerMetadata.roomName)
 		&& (
 			socket
