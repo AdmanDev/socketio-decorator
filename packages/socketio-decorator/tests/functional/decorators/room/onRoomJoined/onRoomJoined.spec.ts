@@ -12,6 +12,7 @@ describe("> OnRoomJoined decorator", () => {
 
 	const allRoomsSpy = jest.fn()
 	const specificRoomSpy = jest.fn()
+	const chatRoomWildcardSpy = jest.fn()
 
 	class OnRoomJoinedEvents {
 		@OnRoomJoined()
@@ -22,6 +23,16 @@ describe("> OnRoomJoined decorator", () => {
 		@OnRoomJoined("vip-room")
 		public onVipRoomJoined (roomName: string, socket: ServerSocket) {
 			specificRoomSpy(roomName, socket.id)
+		}
+
+		@OnRoomJoined("chat-*-game")
+		public onChatRoomJoined (roomName: string, socket: ServerSocket) {
+			chatRoomWildcardSpy(roomName, socket.id)
+		}
+
+		@OnRoomJoined("non-matching-room-*-game")
+		public onNonMatchingRoomJoined (roomName: string, socket: ServerSocket) {
+			chatRoomWildcardSpy(roomName, socket.id)
 		}
 	}
 
@@ -111,6 +122,26 @@ describe("> OnRoomJoined decorator", () => {
 			await waitFor(50)
 
 			expect(allRoomsSpy).not.toHaveBeenCalledWith(serverSocket.id, serverSocket.id)
+		})
+
+		it("should trigger handler for rooms matching wildcard pattern", async () => {
+			const chatRoom1 = "chat-123-game"
+			const chatRoom2 = "chat-456-game"
+			const chatRoomAbc = "chat-abc-game"
+			const nonMatchingRoom = "lobby-123-game"
+
+			serverSocket.join(chatRoom1)
+			serverSocket.join(chatRoom2)
+			serverSocket.join(chatRoomAbc)
+			serverSocket.join(nonMatchingRoom)
+
+			await waitFor(50)
+
+			expect(chatRoomWildcardSpy).toHaveBeenCalledTimes(3)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoom1, serverSocket.id)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoom2, serverSocket.id)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoomAbc, serverSocket.id)
+			expect(chatRoomWildcardSpy).not.toHaveBeenCalledWith(nonMatchingRoom, serverSocket.id)
 		})
 	})
 })

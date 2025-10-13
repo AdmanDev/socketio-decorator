@@ -428,6 +428,44 @@ useSocketIoDecorator({
 })
 ```
 
+#### Wildcard patterns
+
+All room decorators support wildcard patterns using `*` to match dynamic room names. This allows you to listen for events on multiple rooms with a single handler.
+
+```typescript
+class ChatRoomEvents {
+    // Listens to all chat rooms (chat-1, chat-2, chat-general, etc.)
+    @OnRoomCreated("chat-*")
+    public onChatRoomCreated(roomName: string) {
+        console.log(`Chat room ${roomName} was created`)
+    }
+
+    // Listens to all notification rooms (user-notifications, admin-notifications, etc.)
+    @OnRoomJoined("*-notifications")
+    public onNotificationRoomJoined(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} joined notification room ${roomName}`)
+    }
+
+    // Listens to all game lobbies (game-1-lobby, game-tournament-lobby, etc.)
+    @OnRoomLeft("game-*-lobby")
+    public onGameLobbyLeft(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} left game lobby ${roomName}`)
+    }
+}
+```
+
+#### Namespace support
+
+All room decorators support namespace. You can specify the namespace to listen for events on a specific namespace.
+
+```typescript
+// This will trigger only in the /my-namespace namespace
+@OnRoomCreated("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
 #### Examples
 
 ---
@@ -458,14 +496,6 @@ public onLobbyRoomCreated(roomName: string) {
 // Trigger for any room creation event
 @OnRoomCreated()
 public onAnyRoomCreated(roomName: string) {
-    console.log(`Room ${roomName} has been created`)
-}
-```
-
-```typescript
-// Trigger for room creation event in a specific namespace
-@OnRoomCreated("lobby", { namespace: "/my-namespace" })
-public onLobbyRoomCreated(roomName: string) {
     console.log(`Room ${roomName} has been created`)
 }
 ```
@@ -502,14 +532,6 @@ public onAnyRoomDeleted(roomName: string) {
 }
 ```
 
-```typescript
-// Trigger for room deletion event in a specific namespace
-@OnRoomDeleted("lobby", { namespace: "/my-namespace" })
-public onLobbyRoomDeleted(roomName: string) {
-    console.log(`Room ${roomName} has been deleted`)
-}
-```
-
 ---
 
 ##### @OnRoomJoined(roomName?: string)
@@ -542,14 +564,6 @@ public onAnyRoomJoined(roomName: string, socket: Socket) {
 }
 ```
 
-```typescript
-// Trigger for room joined event in a specific namespace
-@OnRoomJoined("lobby", { namespace: "/my-namespace" })
-public onLobbyRoomJoined(roomName: string, socket: Socket) {
-    console.log(`Socket ${socket.id} joined room ${roomName}`)
-}
-```
-
 ---
 
 ##### @OnRoomLeft(roomName?: string)
@@ -578,14 +592,6 @@ public onLobbyRoomLeft(roomName: string, socket: Socket) {
 // Trigger for any room left event
 @OnRoomLeft()
 public onAnyRoomLeft(roomName: string, socket: Socket) {
-    console.log(`Socket ${socket.id} left room ${roomName}`)
-}
-```
-
-```typescript
-// Trigger for room left event in a specific namespace
-@OnRoomLeft("lobby", { namespace: "/my-namespace" })
-public onLobbyRoomLeft(roomName: string, socket: Socket) {
     console.log(`Socket ${socket.id} left room ${roomName}`)
 }
 ```

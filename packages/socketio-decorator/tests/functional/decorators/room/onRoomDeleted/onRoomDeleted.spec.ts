@@ -12,6 +12,7 @@ describe("> OnRoomDeleted decorator", () => {
 
 	const allRoomsSpy = jest.fn()
 	const vipRoomDeletionSpy = jest.fn()
+	const chatRoomWildcardSpy = jest.fn()
 
 	class OnRoomDeletedEvents {
 		@OnRoomDeleted()
@@ -22,6 +23,16 @@ describe("> OnRoomDeleted decorator", () => {
 		@OnRoomDeleted("vip-room")
 		public onVipRoomDeleted (roomName: string) {
 			vipRoomDeletionSpy(roomName)
+		}
+
+		@OnRoomDeleted("chat-*")
+		public onChatRoomDeleted (roomName: string) {
+			chatRoomWildcardSpy(roomName)
+		}
+
+		@OnRoomDeleted("non-matching-room-*")
+		public onNonMatchingRoomDeleted (roomName: string) {
+			chatRoomWildcardSpy(roomName)
 		}
 	}
 
@@ -110,6 +121,31 @@ describe("> OnRoomDeleted decorator", () => {
 			await waitFor(50)
 
 			expect(allRoomsSpy).not.toHaveBeenNthCalledWith(1, serverSocket.id)
+		})
+
+		it("should trigger handler for rooms matching wildcard pattern", async () => {
+			const chatRoom1 = "chat-123"
+			const chatRoom2 = "chat-456"
+			const chatRoomAbc = "chat-abc"
+			const nonMatchingRoom = "lobby-123"
+
+			serverSocket.join(chatRoom1)
+			serverSocket.join(chatRoom2)
+			serverSocket.join(chatRoomAbc)
+			serverSocket.join(nonMatchingRoom)
+
+			serverSocket.leave(chatRoom1)
+			serverSocket.leave(chatRoom2)
+			serverSocket.leave(chatRoomAbc)
+			serverSocket.leave(nonMatchingRoom)
+
+			await waitFor(50)
+
+			expect(chatRoomWildcardSpy).toHaveBeenCalledTimes(3)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoom1)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoom2)
+			expect(chatRoomWildcardSpy).toHaveBeenCalledWith(chatRoomAbc)
+			expect(chatRoomWildcardSpy).not.toHaveBeenCalledWith(nonMatchingRoom)
 		})
 	})
 })
