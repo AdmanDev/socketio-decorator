@@ -1,10 +1,15 @@
 import { Socket } from "socket.io";
-import { OnRoomJoined, OnRoomLeft, OnRoomCreated } from "@admandev/socketio-decorator";
+import { OnRoomJoined, OnRoomLeft, OnRoomCreated, OnRoomDeleted } from "@admandev/socketio-decorator";
 
 export class RoomEvents {
     @OnRoomCreated()
     public onRoomCreated(roomName: string) {
         console.log(`Room ${roomName} has been created`)
+    }
+
+    @OnRoomDeleted()
+    public onRoomDeleted(roomName: string) {
+        console.log(`Room ${roomName} has been deleted`)
     }
 
     @OnRoomJoined()

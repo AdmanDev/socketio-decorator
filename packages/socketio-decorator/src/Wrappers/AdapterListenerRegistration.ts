@@ -35,6 +35,10 @@ export class AdapterListenerRegistration extends Operation {
 				this.RegisterAsOnRoomCreatedListener(namespace, listenerMetadata, classInstance)
 				break
 
+			case "onRoomDeleted":
+				this.RegisterAsOnRoomDeletedListener(namespace, listenerMetadata, classInstance)
+				break
+
 			case "onRoomJoined":
 				this.RegisterAsOnRoomJoinedListener(namespace, listenerMetadata, classInstance)
 				break
@@ -102,6 +106,29 @@ export class AdapterListenerRegistration extends Operation {
 		classInstance: InstanceType<Any>
 	) {
 		namespace.adapter.on("create-room", (room: string) => {
+			const isSocketIdRoom = !!namespace.sockets.get(room)
+			const isMatchingRoomFilter = this.isMatchingRoomFilter(room, listenerMetadata.roomName)
+
+			if (!isMatchingRoomFilter || isSocketIdRoom) {
+				return
+			}
+
+			classInstance[listenerMetadata.methodName](room)
+		})
+	}
+
+	/**
+	 * Registers the listener as an on room deleted listener
+	 * @param {Namespace} namespace The namespace to register the listener to
+	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
+	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
+	 */
+	private RegisterAsOnRoomDeletedListener (
+		namespace: Namespace,
+		listenerMetadata: AdapterListenerMetadata,
+		classInstance: InstanceType<Any>
+	) {
+		namespace.adapter.on("delete-room", (room: string) => {
 			const isSocketIdRoom = !!namespace.sockets.get(room)
 			const isMatchingRoomFilter = this.isMatchingRoomFilter(room, listenerMetadata.roomName)
 
