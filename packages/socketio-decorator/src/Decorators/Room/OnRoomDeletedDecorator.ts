@@ -14,7 +14,7 @@ export function OnRoomDeleted (roomName?: string, options?: RoomDecoratorOption)
 		descriptor: TypedPropertyDescriptor<T>
 	) {
 		AdapterListenerMetadataStore.add({
-			action: "onRoomDeleted",
+			action: "delete-room",
 			target: target,
 			methodName: descriptor.value!.name,
 			roomName: roomName,

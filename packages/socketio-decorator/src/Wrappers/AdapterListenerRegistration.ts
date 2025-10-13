@@ -30,82 +30,38 @@ export class AdapterListenerRegistration extends Operation {
 
 		const classInstance = IoCContainer.getInstance<InstanceType<Any>>(listenerMetadata.target.constructor)
 
-		switch (listenerMetadata.action) {
-			case "onRoomCreated":
-				this.RegisterAsOnRoomCreatedListener(namespace, listenerMetadata, classInstance)
+		const { action } = listenerMetadata
+
+		switch (action) {
+			case "create-room":
+			case "delete-room":
+				this.RegisterAsRoomLifecycleEventListener(action, namespace, listenerMetadata, classInstance)
 				break
 
-			case "onRoomDeleted":
-				this.RegisterAsOnRoomDeletedListener(namespace, listenerMetadata, classInstance)
-				break
-
-			case "onRoomJoined":
-				this.RegisterAsOnRoomJoinedListener(namespace, listenerMetadata, classInstance)
-				break
-
-			case "onRoomLeft":
-				this.RegisterAsOnRoomLeftListener(namespace, listenerMetadata, classInstance)
+			case "join-room":
+			case "leave-room":
+				this.RegisterRoomPresenceEventListener(action, namespace, listenerMetadata, classInstance)
 				break
 
 			default:
-				throw new SiodInvalidMetadataError(`Unknown adapter action: ${listenerMetadata.action}`)
+				throw new SiodInvalidMetadataError(`Unknown adapter action: ${action}`)
 		}
 	}
 
 	/**
-	 * Registers the listener as an on room joined listener
+	 * Registers the listener as a room lifecycle event listener
+	 * @param {string} lifecycleEvent The lifecycle event to register the listener to
 	 * @param {Namespace} namespace The namespace to register the listener to
 	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
 	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
 	 */
-	private RegisterAsOnRoomJoinedListener (
+	private RegisterAsRoomLifecycleEventListener (
+		lifecycleEvent: "create-room" | "delete-room",
 		namespace: Namespace,
 		listenerMetadata: AdapterListenerMetadata,
 		classInstance: InstanceType<Any>
 	) {
-		namespace.adapter.on("join-room", (room: string, id: string) => {
-			const socket = namespace.sockets.get(id)
-			if (!this.canTriggerListener(listenerMetadata, room, socket)) {
-				return
-			}
-
-			classInstance[listenerMetadata.methodName](room, socket!)
-		})
-	}
-
-	/**
-	 * Registers the listener as an on room left listener
-	 * @param {Namespace} namespace The namespace to register the listener to
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
-	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
-	 */
-	private RegisterAsOnRoomLeftListener (
-		namespace: Namespace,
-		listenerMetadata: AdapterListenerMetadata,
-		classInstance: InstanceType<Any>
-	) {
-		namespace.adapter.on("leave-room", (room: string, id: string) => {
-			const socket = namespace.sockets.get(id)
-			if (!this.canTriggerListener(listenerMetadata, room, socket)) {
-				return
-			}
-
-			classInstance[listenerMetadata.methodName](room, socket!)
-		})
-	}
-
-	/**
-	 * Registers the listener as an on room created listener
-	 * @param {Namespace} namespace The namespace to register the listener to
-	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
-	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
-	 */
-	private RegisterAsOnRoomCreatedListener (
-		namespace: Namespace,
-		listenerMetadata: AdapterListenerMetadata,
-		classInstance: InstanceType<Any>
-	) {
-		namespace.adapter.on("create-room", (room: string) => {
+		namespace.adapter.on(lifecycleEvent, (room: string) => {
 			const isSocketIdRoom = !!namespace.sockets.get(room)
 			const isMatchingRoomFilter = this.isMatchingRoomFilter(room, listenerMetadata.roomName)
 
@@ -118,25 +74,25 @@ export class AdapterListenerRegistration extends Operation {
 	}
 
 	/**
-	 * Registers the listener as an on room deleted listener
+	 * Registers the listener as a room presence event listener
+	 * @param {string} presenceEvent The presence event to register the listener to
 	 * @param {Namespace} namespace The namespace to register the listener to
 	 * @param {AdapterListenerMetadata} listenerMetadata The listener metadata to register
 	 * @param {InstanceType<any>} classInstance The class instance to register the listener to
 	 */
-	private RegisterAsOnRoomDeletedListener (
+	private RegisterRoomPresenceEventListener (
+		presenceEvent: "join-room" | "leave-room",
 		namespace: Namespace,
 		listenerMetadata: AdapterListenerMetadata,
 		classInstance: InstanceType<Any>
 	) {
-		namespace.adapter.on("delete-room", (room: string) => {
-			const isSocketIdRoom = !!namespace.sockets.get(room)
-			const isMatchingRoomFilter = this.isMatchingRoomFilter(room, listenerMetadata.roomName)
-
-			if (!isMatchingRoomFilter || isSocketIdRoom) {
+		namespace.adapter.on(presenceEvent, (room: string, id: string) => {
+			const socket = namespace.sockets.get(id)
+			if (!this.canTriggerListener(listenerMetadata, room, socket)) {
 				return
 			}
 
-			classInstance[listenerMetadata.methodName](room)
+			classInstance[listenerMetadata.methodName](room, socket!)
 		})
 	}
 

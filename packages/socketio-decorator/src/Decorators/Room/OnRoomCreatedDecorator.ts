@@ -14,7 +14,7 @@ export function OnRoomCreated (roomName?: string, options?: RoomDecoratorOption)
 		descriptor: TypedPropertyDescriptor<T>
 	) {
 		AdapterListenerMetadataStore.add({
-			action: "onRoomCreated",
+			action: "create-room",
 			target: target,
 			methodName: descriptor.value!.name,
 			roomName: roomName,
