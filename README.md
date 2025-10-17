@@ -30,6 +30,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
   - [UseUserSocket hook](#useusersocket-hook)
   - [UseAppEventBus hook](#useappeventbus-hook)
   - [UseRoomStore hook](#useroomstore-hook)
+  - [UseRoom hook](#useroom-hook)
 - [Dependency Injection](#dependency-injection)
 
 ## Installation
@@ -1660,6 +1661,27 @@ class ChatRoomEvents {
         roomStore.removeRoom(roomName)
     }
 }
+```
+
+---
+
+### useRoom hook
+
+The `useRoom` hook allows you to get a room data object by its name.
+
+```typescript
+import { useRoom } from "@admandev/socketio-decorator"
+
+const room = useRoom<ChatRoom>("myRoom")
+```
+
+Its shortcut version of the following code:
+
+```typescript
+import { useRoomStore } from "@admandev/socketio-decorator"
+
+const roomStore = useRoomStore<ChatRoom>()
+const room = roomStore.getRoom("myRoom")
 ```
 
 ## Dependency Injection

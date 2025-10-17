@@ -43,3 +43,14 @@ export function useAppEventBus (): ApplicationEventBus {
 export function useRoomStore<TRoom> (): RoomStore<TRoom> {
 	return RoomStore.getInstance<TRoom>()
 }
+
+/**
+ * Gets a room data object by its name
+ * @param {string} roomName The name of the room
+ * @returns {TRoom | null} The room data or null if not found
+ * @template TRoom The type of room
+ */
+export function useRoom<TRoom> (roomName: string): TRoom | null {
+	const roomStore = useRoomStore<TRoom>()
+	return roomStore.getRoom(roomName)
+}
