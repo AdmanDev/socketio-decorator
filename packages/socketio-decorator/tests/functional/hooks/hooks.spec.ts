@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { CurrentSocket, SocketOn, useIoServer, useUserSocket } from "../../../src"
+import { ApplicationEventBus, CurrentSocket, SocketOn, useAppEventBus, useIoServer, useRoomStore, useUserSocket } from "../../../src"
 import { createServer, createSocketClient } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
+import { RoomTest } from "../../types/roomTest"
+import { RoomStore } from "../../../src/Features/SocketRoom/RoomStore"
 
 describe("> Hooks tests", () => {
 	let io: Server
@@ -14,7 +16,7 @@ describe("> Hooks tests", () => {
 		io?.close()
 	})
 
-	describe("> UseIoServer hook tests", () => {
+	describe("> useIoServer hook tests", () => {
 		it("should get the socket.io server instance", (done) => {
 			io = createServer(
 				{
@@ -102,6 +104,26 @@ describe("> Hooks tests", () => {
 
 				done()
 			}
+		})
+	})
+
+	describe("> useAppEventBus hook tests", () => {
+		it("should get the app event bus instance", () => {
+			const actualAppEventBus = useAppEventBus()
+			const expectedAppEventBus = ApplicationEventBus.getInstance()
+
+			expect(actualAppEventBus).toBeDefined()
+			expect(actualAppEventBus).toBe(expectedAppEventBus)
+		})
+	})
+
+	describe("> useRoomStore hook tests", () => {
+		it("should get the room store instance", () => {
+			const actualRoomStore = useRoomStore<RoomTest>()
+			const expectedRoomStore = RoomStore.getInstance<RoomTest>()
+
+			expect(actualRoomStore).toBeDefined()
+			expect(actualRoomStore).toBe(expectedRoomStore)
 		})
 	})
 

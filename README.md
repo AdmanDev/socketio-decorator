@@ -28,6 +28,8 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
   - [UseUserSocket hook](#useusersocket-hook)
+  - [UseAppEventBus hook](#useappeventbus-hook)
+  - [UseRoomStore hook](#useroomstore-hook)
 - [Dependency Injection](#dependency-injection)
 
 ## Installation
@@ -1571,6 +1573,94 @@ The `useUserSocket` hook allows you to retrieve a specific connected socket inst
 
     const userSocket: Socket | null = await useUserSocket(userId)
     ```
+
+---
+
+### UseRoomStore hook
+
+The `useRoomStore` hook allows you to manage rooms dynamically in your code.
+It provides the `RoomStore` instance that you can use to set or get room data.
+
+```typescript
+import { useRoomStore } from "@admandev/socketio-decorator"
+
+const roomStore: RoomStore<ChatRoom> = useRoomStore()
+
+roomStore.addRoom("myRoom", {
+    id: "myRoom",
+    messages: [],
+    users: []
+})
+
+const room = roomStore.getRoom("myRoom")
+```
+
+#### `RoomStore` API
+
+| Method | Description |
+|--------|---------|
+| `addRoom(roomId: string, room: TRoom)` | Adds a room to the store |
+| `getRoom(roomId: string)` | Gets a room by its id |
+| `removeRoom(roomId: string)` | Removes a room from the store |
+| `clearAllRooms()` | Clears all rooms from the store |
+
+---
+
+#### Example of using `useRoomStore` with room event handlers
+
+```typescript
+class ChatRoomEvents {
+    @OnRoomCreated("chat-*")
+    public onChatRoomCreated(roomName: string) {
+        console.log(`Room ${roomName} has been created`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        roomStore.addRoom(roomName, {
+            id: roomName,
+            members: [],
+            users: [],
+        })
+    }
+
+    @OnRoomJoined("chat-*")
+    public onChatRoomJoined(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} has joined room ${roomName}`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        const room = roomStore.getRoom(roomName)
+
+        const socketDataStore = new SocketDataStore<DataStoreSchema>(socket)
+        const member = socketDataStore.getData("member")
+        
+        if (room && member) {
+            room.members.push(member)
+        }
+    }
+
+    @OnRoomLeft("chat-*")
+    public onChatRoomLeft(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} has left room ${roomName}`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        const room = roomStore.getRoom(roomName)
+
+        if (room) {
+            const socketDataStore = new SocketDataStore<DataStoreSchema>(socket)
+            const leftMember = socketDataStore.getData("member")
+
+            room.members = room.members.filter(member => member !== leftMember)
+        }
+    }
+
+    @OnRoomDeleted("chat-*")
+    public onChatRoomDeleted(roomName: string) {
+        console.log(`Room ${roomName} has been deleted`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        roomStore.removeRoom(roomName)
+    }
+}
+```
 
 ## Dependency Injection
 
