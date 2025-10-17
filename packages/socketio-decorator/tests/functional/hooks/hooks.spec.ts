@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals"
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
-import { ApplicationEventBus, CurrentSocket, SocketOn, useAppEventBus, useIoServer, useRoomStore, useUserSocket } from "../../../src"
+import { ApplicationEventBus, CurrentSocket, SocketOn, useAppEventBus, useIoServer, useRoom, useRoomStore, useUserSocket } from "../../../src"
 import { createServer, createSocketClient } from "../../utilities/serverUtils"
 import { waitFor } from "../../utilities/testUtils"
 import { RoomTest } from "../../types/roomTest"
@@ -124,6 +124,29 @@ describe("> Hooks tests", () => {
 
 			expect(actualRoomStore).toBeDefined()
 			expect(actualRoomStore).toBe(expectedRoomStore)
+		})
+	})
+
+	describe("> useRoom hook tests", () => {
+		it("should get the room instance", () => {
+			const roomName = "test-room"
+			const roomStore = useRoomStore<RoomTest>()
+
+			const expectedRoom: RoomTest = {
+				id: roomName,
+				messages: ["Test Room"]
+			}
+
+			roomStore.addRoom(roomName, expectedRoom)
+
+			const actualRoom = useRoom<RoomTest>(roomName)
+
+			expect(actualRoom).toEqual(expectedRoom)
+		})
+
+		it("should return null if the room doesn't exist", () => {
+			const actualRoom = useRoom<RoomTest>("non-existent-room")
+			expect(actualRoom).toBeNull()
 		})
 	})
 
