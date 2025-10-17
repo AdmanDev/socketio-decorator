@@ -3,7 +3,21 @@
  * @template TRoom The type of the room
  */
 export class RoomStore<TRoom> {
+	public static instance: RoomStore<unknown>
 	private rooms: Map<string, TRoom> = new Map()
+
+	/**
+	 * Get the instance of the room store
+	 * @returns {RoomStore<TRoom>} The instance of the room store
+	 * @template TRoom The type of the room
+	 */
+	public static getInstance<TRoom>(): RoomStore<TRoom> {
+		if (!this.instance) {
+			this.instance = new RoomStore<TRoom>()
+		}
+
+		return this.instance as RoomStore<TRoom>
+	}
 
 	/**
 	 * Get a room by its id

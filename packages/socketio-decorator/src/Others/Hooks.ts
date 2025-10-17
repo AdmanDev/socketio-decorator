@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io"
 import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { ApplicationEventBus } from "../Wrappers/AppEvent/ApplicationEventBus"
+import { RoomStore } from "../Features/SocketRoom/RoomStore"
 
 /**
  * Get the socket.io server instance
@@ -32,4 +33,13 @@ export async function useUserSocket<T> (arg: T) {
  */
 export function useAppEventBus (): ApplicationEventBus {
 	return ApplicationEventBus.getInstance()
+}
+
+/**
+ * Get the room store instance to manage rooms data
+ * @returns {RoomStore<TRoom>} The room store instance
+ * @template TRoom The type of room
+ */
+export function useRoomStore<TRoom> (): RoomStore<TRoom> {
+	return RoomStore.getInstance<TRoom>()
 }
