@@ -14,6 +14,7 @@ export * from "./Decorators/Room/OnRoomJoinedDecorator"
 export * from "./Decorators/Room/OnRoomLeftDecorator"
 export * from "./Decorators/Room/OnRoomCreatedDecorator"
 export * from "./Decorators/Room/OnRoomDeletedDecorator"
+export * from "./Decorators/Room/SocketRoomDecorator"
 
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
@@ -47,8 +48,11 @@ export * from "./Models/DecoratorOptions/RoomDecoratorOption"
 export * from "./Models/AppEventBus/AppEventBusModels"
 
 // Errors
+export * from "./Models/Errors/SiodDecoratorError"
 export * from "./Models/Errors/SiodIncomingDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
+export * from "./Models/Errors/SiodInvalidMetadataError"
+export * from "./Models/Errors/SiodRequiredRoomError"
 export * from "./Models/Errors/SiodThrottleError"
 
 // Utils
