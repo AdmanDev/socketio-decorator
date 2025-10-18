@@ -409,11 +409,14 @@ The following decorators can be used to manage socket.io rooms:
 | `@OnRoomDeleted(roomName?: string)` | Listens for room deletion events. | `namespace.adapter.on("delete-room", callback)` |
 | `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
 | `@OnRoomLeft(roomName?: string)` | Listens for room left events. | `namespace.adapter.on("leave-room", callback)` |
+| `@SocketRoom(roomName?: string)` | Injects a specific room or all rooms the current socket is in. | / |
 
 > [!NOTE]
 > Socket ID room events are automatically filtered out and will not trigger the listener.
 
-#### Setup
+To learn more about room management, see [UseRoomStore hook](#useroomstore-hook) and [UseRoom hook](#useroom-hook).
+
+#### Room listeners setup
 
 Classes using these decorators **must be registered in the `useSocketIoDecorator` config:**
 
@@ -598,6 +601,51 @@ public onAnyRoomLeft(roomName: string, socket: Socket) {
     console.log(`Socket ${socket.id} left room ${roomName}`)
 }
 ```
+
+---
+
+##### @SocketRoom(roomName?: string)
+
+Injects a specific room or all rooms the current socket is in.
+
+**Usage** :
+
+1. **Inject all rooms the socket is in**
+
+   When used without a parameter, `@SocketRoom()` injects an array of all rooms the current socket is in.
+
+   ```typescript
+   @SocketOn("message")
+   public onMessage(@SocketRoom() rooms: ChatRoom[]) {
+       console.log(`Socket is in ${rooms.length} rooms`)
+   }
+   ```
+
+2. **Inject a specific room**
+
+   When used with a room name parameter, `@SocketRoom("roomName")` injects the specific room object if the socket is in that room, otherwise it injects `null`.
+
+   ```typescript
+   @SocketOn("message")
+   public onMessage(@SocketRoom("roomName") room: ChatRoom | null) {
+       if (room) {
+           console.log("Socket is in room:", room.name)
+       } else {
+           console.log("Socket is not in the room")
+       }
+   }
+   ```
+
+3. Handler with required room
+
+    If you want to ensure that the socket is in a specific room before handling the event, you can use the `required` option. If the socket is not in the specified room, an `SiodRequiredRoomError` will be thrown.
+
+    ```typescript
+    @SocketOn("message")
+    public onMessage(@SocketRoom("roomName", { required: true }) room: ChatRoom) {
+        console.log("For sure, socket is in the room:", room.name)
+    }
+    ```
 
 ### Parameter injection decorators
 
