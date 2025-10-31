@@ -46,6 +46,7 @@ export * from "./Models/DecoratorOptions/EmitterOption"
 export * from "./Models/DecoratorOptions/DecoratorOptions"
 export * from "./Models/DecoratorOptions/RoomDecoratorOption"
 export * from "./Models/AppEventBus/AppEventBusModels"
+export * from "./Models/HookModels"
 
 // Errors
 export * from "./Models/Errors/SiodDecoratorError"

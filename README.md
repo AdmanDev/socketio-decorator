@@ -1713,24 +1713,28 @@ class ChatRoomEvents {
 
 ---
 
-### useRoom hook
+### UseRoom hook
 
-The `useRoom` hook allows you to get a room data object by its name.
+The `useRoom` hook provides utilities for working with a specific room, including accessing room data and utility functions.
 
 ```typescript
 import { useRoom } from "@admandev/socketio-decorator"
 
-const room = useRoom<ChatRoom>("myRoom")
+// Get room data and utilities for a specific room
+const { room, getClients, isEmpty, hasClientInRoom } = useRoom<ChatRoom>("myRoom")
 ```
 
-Its shortcut version of the following code:
+**Return value properties:**
 
-```typescript
-import { useRoomStore } from "@admandev/socketio-decorator"
+| Property | Type | Description |
+|----------|------|-------------|
+| `room` | `TRoom \| null` | The room data object if it exists, null otherwise |
+| `getClients` | `() => string[]` | Returns an array of socket IDs for all clients in the room |
+| `isEmpty` | `() => boolean` | Returns true if the room has no clients |
+| `hasClientInRoom` | `(socketId: string) => boolean` | Checks if a specific client is in the room |
 
-const roomStore = useRoomStore<ChatRoom>()
-const room = roomStore.getRoom("myRoom")
-```
+> [!NOTE]
+> The utility functions are based on Socket.IO's room management (`io.sockets.adapter.rooms`) and may not reflect custom room data stored in `RoomStore`.
 
 ## Dependency Injection
 
