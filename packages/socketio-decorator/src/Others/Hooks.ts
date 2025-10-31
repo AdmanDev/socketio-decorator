@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io"
 import { ConfigStore } from "../MetadataRepository/Stores/ConfigStore"
 import { ApplicationEventBus } from "../Wrappers/AppEvent/ApplicationEventBus"
 import { RoomStore } from "../Features/SocketRoom/RoomStore"
+import { UseRoomReturnType } from "../Models/HookModels"
 
 /**
  * Get the socket.io server instance
@@ -45,12 +46,34 @@ export function useRoomStore<TRoom> (): RoomStore<TRoom> {
 }
 
 /**
- * Gets a room data object by its name
+ * Gets the room data and utility functions for a specific room
  * @param {string} roomName The name of the room
- * @returns {TRoom | null} The room data or null if not found
+ * @returns {UseRoomReturnType<TRoom>} The room data and utility functions
  * @template TRoom The type of room
  */
-export function useRoom<TRoom> (roomName: string): TRoom | null {
+export function useRoom<TRoom> (roomName: string): UseRoomReturnType<TRoom> {
+	const io = useIoServer()
 	const roomStore = useRoomStore<TRoom>()
-	return roomStore.getRoom(roomName)
+	const room = roomStore.getRoom(roomName)
+
+	const getClients = (): string[] => {
+		const clientsSet = io.sockets.adapter.rooms.get(roomName)
+		return clientsSet ? Array.from(clientsSet) : []
+	}
+
+	const isEmpty = (): boolean => {
+		const clientsSet = io.sockets.adapter.rooms.get(roomName)
+		return !clientsSet || clientsSet.size === 0
+	}
+
+	const hasClientInRoom = (socketId: string): boolean => {
+		return io.sockets.adapter.rooms.get(roomName)?.has(socketId) || false
+	}
+
+	return {
+		room,
+		getClients,
+		isEmpty,
+		hasClientInRoom
+	}
 }
