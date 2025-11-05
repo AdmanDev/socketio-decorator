@@ -1,4 +1,4 @@
-import { config } from "./globalMetadata"
+import { ConfigStore } from "./MetadataRepository/Stores/ConfigStore"
 import { ClassConstructorType } from "./Models/ClassConstructorType"
 
 /**
@@ -26,12 +26,23 @@ export class IoCContainer {
 	 * @returns {T} The instance of the service
 	 */
 	public static getInstance<T> (service: Function) {
-		const userContainer = config.iocContainer
+		const userContainer = ConfigStore.get().iocContainer
 		if (userContainer) {
 			return userContainer.get(service as ClassConstructorType<typeof service>) as T
 		}
 
 		return IoCContainer.getServiceInstance(service as ClassConstructorType<typeof service>) as T
+	}
+
+	/**
+	 * Set an instance of a service
+	 * @param {ClassConstructorType<T>} service The service to set an instance of
+	 * @param {T} instance The instance of the service
+	 * @template T The type of the service
+	 */
+	public static setInstance<T> (service: ClassConstructorType<T>, instance: T) {
+		const container = ConfigStore.get().iocContainer || IoCContainer.container
+		container.set(service, instance)
 	}
 
 	/**
@@ -46,7 +57,7 @@ export class IoCContainer {
 		}
 
 		const instance = new constructor()
-		IoCContainer.container.set(constructor, instance)
+		IoCContainer.setInstance(constructor, instance)
 
 		return instance
 	}

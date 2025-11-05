@@ -1,5 +1,5 @@
 import { Data, SocketNamespace, SocketOn } from "@admandev/socketio-decorator";
-import { MessageRequest } from "../messageRequest";
+import { MessageRequest } from "../models/messageRequest";
 
 @SocketNamespace("/my-namespace")
 export class MyNamespaceController {

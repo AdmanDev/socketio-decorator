@@ -12,6 +12,7 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Decorators](#decorators)
   - [Listening for Events](#listening-for-events)
   - [Emitting Events](#emitting-events)
+  - [Room management decorators](#room-decorators)
   - [Parameter injection](#parameter-injection-decorators)
   - [Other decorators](#other-decorators)
 - [Middlewares](#middlewares)
@@ -23,9 +24,13 @@ This library provides an elegant and declarative way to define Socket.IO event l
 - [Data validation](#data-validation)
   - [Setup](#setup)
   - [Disable validation for a specific handler](#disable-validation-for-a-specific-handler)
+- [Application Events Bus](#application-events)
 - [Hooks](#hooks)
   - [UseIoServer hook](#useioserver-hook)
   - [UseUserSocket hook](#useusersocket-hook)
+  - [UseAppEventBus hook](#useappeventbus-hook)
+  - [UseRoomStore hook](#useroomstore-hook)
+  - [UseRoom hook](#useroom-hook)
 - [Dependency Injection](#dependency-injection)
 
 ## Installation
@@ -393,6 +398,254 @@ public joinRoom(@CurrentSocket() socket: Socket) {
     })
 }
 ```
+
+### Room decorators
+
+The following decorators can be used to manage socket.io rooms:
+
+| Decorator | Description | Equivalent in Basic Socket.io |
+|-----------|-------------|-------------------------------|
+| `@OnRoomCreated(roomName?: string)` | Listens for room creation events. | `namespace.adapter.on("create-room", callback)` |
+| `@OnRoomDeleted(roomName?: string)` | Listens for room deletion events. | `namespace.adapter.on("delete-room", callback)` |
+| `@OnRoomJoined(roomName?: string)` | Listens for room joined events. | `namespace.adapter.on("join-room", callback)` |
+| `@OnRoomLeft(roomName?: string)` | Listens for room left events. | `namespace.adapter.on("leave-room", callback)` |
+| `@SocketRoom(roomName?: string)` | Injects a specific room or all rooms the current socket is in. | / |
+
+> [!NOTE]
+> Socket ID room events are automatically filtered out and will not trigger the listener.
+
+To learn more about room management, see [UseRoomStore hook](#useroomstore-hook) and [UseRoom hook](#useroom-hook).
+
+#### Room listeners setup
+
+Classes using these decorators **must be registered in the `useSocketIoDecorator` config:**
+
+```typescript
+class ChatRoomEvents {
+    @OnRoomCreated()
+    public onRoomCreated(roomName: string) {
+        console.log(`Room ${roomName} has been created`)
+    }
+}
+
+useSocketIoDecorator({
+    roomEventListeners: [ChatRoomEvents], // Or [path/to/directory/*.js]
+    ...
+})
+```
+
+#### Wildcard patterns
+
+All room decorators support wildcard patterns using `*` to match dynamic room names. This allows you to listen for events on multiple rooms with a single handler.
+
+```typescript
+class ChatRoomEvents {
+    // Listens to all chat rooms (chat-1, chat-2, chat-general, etc.)
+    @OnRoomCreated("chat-*")
+    public onChatRoomCreated(roomName: string) {
+        console.log(`Chat room ${roomName} was created`)
+    }
+
+    // Listens to all notification rooms (user-notifications, admin-notifications, etc.)
+    @OnRoomJoined("*-notifications")
+    public onNotificationRoomJoined(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} joined notification room ${roomName}`)
+    }
+
+    // Listens to all game lobbies (game-1-lobby, game-tournament-lobby, etc.)
+    @OnRoomLeft("game-*-lobby")
+    public onGameLobbyLeft(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} left game lobby ${roomName}`)
+    }
+}
+```
+
+#### Namespace support
+
+All room decorators support namespace. You can specify the namespace to listen for events on a specific namespace.
+
+```typescript
+// This will trigger only in the /my-namespace namespace
+@OnRoomCreated("lobby", { namespace: "/my-namespace" })
+public onLobbyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
+#### Examples
+
+---
+
+##### @OnRoomCreated(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("create-room", callback)`
+
+Listens for room creation events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room creation event
+@OnRoomCreated("lobby")
+public onLobbyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
+```typescript
+// Trigger for any room creation event
+@OnRoomCreated()
+public onAnyRoomCreated(roomName: string) {
+    console.log(`Room ${roomName} has been created`)
+}
+```
+
+---
+
+##### @OnRoomDeleted(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("delete-room", callback)`
+
+Listens for room deletion events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room deletion event
+@OnRoomDeleted("lobby")
+public onLobbyRoomDeleted(roomName: string) {
+    console.log(`Room ${roomName} has been deleted`)
+}
+```
+
+```typescript
+// Trigger for any room deletion event
+@OnRoomDeleted()
+public onAnyRoomDeleted(roomName: string) {
+    console.log(`Room ${roomName} has been deleted`)
+}
+```
+
+---
+
+##### @OnRoomJoined(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("join-room", callback)`
+
+Listens for specific room joined events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string, socket: Socket) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room joined event
+@OnRoomJoined("lobby")
+public onLobbyRoomJoined(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} joined room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for any room joined event
+@OnRoomJoined()
+public onAnyRoomJoined(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} joined room ${roomName}`)
+}
+```
+
+---
+
+##### @OnRoomLeft(roomName?: string)
+
+**Equivalent in basic Socket.io:** `namespace.adapter.on("leave-room", callback)`
+
+Listens for specific room left events. If no room name is provided, the listener will be triggered for any room.
+
+This decorator requires to be used on a handler with the signature:
+
+```typescript
+(roomName: string, socket: Socket) => any
+```
+
+**Usage** :
+
+```typescript
+// Trigger only for the lobby room left event
+@OnRoomLeft("lobby")
+public onLobbyRoomLeft(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} left room ${roomName}`)
+}
+```
+
+```typescript
+// Trigger for any room left event
+@OnRoomLeft()
+public onAnyRoomLeft(roomName: string, socket: Socket) {
+    console.log(`Socket ${socket.id} left room ${roomName}`)
+}
+```
+
+---
+
+##### @SocketRoom(roomName?: string)
+
+Injects a specific room or all rooms the current socket is in.
+
+**Usage** :
+
+1. **Inject all rooms the socket is in**
+
+   When used without a parameter, `@SocketRoom()` injects an array of all rooms the current socket is in.
+
+   ```typescript
+   @SocketOn("message")
+   public onMessage(@SocketRoom() rooms: ChatRoom[]) {
+       console.log(`Socket is in ${rooms.length} rooms`)
+   }
+   ```
+
+2. **Inject a specific room**
+
+   When used with a room name parameter, `@SocketRoom("roomName")` injects the specific room object if the socket is in that room, otherwise it injects `null`.
+
+   ```typescript
+   @SocketOn("message")
+   public onMessage(@SocketRoom("roomName") room: ChatRoom | null) {
+       if (room) {
+           console.log("Socket is in room:", room.name)
+       } else {
+           console.log("Socket is not in the room")
+       }
+   }
+   ```
+
+3. Handler with required room
+
+    If you want to ensure that the socket is in a specific room before handling the event, you can use the `required` option. If the socket is not in the specified room, an `SiodRequiredRoomError` will be thrown.
+
+    ```typescript
+    @SocketOn("message")
+    public onMessage(@SocketRoom("roomName", { required: true }) room: ChatRoom) {
+        console.log("For sure, socket is in the room:", room.name)
+    }
+    ```
 
 ### Parameter injection decorators
 
@@ -1108,9 +1361,226 @@ Here is the default value for the `disableDataValidation` option:
 
 For more information on data validation, see the [class-validator documentation](https://github.com/typestack/class-validator).
 
+## Application Events
+
+Application events provide an internal event bus for cross-service / class communication within your server. Unlike Socket.IO events that communicate over the network, application events are server-side only and enable decoupled communication between different parts of your application.
+
+### Why use Application Events?
+
+Application events are particularly useful for:
+
+- **Cross-Service communication**: Enable different services to communicate without direct references (e.g., OrderController notifying InventoryService and NotificationService)
+
+- **Decoupled architecture**: Create loosely coupled components that can interact through events
+
+- **Event-driven actions**: Trigger application-wide actions when Socket.IO events occur (e.g., emit an app event after processing a socket message)
+
+### How It Works
+
+The Application Events system uses two main decorators:
+
+| Decorator  | Description |
+|-----------|-------------|
+| `@AppOn(eventName: string)` | Registers a method as an application event listener |
+| `@AppEmit(eventName: string)` | Emits an application event when a method executes |
+
+When an event is emitted, all registered listeners for that event are called asynchronously with an `AppEventContext` object containing the event details.
+
+**How to use them?**
+
+#### `@AppOn(eventName: string)`
+
+**Description**: Registers a method as an application event listener
+
+**Method signature required**: `(context: AppEventContext) => unknown | Promise<unknown>`
+
+**Usage**:
+
+1. **Create a class with the event listener**
+
+    ```typescript
+    type OrderData = {
+        orderId: string
+        items: OrderItem[]
+        total: number
+        createdAt: Date
+    }
+
+    // App event listener that responds to order creation
+    class InventoryService {
+        @AppOn("order-created")
+        public updateInventory(context: AppEventContext) {
+            const order = context.data as OrderData
+                    
+            // Inventory update logic
+        }
+    }
+
+    // Another listener for the same event
+    class NotificationService {
+        @AppOn("order-created")
+        public notifyWarehouse(context: AppEventContext) {
+            const order = context.data as OrderData
+
+            // Available when the event is triggered from a socket handler
+            const socket = context.ioContext?.currentSocket
+            
+            // Warehouse notification logic
+        }
+    }
+    ```
+
+2. **Register them in the `useSocketIoDecorator` config**
+
+    ```typescript
+    useSocketIoDecorator({
+        ...,
+        appEventListeners: [InventoryService, NotificationService] // Or [path/to/directory/*.js]
+    })
+    ```
+
+**Key features**:
+
+- Multiple listeners can subscribe to the same event
+- Listeners execute independently and asynchronously
+- Method receives an `AppEventContext` object with event details
+
+---
+
+#### `@AppEmit(eventName: string)`
+
+**Description**: Emits an application event when the decorated method executes
+
+**Usage**:
+
+```typescript
+// Emits from a Socket.IO listener
+class OrderController {
+    @SocketOn("create-order")
+    @AppEmit("order-created")
+    public createOrder(@Data() orderData: any) {
+        console.log("Creating order from socket event")
+        
+        // Order creation logic
+        const order: OrderData = {
+            orderId: "ORD-123",
+            items: orderData.items,
+            total: orderData.total,
+            createdAt: new Date()
+        }
+        
+        // This return value becomes the data available in listeners context
+        return order
+    }
+}
+
+// Emits from a simple class method
+class OrderService {
+    @AppEmit("order-created")
+    public createOrder(orderData: any) {
+        console.log("Creating order from service")
+        
+        // Order creation logic
+        const order = ...
+        
+        // This return value becomes the data available in listeners context
+        return order
+    }
+}
+```
+
+Note: No need to register the event emitters in the `useSocketIoDecorator` config.
+
+**Key features**:
+
+- Method's return value becomes the event data in listeners context
+- Can be combined with Socket.IO decorators
+- Can be used with any class method
+- Event is emitted to all registered listeners
+
+### AppEventContext Interface
+
+The `AppEventContext` object passed to event listeners contains:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `eventName` | `string` | The name of the application event that triggered the listener |
+| `data` | `unknown` | The data associated with the event (return value from `@AppEmit` method) |
+| `ioContext` | `object` (optional) | Socket.IO context when event is triggered from a socket handler |
+
+**`ioContext` properties** (when available):
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `currentSocket` | `Socket \| null` | The current Socket.IO socket instance |
+| `eventName` | `string` | The original Socket.IO event name |
+| `eventData` | `unknown[]` | The original Socket.IO event arguments |
+
+### Use application event bus dynamically
+
+You can also use the application event bus dynamically by using the `useAppEventBus` hook.
+See [UseAppEventBus hook](#useappeventbus-hook)
+
+### Important Notes
+
+- **Server-side only**: Application Events are internal to your server and don't communicate over the network
+
+- **Asynchronous execution**: Listeners execute independently and asynchronously
+
+- **No execution order guarantee**: The order in which multiple listeners execute is not guaranteed
+
+- **Error isolation**: Errors in one listener don't affect the emitter or other listeners
+
+- **Error handling**: ErrorMiddleware is not applied to app event listeners - you must handle errors within your listener methods
+
 ## Hooks
 
-Hooks in Socketio Decorator are functions that provides some data.
+Hooks in Socketio Decorator are functions that provides some services.
+
+### UseAppEventBus hook
+
+The `useAppEventBus` hook allows you to use the application event bus dynamically in your code.
+
+This hook provides the `ApplicationEventBus` instance that you can use to listen and emit events without using the `@AppOn` and `@AppEmit` decorators.
+
+```typescript
+import { useAppEventBus, ApplicationEventBus } from "@admandev/socketio-decorator"
+
+const appEventBus: ApplicationEventBus = useAppEventBus()
+
+appEventBus.on({
+    eventName: "new-message",
+    targetClass: NotificationService,
+    methodName: "sendMessage"
+})
+
+appEventBus.emit({
+    eventName: "new-message",
+    data: "Hello, world!"
+})
+```
+
+#### `ApplicationEventBus` API
+
+The `ApplicationEventBus` instance provides the following methods:
+
+| Method | Description |
+|--------|---------|
+| `on(listenerInfo: ListenerRegistration<TTarget>)` | Registers a listener for a specific event |
+| `emit(context: AppEventContext)` | Emits an event to all registered listeners |
+| `off(listenerInfo: ListenerRegistration<TTarget>)` | Removes a specific listener for an event |
+| `offAll(eventName: string)` | Removes all listeners for a specific event |
+| `removeAllListeners()` | Removes all listeners |
+
+**The `ListenerRegistration<TTarget>` type is defined as follows:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `eventName` | `string` | The name of the event to listen for |
+| `targetClass` | `ClassConstructorType<unknown>` | The target class constructor of the listener |
+| `methodName` | `string` | The name of the method to listen for in the target class |
+
+---
 
 ### UseIoServer hook
 
@@ -1152,6 +1622,119 @@ The `useUserSocket` hook allows you to retrieve a specific connected socket inst
 
     const userSocket: Socket | null = await useUserSocket(userId)
     ```
+
+---
+
+### UseRoomStore hook
+
+The `useRoomStore` hook allows you to manage rooms dynamically in your code.
+It provides the `RoomStore` instance that you can use to set or get room data.
+
+```typescript
+import { useRoomStore } from "@admandev/socketio-decorator"
+
+const roomStore: RoomStore<ChatRoom> = useRoomStore()
+
+roomStore.addRoom("myRoom", {
+    id: "myRoom",
+    messages: [],
+    users: []
+})
+
+const room = roomStore.getRoom("myRoom")
+```
+
+#### `RoomStore` API
+
+| Method | Description |
+|--------|---------|
+| `addRoom(roomId: string, room: TRoom)` | Adds a room to the store |
+| `getRoom(roomId: string)` | Gets a room by its id |
+| `removeRoom(roomId: string)` | Removes a room from the store |
+| `clearAllRooms()` | Clears all rooms from the store |
+
+---
+
+#### Example of using `useRoomStore` with room event handlers
+
+```typescript
+class ChatRoomEvents {
+    @OnRoomCreated("chat-*")
+    public onChatRoomCreated(roomName: string) {
+        console.log(`Room ${roomName} has been created`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        roomStore.addRoom(roomName, {
+            id: roomName,
+            members: [],
+            users: [],
+        })
+    }
+
+    @OnRoomJoined("chat-*")
+    public onChatRoomJoined(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} has joined room ${roomName}`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        const room = roomStore.getRoom(roomName)
+
+        const socketDataStore = new SocketDataStore<DataStoreSchema>(socket)
+        const member = socketDataStore.getData("member")
+        
+        if (room && member) {
+            room.members.push(member)
+        }
+    }
+
+    @OnRoomLeft("chat-*")
+    public onChatRoomLeft(roomName: string, socket: Socket) {
+        console.log(`Socket ${socket.id} has left room ${roomName}`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        const room = roomStore.getRoom(roomName)
+
+        if (room) {
+            const socketDataStore = new SocketDataStore<DataStoreSchema>(socket)
+            const leftMember = socketDataStore.getData("member")
+
+            room.members = room.members.filter(member => member !== leftMember)
+        }
+    }
+
+    @OnRoomDeleted("chat-*")
+    public onChatRoomDeleted(roomName: string) {
+        console.log(`Room ${roomName} has been deleted`)
+
+        const roomStore = useRoomStore<ChatRoom>()
+        roomStore.removeRoom(roomName)
+    }
+}
+```
+
+---
+
+### UseRoom hook
+
+The `useRoom` hook provides utilities for working with a specific room, including accessing room data and utility functions.
+
+```typescript
+import { useRoom } from "@admandev/socketio-decorator"
+
+// Get room data and utilities for a specific room
+const { room, getClients, isEmpty, hasClientInRoom } = useRoom<ChatRoom>("myRoom")
+```
+
+**Return value properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `room` | `TRoom \| null` | The room data object if it exists, null otherwise |
+| `getClients` | `() => string[]` | Returns an array of socket IDs for all clients in the room |
+| `isEmpty` | `() => boolean` | Returns true if the room has no clients |
+| `hasClientInRoom` | `(socketId: string) => boolean` | Checks if a specific client is in the room |
+
+> [!NOTE]
+> The utility functions are based on Socket.IO's room management (`io.sockets.adapter.rooms`) and may not reflect custom room data stored in `RoomStore`.
 
 ## Dependency Injection
 

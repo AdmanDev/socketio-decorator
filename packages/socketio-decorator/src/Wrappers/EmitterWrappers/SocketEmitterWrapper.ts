@@ -1,16 +1,16 @@
 import { SiodInvalidArgumentError } from "../../Models/Errors/SiodInvalidArgumentError"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { EmitterMetadata } from "../../Models/Metadata/EmitterMetadata"
+import { EmitterMetadata } from "../../MetadataRepository/MetadataObjects/EmitterMetadata"
 import { MetadataUtils } from "../../Utils/MetadataUtils"
 import { EmitterWrapperUtils } from "./EmitterWrapperUtils"
-import { Wrapper } from "../WrapperCore/Wrapper"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * A wrapper to add socket emitter layer to the controller methods
  */
-export class SocketEmitterWrapper extends Wrapper {
+export class SocketEmitterWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		const controllerInstance = metadata.controllerInstance!

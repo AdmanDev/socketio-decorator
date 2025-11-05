@@ -1,5 +1,5 @@
-import { Wrapper } from "../WrapperCore/Wrapper"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
 import { EventFuncProxyArgs } from "../../Models/EventFuncProxyType"
 import { SiodInvalidMetadataError } from "../../Models/Errors/SiodInvalidMetadataError"
 import { getReflectMethodMetadata } from "../../reflectMetadataFunc"
@@ -8,7 +8,7 @@ import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 /**
  * A wrapper to normalize the arguments of the controller methods
  */
-export class ArgsNormalizer extends Wrapper {
+export class ArgsNormalizer extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		metadata.methodMetadata.forEach(methodMetadata => {

@@ -1,15 +1,15 @@
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { IoCContainer } from "../../IoCContainer"
 import { EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
-import { SocketMiddlewareMetadata } from "../../Models/Metadata/MiddlewareMetadata"
-import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
+import { SocketMiddlewareMetadata } from "../../MetadataRepository/MetadataObjects/MiddlewareMetadata"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
 
 /**
  * Defines a wrapper to apply socket middleware decorators.
  */
-export class SocketMiddlewareDecoratorWrapper extends Wrapper {
+export class SocketMiddlewareDecoratorWrapper extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		const socketMiddlewareDecoratorMetadata = metadata.methodMetadata.flatMap(m => m.metadata.socketMiddlewareMetadata)

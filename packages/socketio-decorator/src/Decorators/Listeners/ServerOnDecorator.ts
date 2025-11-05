@@ -1,4 +1,4 @@
-import { addListenerMetadata } from "../../globalMetadata"
+import { ListenerOperations } from "../../MetadataRepository/Operations/ListenerOperations"
 
 /**
  * Regiser a method as "io.on" event listener for the given event
@@ -7,7 +7,7 @@ import { addListenerMetadata } from "../../globalMetadata"
  */
 export function ServerOn (event: string) {
 	return function (target: Object, propertyKey: string) {
-		addListenerMetadata({
+		ListenerOperations.add({
 			type: "server",
 			action: "on",
 			target: target,

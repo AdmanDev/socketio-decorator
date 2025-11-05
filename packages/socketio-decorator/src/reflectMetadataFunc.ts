@@ -1,5 +1,5 @@
 import { MiddlewareOptionType } from "./Models/DecoratorOptions/MiddlewareOptionType"
-import { MethodMetadata } from "./Models/Metadata/Metadata"
+import { MethodMetadata } from "./MetadataRepository/MetadataObjects/Metadata"
 
 const METHOD_METADATA_KEY = "siod:method-metadata"
 const MIDDLEWARE_OPTION_KEY = "siod:middleware-option"

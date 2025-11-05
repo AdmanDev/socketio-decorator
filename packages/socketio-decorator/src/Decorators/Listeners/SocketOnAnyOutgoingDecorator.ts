@@ -1,4 +1,4 @@
-import { addListenerMetadata } from "../../globalMetadata"
+import { ListenerOperations } from "../../MetadataRepository/Operations/ListenerOperations"
 
 /**
  * Register a new catch-all listener for outgoing packets (socket.onAnyOutgoing)
@@ -6,7 +6,7 @@ import { addListenerMetadata } from "../../globalMetadata"
  */
 export function SocketOnAnyOutgoing () {
 	return function (target: Object, propertyKey: string) {
-		addListenerMetadata({
+		ListenerOperations.add({
 			type: "socket",
 			action: "onAnyOutgoing",
 			target: target,

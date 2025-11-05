@@ -1,4 +1,4 @@
-import { addEmitterMetadata } from "../../globalMetadata"
+import { EmitterOperations } from "../../MetadataRepository/Operations/EmitterOperations"
 
 /**
  * Decorator that register a method as an emiter to current client (socket.emit)
@@ -8,7 +8,7 @@ import { addEmitterMetadata } from "../../globalMetadata"
  */
 export function SocketEmitter (eventName?: string): MethodDecorator {
 	return function (target: Object, propertyKey: string | symbol) {
-		addEmitterMetadata({
+		EmitterOperations.add({
 			type: "socket",
 			action: "emitSelf",
 			target: target,

@@ -1,4 +1,4 @@
-import { config } from "../../globalMetadata"
+import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { IThrottleStorage } from "../../Interfaces/IThrottleStorage"
 import { IoCContainer } from "../../IoCContainer"
 import { SiodThrottleError } from "../../Models/Errors/SiodThrottleError"
@@ -17,9 +17,12 @@ export class ThrottleManager {
 	 */
 	private static get store () {
 		if (!this.storeInstance) {
+			const config = ConfigStore.get()
+
 			const ThrottleStorageClass = config.throttleConfig?.store || InMemoryThrottleStorage
 			this.storeInstance = IoCContainer.getInstance<IThrottleStorage>(ThrottleStorageClass)
 		}
+
 		return this.storeInstance
 	}
 
@@ -74,9 +77,12 @@ export class ThrottleManager {
 	 * @returns {Promise<string>} The user identifier
 	 */
 	private static async getUserIdentifier (socket: Socket): Promise<string> {
+		const config = ConfigStore.get()
+
 		if (config.throttleConfig?.getUserIdentifier) {
 			return await Promise.resolve(config.throttleConfig.getUserIdentifier(socket))
 		}
+
 		return socket.id
 	}
 }

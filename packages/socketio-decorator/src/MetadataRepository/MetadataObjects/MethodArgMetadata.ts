@@ -1,3 +1,5 @@
+import { SocketRoomOption } from "../../Models/DecoratorOptions/RoomDecoratorOption"
+
 export type MethodArgMetadata = {
 	parameterIndex: number
 } & (
@@ -13,6 +15,10 @@ export type MethodArgMetadata = {
 	} | {
 		valueType: "socketDataAttribute"
 		dataKey?: string
+	} | {
+		valueType: "room"
+		roomName?: string
+		option?: SocketRoomOption
 	}
 )
 

@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest 
 import { Server, Socket as ServerSocket } from "socket.io"
 import { Socket as ClientSocket } from "socket.io-client"
 import { CurrentSocket, CurrentUser, IErrorMiddleware, SocketOn } from "../../../../src"
-import { config } from "../../../../src/globalMetadata"
+import { ConfigStore } from "../../../../src/MetadataRepository/Stores/ConfigStore"
 import { createServer, createSocketClient } from "../../../utilities/serverUtils"
 
 describe("> CurrentUser Decorator", () => {
@@ -78,15 +78,17 @@ describe("> CurrentUser Decorator", () => {
 		})
 
 		describe("when the currentUserProvider is not defined", () => {
-			let originalProvider: typeof config.currentUserProvider
+			let originalProvider: ((socket: ServerSocket) => Promise<unknown | null>) | undefined
 
 			beforeAll(() => {
+				const config = ConfigStore.get()
+
 				originalProvider = config.currentUserProvider
 				config.currentUserProvider = undefined
 			})
 
 			afterAll(() => {
-				config.currentUserProvider = originalProvider
+				ConfigStore.get().currentUserProvider = originalProvider
 			})
 
 			it("should throw an error when the currentUserProvider is not defined", (done) => {

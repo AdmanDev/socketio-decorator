@@ -1,4 +1,4 @@
-import { addEmitterMetadata } from "../../globalMetadata"
+import { EmitterOperations } from "../../MetadataRepository/Operations/EmitterOperations"
 import type { EmitterOption } from "../../Models/DecoratorOptions/EmitterOption"
 
 /**
@@ -9,7 +9,7 @@ import type { EmitterOption } from "../../Models/DecoratorOptions/EmitterOption"
  */
 export function ServerEmitter (eventName?: string, to?: string,) {
 	return function (target: Object, propertyKey: string | symbol) {
-		addEmitterMetadata({
+		EmitterOperations.add({
 			type: "server",
 			action: "emitto",
 			target: target,

@@ -1,5 +1,5 @@
-import { addMethodArgMetadata } from "../../globalMetadata"
-import { MethodArgMetadata } from "../../Models/Metadata/MethodArgMetadata"
+import { MethodArgOperations } from "../../MetadataRepository/Operations/MethodArgOperations"
+import { MethodArgMetadata } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
 
 /**
  * Injects, into the specified parameter, a socket data attribute by key or entire data store if no key is provided.
@@ -14,6 +14,6 @@ export function SocketData (dataKey?: string) {
 			dataKey,
 		}
 
-		addMethodArgMetadata(target, propertyKey, argMetadata)
+		MethodArgOperations.add(target, propertyKey, argMetadata)
 	}
 }

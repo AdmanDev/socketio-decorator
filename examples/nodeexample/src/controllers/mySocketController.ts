@@ -1,7 +1,7 @@
 import { CurrentSocket, Data, ServerOn, SocketData, SocketDataStore, SocketEmitter, SocketOn } from "@admandev/socketio-decorator";
 import { Socket } from "socket.io";
-import { MessageRequest } from "../messageRequest";
-import { SocketDataStoreSchema } from "../socketDataStoreSchema";
+import { MessageRequest } from "../models/messageRequest";
+import { SocketDataStoreSchema } from "../models/socketDataStoreSchema";
 
 export class SocketController {
 	@ServerOn("connection")

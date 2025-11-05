@@ -10,6 +10,12 @@ export * from "./Decorators/Listeners/SocketOnAnyOutgoingDecorator"
 export * from "./Decorators/Emitters/ServerEmitterDecorator"
 export * from "./Decorators/Emitters/SocketEmiterDecorator"
 
+export * from "./Decorators/Room/OnRoomJoinedDecorator"
+export * from "./Decorators/Room/OnRoomLeftDecorator"
+export * from "./Decorators/Room/OnRoomCreatedDecorator"
+export * from "./Decorators/Room/OnRoomDeletedDecorator"
+export * from "./Decorators/Room/SocketRoomDecorator"
+
 export * from "./Decorators/Middlewares/UseSocketMiddlewareDecorator"
 
 export * from "./Decorators/ArgsInjection/CurrentSocketDecorator"
@@ -20,6 +26,9 @@ export * from "./Decorators/ArgsInjection/SocketDataDecorator"
 
 export * from "./Decorators/Others/SocketNamespaceDecorator"
 export * from "./Decorators/Others/ThrottleDecorator"
+
+export * from "./Decorators/AppEvent/AppOnDecorator"
+export * from "./Decorators/AppEvent/AppEmitDecorator"
 
 // Hooks
 export * from "./Others/Hooks"
@@ -35,11 +44,18 @@ export * from "./Models/SiodConfig"
 export * from "./Models/ThrottleConfig"
 export * from "./Models/DecoratorOptions/EmitterOption"
 export * from "./Models/DecoratorOptions/DecoratorOptions"
+export * from "./Models/DecoratorOptions/RoomDecoratorOption"
+export * from "./Models/AppEventBus/AppEventBusModels"
+export * from "./Models/HookModels"
 
 // Errors
+export * from "./Models/Errors/SiodDecoratorError"
 export * from "./Models/Errors/SiodIncomingDataError"
 export * from "./Models/Errors/SiodInvalidArgumentError"
+export * from "./Models/Errors/SiodInvalidMetadataError"
+export * from "./Models/Errors/SiodRequiredRoomError"
 export * from "./Models/Errors/SiodThrottleError"
 
 // Utils
 export * from "./Wrappers/EventFuncProxy/ArgProviders/SocketDataStore"
+export * from "./Wrappers/AppEvent/ApplicationEventBus"

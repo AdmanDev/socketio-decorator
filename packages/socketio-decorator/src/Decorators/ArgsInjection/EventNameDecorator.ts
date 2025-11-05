@@ -1,5 +1,5 @@
-import { addMethodArgMetadata } from "../../globalMetadata"
-import { MethodArgMetadata } from "../../Models/Metadata/MethodArgMetadata"
+import { MethodArgOperations } from "../../MetadataRepository/Operations/MethodArgOperations"
+import { MethodArgMetadata } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
 
 /**
  * Decorator to inject the event name into a method parameter.
@@ -12,6 +12,6 @@ export function EventName () {
 			valueType: "eventName"
 		}
 
-		addMethodArgMetadata(target, propertyKey, argMetadata)
+		MethodArgOperations.add(target, propertyKey, argMetadata)
 	}
 }

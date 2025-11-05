@@ -1,4 +1,4 @@
-import { addClassSocketMiddlewareMetadata, addMethodSocketMiddlewareMetadata } from "../../globalMetadata"
+import { MiddlewareOperations } from "../../MetadataRepository/Operations/MiddlewareOperations"
 import { ISocketMiddleware } from "../../Interfaces/ISocketMiddleware"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { DecoratorUtils } from "../../Utils/DecoratorUtils"
@@ -12,7 +12,7 @@ export function UseSocketMiddleware (...middlewares: (new() => ISocketMiddleware
 	return function (...args: unknown[]) {
 		if (DecoratorUtils.isMethodDecorator(args)) {
 			const [target, propertyKey] = args
-			addMethodSocketMiddlewareMetadata({
+			MiddlewareOperations.addToMethod({
 				target: target,
 				methodName: propertyKey as string,
 				middlewares: middlewares
@@ -23,7 +23,7 @@ export function UseSocketMiddleware (...middlewares: (new() => ISocketMiddleware
 
 		if (DecoratorUtils.isClassDecorator(args)) {
 			const [target] = args
-			addClassSocketMiddlewareMetadata({
+			MiddlewareOperations.addToClass({
 				target: target.prototype,
 				middlewares: middlewares
 			})

@@ -1,17 +1,19 @@
 import { Socket } from "socket.io"
-import { config } from "../../globalMetadata"
+import { ConfigStore } from "../../MetadataRepository/Stores/ConfigStore"
 import { SiodDecoratorError } from "../../Models/Errors/SiodDecoratorError"
 import { EventFuncProxyArgs, EventFuncProxyType } from "../../Models/EventFuncProxyType"
-import { ControllerMetadata } from "../../Models/Metadata/Metadata"
-import { MethodArgMetadata, MethodArgValueType } from "../../Models/Metadata/MethodArgMetadata"
-import { Wrapper } from "../WrapperCore/Wrapper"
+import { ControllerMetadata } from "../../MetadataRepository/MetadataObjects/Metadata"
+import { MethodArgMetadata, MethodArgValueType } from "../../MetadataRepository/MetadataObjects/MethodArgMetadata"
+import { ControllerWrapper } from "../WrapperCore/ControllerWrapper/ControllerWrapper"
 import { SocketDataStore } from "./ArgProviders/SocketDataStore"
 import { ControllerInstance } from "../../Models/Utilities/ControllerTypes"
+import { RoomStore } from "../../Features/SocketRoom/RoomStore"
+import { SiodRequiredRoomError } from "../../Models/Errors/SiodRequiredRoomError"
 
 /**
  * Defines the event function handler proxy wrapper to manage handler args
  */
-export class ArgsInjector extends Wrapper {
+export class ArgsInjector extends ControllerWrapper {
 	/** @inheritdoc */
 	public execute (metadata: ControllerMetadata): void {
 		metadata.methodMetadata.forEach(methodMetadata => {
@@ -69,7 +71,8 @@ export class ArgsInjector extends Wrapper {
 			socketDataAttribute: this.getSocketDataAttribute(argMetadata, args.socket),
 			data: args.data,
 			eventName: args.eventName,
-			currentUser: await this.getCurrentUserArg(argMetadata, args.socket)
+			currentUser: await this.getCurrentUserArg(argMetadata, args.socket),
+			room: this.getRoomArg(argMetadata, args.socket),
 		}
 
 		switch (argMetadata.valueType) {
@@ -91,6 +94,8 @@ export class ArgsInjector extends Wrapper {
 		if (argMetadata.valueType !== "currentUser") {
 			return Promise.resolve(null)
 		}
+
+		const config = ConfigStore.get()
 
 		if (!config.currentUserProvider) {
 			throw new SiodDecoratorError("To use @CurrentUser decorator, you must provide a currentUserProvider in the config.")
@@ -123,5 +128,42 @@ export class ArgsInjector extends Wrapper {
 		}
 
 		return socket.data[argMetadata.dataKey] || null
+	}
+
+	/**
+	 * Gets the room argument value from the socket and room store
+	 * @param {MethodArgMetadata} argMetadata The argument metadata
+	 * @param {Socket | null} socket The socket instance
+	 * @returns {unknown | null} The room value
+	 */
+	private getRoomArg (argMetadata: MethodArgMetadata, socket: Socket | null) {
+		if (argMetadata.valueType !== "room") {
+			return null
+		}
+
+		if (!socket) {
+			throw new SiodDecoratorError("Unable to get room data, the socket instance is undefined.")
+		}
+
+		const roomStore = RoomStore.getInstance()
+
+		const roomIds = Array.from(socket.rooms).filter(roomId => roomId !== socket.id)
+
+		if (!argMetadata.roomName) {
+			return roomIds.map(roomId => roomStore.getRoom(roomId))
+		}
+
+		const isRequiredRoom = argMetadata.option?.required === true
+		const isInRoom = roomIds.includes(argMetadata.roomName)
+
+		if (!isInRoom) {
+			if (isRequiredRoom) {
+				throw new SiodRequiredRoomError(argMetadata.roomName, socket.id)
+			}
+
+			return null
+		}
+
+		return roomStore.getRoom(argMetadata.roomName)
 	}
 }

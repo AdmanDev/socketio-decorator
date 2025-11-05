@@ -24,6 +24,8 @@ useSocketIoDecorator({
 	serverMiddlewares: [MyServerMiddleware],
 	socketMiddlewares: [MySocketMiddleware],
 	errorMiddleware: MyErrorMiddleware,
+	appEventListeners: [path.join(__dirname, "/appEvent/*.js")],
+	roomEventListeners: [path.join(__dirname, "/roomEvent/*.js")],
 	currentUserProvider: async (socket: Socket) => {
 		return Promise.resolve({
 			id: socket.id
